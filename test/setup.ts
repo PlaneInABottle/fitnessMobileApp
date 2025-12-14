@@ -6,20 +6,20 @@ import mockFile from "./mockFile"
 
 // libraries to mock
 jest.doMock("react-native", () => {
-  // Extend ReactNative
+  // Extend ReactNative without replacing component functions.
+  const Image = ReactNative.Image as any
+  Image.resolveAssetSource = jest.fn((_source: any) => mockFile)
+  Image.getSize = jest.fn(
+    (
+      uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+      success: (width: number, height: number) => void,
+      failure?: (_error: any) => void, // eslint-disable-line @typescript-eslint/no-unused-vars
+    ) => success(100, 100),
+  )
+
   return Object.setPrototypeOf(
     {
-      Image: {
-        ...ReactNative.Image,
-        resolveAssetSource: jest.fn((_source) => mockFile), // eslint-disable-line @typescript-eslint/no-unused-vars
-        getSize: jest.fn(
-          (
-            uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
-            success: (width: number, height: number) => void,
-            failure?: (_error: any) => void, // eslint-disable-line @typescript-eslint/no-unused-vars
-          ) => success(100, 100),
-        ),
-      },
+      Image,
     },
     ReactNative,
   )
@@ -39,6 +39,17 @@ jest.mock("expo-localization", () => ({
   ...jest.requireActual("expo-localization"),
   getLocales: () => [{ languageTag: "en-US", textDirection: "ltr" }],
 }))
+
+jest.mock("react-native-keyboard-controller", () => {
+  const React = require("react")
+  const { ScrollView } = require("react-native")
+  return {
+    KeyboardProvider: ({ children }: any) => children,
+    KeyboardAwareScrollView: React.forwardRef((props: any, ref: any) =>
+      React.createElement(ScrollView, { ...props, ref }),
+    ),
+  }
+})
 
 jest.mock("../app/i18n/index.ts", () => ({
   i18n: {
