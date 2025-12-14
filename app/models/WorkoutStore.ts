@@ -21,6 +21,7 @@ type RootWithWorkoutDeps = {
   exerciseStore: {
     hasExercise(id: string): boolean
     getRequiredFieldsForExercise(id: string): readonly ExerciseSetFieldKey[]
+    getExerciseCategory(id: string): "STRENGTH" | "BODYWEIGHT" | "TIMED" | "CARDIO" | undefined
   }
   setStore: {
     validateSetData(exerciseId: string, setData: Partial<SetData> | null | undefined): { ok: true } | {
@@ -29,13 +30,21 @@ type RootWithWorkoutDeps = {
     }
   }
   performanceMemoryStore: {
-    getSetMemories(exerciseId: string): Array<{ weight?: number; reps?: number; time?: number; distance?: number }>
-    updateSetMemory(
-      exerciseId: string,
-      setType: string,
-      typeOrder: number,
-      performance: { weight?: number; reps?: number; time?: number; distance?: number },
-    ): void
+    recordCompletedWorkout(workout: {
+      completedAt: Date
+      exercises: Array<{
+        exerciseId: string
+        category: "STRENGTH" | "BODYWEIGHT" | "TIMED" | "CARDIO"
+        sets: Array<{
+          setType: SetTypeId
+          weight?: number
+          reps?: number
+          time?: number
+          distance?: number
+          restTime?: number
+        }>
+      }>
+    }): void
   }
 }
 
@@ -200,15 +209,27 @@ export const WorkoutStoreModel = types
 
       const snapshot = getSnapshot(session)
 
-      ;(snapshot.exercises ?? []).forEach((we) => {
-        ;(we.sets ?? []).forEach((s, index) => {
-          root.performanceMemoryStore.updateSetMemory(we.exerciseId, s.setType, index, {
-            weight: s.weight,
-            reps: s.reps,
-            time: s.time,
-            distance: s.distance,
+      root.performanceMemoryStore.recordCompletedWorkout({
+        completedAt: now,
+        exercises: (snapshot.exercises ?? [])
+          .map((we) => {
+            const category = root.exerciseStore.getExerciseCategory(we.exerciseId)
+            if (!category) return undefined
+
+            return {
+              exerciseId: we.exerciseId,
+              category,
+              sets: (we.sets ?? []).map((s) => ({
+                setType: s.setType,
+                weight: s.weight,
+                reps: s.reps,
+                time: s.time,
+                distance: s.distance,
+                restTime: s.restTime,
+              })),
+            }
           })
-        })
+          .filter((x): x is NonNullable<typeof x> => !!x),
       })
 
       self.currentSession = undefined

@@ -111,6 +111,10 @@ export const ExerciseStoreModel = types
       return self.exercises.has(id)
     },
 
+    getExerciseCategory(id: string): ExerciseCategory | undefined {
+      return self.exercises.get(id)?.category
+    },
+
     getExercisesByCategory(category: ExerciseCategory): Exercise[] {
       return Array.from(self.exercises.values()).filter((exercise) => exercise.category === category)
     },

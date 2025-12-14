@@ -26,9 +26,14 @@ describe("WorkoutStore", () => {
     expect(root.workoutStore.sessionHistory).toHaveLength(1)
     expect(root.workoutStore.sessionHistory[0].completedAt?.toISOString()).toBe("2025-01-01T00:00:10.000Z")
 
-    const memories = root.performanceMemoryStore.getSetMemories("bench-press")
-    expect(memories[0]?.weight).toBe(100)
-    expect(memories[0]?.reps).toBe(5)
+    const placeholders = root.performanceMemoryStore.getPlaceholdersForSet({
+      exerciseId: "bench-press",
+      category: "STRENGTH",
+      setType: "working",
+      order: 1,
+    })
+    expect(placeholders.weight).toBe("100")
+    expect(placeholders.reps).toBe("5")
 
     // New session starts with no prefilled sets; UI can offer suggestions from memory after a set is completed.
     jest.setSystemTime(new Date("2025-01-01T00:01:00Z"))

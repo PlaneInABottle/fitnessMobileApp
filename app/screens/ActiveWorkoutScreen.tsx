@@ -7,7 +7,7 @@ import { ErrorMessage } from "@/components/common/ErrorMessage"
 import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
-import { MemorySuggestions, type MemorySuggestion } from "@/components/workout/MemorySuggestions"
+
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
@@ -18,21 +18,6 @@ import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
 type TouchedMap = Partial<Record<"setType" | "weight" | "reps" | "time" | "distance", boolean>>
-
-function formatSuggestionLabel(category: string, setType: string, data: Partial<SetData>) {
-  switch (category) {
-    case "STRENGTH":
-      return `${setType} ${data.reps ?? "?"} x ${data.weight ?? "?"}kg`
-    case "BODYWEIGHT":
-      return `${setType} ${data.reps ?? "?"} reps`
-    case "TIMED":
-      return `${setType} ${data.time ?? "?"} sec`
-    case "CARDIO":
-      return `${setType} ${data.time ?? "?"} sec • ${data.distance ?? "?"} m`
-    default:
-      return setType
-  }
-}
 
 export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> = observer(
   function ActiveWorkoutScreen({ navigation }) {
@@ -47,9 +32,9 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     const [draftTouched, setDraftTouched] = useState<TouchedMap>({})
     const [inlineError, setInlineError] = useState<string | undefined>(undefined)
 
-    function handleStartAddSet(workoutExerciseId: string, suggested?: Partial<SetData>) {
+    function handleStartAddSet(workoutExerciseId: string, setType?: SetData["setType"]) {
       setEditingWorkoutExerciseId(workoutExerciseId)
-      setDraftSetData({ setType: (suggested?.setType as any) ?? "working", ...suggested })
+      setDraftSetData({ setType: (setType as any) ?? "working" })
       setDraftTouched({})
       setInlineError(undefined)
       workoutStore.clearError()
@@ -130,28 +115,6 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                 if (!exercise) return null
 
                 const lastSet = we.sets.length ? we.sets[we.sets.length - 1] : undefined
-                const canShowMemory = we.sets.length > 0
-
-                const memorySuggestions: MemorySuggestion[] = canShowMemory
-                  ? performanceMemoryStore
-                      .getSetMemories(we.exerciseId)
-                      .slice(0, 3)
-                      .map((m) => {
-                        const setType = typeof m.setType === "string" ? m.setType : "working"
-                        const setData: Partial<SetData> = {
-                          setType,
-                          weight: m.weight,
-                          reps: m.reps,
-                          time: m.time,
-                          distance: m.distance,
-                        }
-                        return {
-                          id: `${m.performedAt.getTime()}_${setType}_${m.typeOrder}`,
-                          label: formatSuggestionLabel(exercise.category, setType, setData),
-                          setData,
-                        }
-                      })
-                  : []
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
@@ -183,21 +146,16 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                             mode="edit"
                             availableSetTypes={availableSetTypes}
                             value={draftSetData}
+                            placeholders={performanceMemoryStore.getPlaceholdersForSet({
+                              exerciseId: we.exerciseId,
+                              category: exercise.category,
+                              setType: (draftSetData.setType as any) ?? "working",
+                              order:
+                                we.sets.filter((s) => s.setType === ((draftSetData.setType as any) ?? "working")).length + 1,
+                            })}
                             touched={draftTouched}
                             onChange={handleDraftChange}
                             onDone={() => handleDoneAddSet(we.id)}
-                          />
-
-                          <MemorySuggestions
-                            suggestions={memorySuggestions}
-                            onUseSuggestion={(setData) => {
-                              setDraftSetData((prev) => ({
-                                ...prev,
-                                ...setData,
-                                setType: (setData.setType as any) ?? prev.setType,
-                              }))
-                              setDraftTouched({})
-                            }}
                           />
 
                           {!!inlineError && <ErrorMessage message={inlineError} />}
@@ -208,20 +166,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                         <Button
                           text="Add Set"
                           preset="default"
-                          onPress={() =>
-                            handleStartAddSet(
-                              we.id,
-                              lastSet
-                                ? {
-                                    setType: lastSet.setType,
-                                    weight: lastSet.weight,
-                                    reps: lastSet.reps,
-                                    time: lastSet.time,
-                                    distance: lastSet.distance,
-                                  }
-                                : undefined,
-                            )
-                          }
+                          onPress={() => handleStartAddSet(we.id, lastSet?.setType)}
                         />
                       )}
                     </View>

@@ -4,6 +4,7 @@ import { applySnapshot, IDisposer, onSnapshot } from "mobx-state-tree"
 import * as storage from "@/utils/storage"
 import * as secureStorage from "@/utils/storage/secure"
 
+import { migratePerformanceMemoryStoreSnapshotToV2 } from "./PerformanceMemoryStore"
 import { RootStore, RootStoreModel, RootStoreSnapshotIn, RootStoreSnapshotOut } from "./RootStore"
 
 export const ROOT_STORE_PERSISTENCE_KEY = "ROOT_STORE"
@@ -24,18 +25,42 @@ export async function setupRootStore(): Promise<{ rootStore: RootStore; dispose:
     },
   } as RootStoreSnapshotIn
 
+  try {
+    ;(merged as any).performanceMemoryStore = migratePerformanceMemoryStoreSnapshotToV2(
+      (merged as any).performanceMemoryStore,
+      (merged as any).exerciseStore,
+    )
+  } catch {
+    ;(merged as any).performanceMemoryStore = {
+      schemaVersion: 2,
+      patternMemories: {},
+      personalRecords: {},
+    }
+  }
+
   if (persistedState || persistedSecureState) {
     try {
       applySnapshot(rootStore, merged)
     } catch {
-      storage.remove(ROOT_STORE_PERSISTENCE_KEY)
-      secureStorage.remove(ROOT_STORE_SECURE_PERSISTENCE_KEY)
+      try {
+        applySnapshot(rootStore, {
+          ...merged,
+          performanceMemoryStore: {
+            schemaVersion: 2,
+            patternMemories: {},
+            personalRecords: {},
+          },
+        } as any)
+      } catch {
+        storage.remove(ROOT_STORE_PERSISTENCE_KEY)
+        secureStorage.remove(ROOT_STORE_SECURE_PERSISTENCE_KEY)
+      }
     }
   }
 
   const dispose = onSnapshot(rootStore, (snapshot) => {
     // Keep exercises in plain storage; put performance/workouts into encrypted MMKV.
-    const secureSaved = secureStorage.save(ROOT_STORE_SECURE_PERSISTENCE_KEY, {
+    secureStorage.save(ROOT_STORE_SECURE_PERSISTENCE_KEY, {
       performanceMemoryStore: snapshot.performanceMemoryStore,
       workoutStore: snapshot.workoutStore,
     })
@@ -47,20 +72,18 @@ export async function setupRootStore(): Promise<{ rootStore: RootStore; dispose:
         ...snapshot.authenticationStore,
         accessToken: undefined,
       },
-      ...(secureSaved
-        ? {
-            performanceMemoryStore: {
-              exerciseMemories: {},
-              personalRecords: {},
-            },
-            workoutStore: {
-              currentSession: undefined,
-              templates: {},
-              sessionHistory: [],
-              lastError: undefined,
-            },
-          }
-        : {}),
+      // Never persist workout/memory to plain MMKV; keep it encrypted.
+      performanceMemoryStore: {
+        schemaVersion: 2,
+        patternMemories: {},
+        personalRecords: {},
+      },
+      workoutStore: {
+        currentSession: undefined,
+        templates: {},
+        sessionHistory: [],
+        lastError: undefined,
+      },
     }
 
     storage.save(ROOT_STORE_PERSISTENCE_KEY, snapshotToPersist)

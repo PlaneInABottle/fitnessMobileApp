@@ -19,6 +19,7 @@ export interface SetRowProps {
   category: ExerciseCategory
   mode: SetRowMode
   value?: Partial<SetData>
+  placeholders?: Partial<Record<EditableFieldKey, string>>
   touched?: Partial<Record<EditableFieldKey | "setType", boolean>>
   availableSetTypes?: Array<{ id: SetTypeId; name: string }>
   onChange?: (next: Partial<SetData>, touchedKey?: EditableFieldKey | "setType") => void
@@ -59,6 +60,7 @@ export function SetRow({
   category,
   mode,
   value,
+  placeholders,
   touched,
   availableSetTypes,
   onChange,
@@ -101,8 +103,9 @@ export function SetRow({
         <View style={$cell}>
           <TextInput
             value={toText(current)}
-            placeholder={field.label}
-            placeholderTextColor={colors.textDim}
+            accessibilityLabel={field.label}
+            placeholder={placeholders?.[key] ?? "-"}
+            placeholderTextColor="#999"
             keyboardType="numeric"
             onChangeText={(t) => onChange({ ...value, [key]: toNumberOrUndefined(t) }, key)}
             style={[

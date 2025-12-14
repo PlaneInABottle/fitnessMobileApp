@@ -16,8 +16,20 @@ const Stack = createNativeStackNavigator<WorkoutStackParamList>()
 function renderWorkoutFlow() {
   const store = RootStoreModel.create({})
 
-  // Seed memory so suggestions can appear after the first set.
-  store.performanceMemoryStore.updateSetMemory("bench-press", "working", 0, { weight: 100, reps: 5 })
+  // Seed memory so placeholders appear immediately.
+  store.performanceMemoryStore.recordCompletedWorkout({
+    completedAt: new Date("2025-01-01T00:00:00Z"),
+    exercises: [
+      {
+        exerciseId: "bench-press",
+        category: "STRENGTH",
+        sets: [
+          { setType: "working", weight: 100, reps: 5 },
+          { setType: "working", weight: 110, reps: 3 },
+        ],
+      },
+    ],
+  })
 
   const result = render(
     <RootStoreProvider value={store}>
@@ -39,7 +51,7 @@ function renderWorkoutFlow() {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const { store, getByText, getByTestId, getByPlaceholderText, queryByText } = renderWorkoutFlow()
+    const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText, queryByText } = renderWorkoutFlow()
 
     fireEvent.press(getByText("Start Empty Workout"))
 
@@ -56,17 +68,25 @@ describe("Workout MVP flow", () => {
     // Add first set
     fireEvent.press(getByText("Add Set"))
 
-    fireEvent.changeText(getByPlaceholderText("Reps"), "5")
-    fireEvent.changeText(getByPlaceholderText("Kg"), "60")
+    const reps1 = getByLabelText("Reps")
+    const kg1 = getByLabelText("Kg")
+    expect(reps1.props.placeholder).toBe("5")
+    expect(kg1.props.placeholder).toBe("100")
+
+    fireEvent.changeText(reps1, "5")
+    fireEvent.changeText(kg1, "60")
 
     fireEvent.press(getByText("✓"))
 
     await waitFor(() => expect(queryByText("weight is required")).toBeNull())
 
-    // Add second set; memory UI should now be enabled for this exercise.
+    // Add second set; placeholders should be pattern-specific (working #2).
     fireEvent.press(getByText("Add Set"))
 
-    await waitFor(() => expect(getByText("Suggestions")).toBeTruthy())
+    const reps2 = getByLabelText("Reps")
+    const kg2 = getByLabelText("Kg")
+    expect(reps2.props.placeholder).toBe("3")
+    expect(kg2.props.placeholder).toBe("110")
 
     fireEvent.press(getByText("End"))
 

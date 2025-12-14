@@ -1,38 +1,90 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
-export type SetPerformanceInput = {
+import { EXERCISE_CATEGORY_VALUES, type ExerciseCategory } from "./ExerciseStore"
+import type { SetTypeId } from "./SetStore"
+
+const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset"] as const
+
+export type SetFieldKey = "weight" | "reps" | "time" | "distance" | "restTime"
+
+export type PlaceholderValue = string
+
+export type PlaceholderResult = Readonly<{
+  reps: PlaceholderValue
+  weight: PlaceholderValue
+  time: PlaceholderValue
+  distance: PlaceholderValue
+  restTime: PlaceholderValue
+}>
+
+export interface PlaceholderQuery {
+  exerciseId: string
+  category: ExerciseCategory
+  setType: SetTypeId
+  order: number // 1-based order within the setType
+}
+
+export type CompletedSet = {
+  setType: SetTypeId
   weight?: number
   reps?: number
   time?: number
   distance?: number
+  restTime?: number
+}
+
+export type CompletedExercise = {
+  exerciseId: string
+  category: ExerciseCategory
+  sets: CompletedSet[]
+}
+
+export type CompletedWorkout = {
+  completedAt: Date
+  exercises: CompletedExercise[]
 }
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value)
 }
 
-export const SetMemoryModel = types.model("SetMemory", {
-  setType: types.string,
-  typeOrder: types.number,
+function toDate(value: unknown): Date | undefined {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? undefined : d
+  }
+  if (typeof value === "string") {
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? undefined : d
+  }
+  return undefined
+}
+
+function toPlaceholder(value: unknown): string {
+  return isFiniteNumber(value) ? String(value) : "-"
+}
+
+function buildKey(query: PlaceholderQuery): string {
+  return `${query.exerciseId}::${query.category}|${query.setType}|${query.order}`
+}
+
+export const PatternMemoryEntryModel = types.model("PatternMemoryEntry", {
+  exerciseId: types.string,
+  category: types.enumeration("ExerciseCategory", [...EXERCISE_CATEGORY_VALUES]),
+  setType: types.enumeration("SetType", [...SET_TYPE_IDS]),
+  order: types.number,
+  performedAt: types.Date,
   weight: types.maybe(types.number),
   reps: types.maybe(types.number),
   time: types.maybe(types.number),
   distance: types.maybe(types.number),
-  performedAt: types.Date,
+  restTime: types.maybe(types.number),
 })
 
-export interface SetMemory extends Instance<typeof SetMemoryModel> {}
-export interface SetMemorySnapshotIn extends SnapshotIn<typeof SetMemoryModel> {}
-export interface SetMemorySnapshotOut extends SnapshotOut<typeof SetMemoryModel> {}
-
-export const ExerciseMemoryModel = types.model("ExerciseMemory", {
-  exerciseId: types.identifier,
-  setMemories: types.optional(types.map(types.array(SetMemoryModel)), {}),
-})
-
-export interface ExerciseMemory extends Instance<typeof ExerciseMemoryModel> {}
-export interface ExerciseMemorySnapshotIn extends SnapshotIn<typeof ExerciseMemoryModel> {}
-export interface ExerciseMemorySnapshotOut extends SnapshotOut<typeof ExerciseMemoryModel> {}
+export interface PatternMemoryEntry extends Instance<typeof PatternMemoryEntryModel> {}
+export interface PatternMemoryEntrySnapshotIn extends SnapshotIn<typeof PatternMemoryEntryModel> {}
+export interface PatternMemoryEntrySnapshotOut extends SnapshotOut<typeof PatternMemoryEntryModel> {}
 
 export const PersonalRecordModel = types.model("PersonalRecord", {
   maxWeight: types.maybe(types.number),
@@ -48,29 +100,48 @@ export interface PersonalRecordSnapshotOut extends SnapshotOut<typeof PersonalRe
 
 export const PerformanceMemoryStoreModel = types
   .model("PerformanceMemoryStore", {
-    exerciseMemories: types.optional(types.map(ExerciseMemoryModel), {}),
+    schemaVersion: types.optional(types.number, 2),
+    patternMemories: types.optional(types.map(PatternMemoryEntryModel), {}),
     personalRecords: types.optional(types.map(PersonalRecordModel), {}),
   })
   .views((self) => ({
-    getSetMemories(exerciseId: string): SetMemory[] {
-      const exerciseMemory = self.exerciseMemories.get(exerciseId)
-      if (!exerciseMemory) return []
-
-      const allMemories: SetMemory[] = []
-      exerciseMemory.setMemories.forEach((arr) => {
-        allMemories.push(...arr.slice())
-      })
-
-      allMemories.sort((a: SetMemory, b: SetMemory) => b.performedAt.getTime() - a.performedAt.getTime())
-      return allMemories.slice(0, 5)
-    },
-
     getPersonalRecord(exerciseId: string): PersonalRecord | undefined {
       return self.personalRecords.get(exerciseId)
     },
+
+    getPlaceholderForField(query: PlaceholderQuery, field: SetFieldKey): PlaceholderValue {
+      if (!query.exerciseId || !query.category || !query.setType) return "-"
+      if (!isFiniteNumber(query.order) || query.order <= 0) return "-"
+
+      const entry = self.patternMemories.get(buildKey(query))
+      if (!entry) return "-"
+
+      switch (field) {
+        case "weight":
+          return toPlaceholder(entry.weight)
+        case "reps":
+          return toPlaceholder(entry.reps)
+        case "time":
+          return toPlaceholder(entry.time)
+        case "distance":
+          return toPlaceholder(entry.distance)
+        case "restTime":
+          return toPlaceholder(entry.restTime)
+      }
+    },
+
+    getPlaceholdersForSet(query: PlaceholderQuery): PlaceholderResult {
+      return {
+        reps: this.getPlaceholderForField(query, "reps"),
+        weight: this.getPlaceholderForField(query, "weight"),
+        time: this.getPlaceholderForField(query, "time"),
+        distance: this.getPlaceholderForField(query, "distance"),
+        restTime: this.getPlaceholderForField(query, "restTime"),
+      }
+    },
   }))
   .actions((self) => {
-    function updatePersonalRecord(exerciseId: string, performance: SetPerformanceInput, now: Date) {
+    function updatePersonalRecord(exerciseId: string, performance: CompletedSet, now: Date) {
       const current = self.personalRecords.get(exerciseId)
 
       const maxWeight = isFiniteNumber(performance.weight) ? performance.weight : undefined
@@ -119,47 +190,163 @@ export const PerformanceMemoryStoreModel = types
       }
     }
 
-    function ensureExerciseMemory(exerciseId: string): ExerciseMemory {
-      const existing = self.exerciseMemories.get(exerciseId)
-      if (existing) return existing
-
-      self.exerciseMemories.set(exerciseId, {
-        exerciseId,
-        setMemories: {},
-      })
-      return self.exerciseMemories.get(exerciseId)!
-    }
-
     return {
-      updateSetMemory(exerciseId: string, setType: string, typeOrder: number, performance: SetPerformanceInput) {
-        if (!exerciseId) throw new Error("exerciseId is required")
-        if (!setType) throw new Error("setType is required")
-        if (!isFiniteNumber(typeOrder)) throw new Error("typeOrder must be a finite number")
+      recordCompletedWorkout(workout: CompletedWorkout) {
+        const now = workout?.completedAt instanceof Date ? workout.completedAt : new Date()
 
-        const now = new Date()
-        const exerciseMemory = ensureExerciseMemory(exerciseId)
+        workout?.exercises?.forEach((exercise) => {
+          const counters: Partial<Record<SetTypeId, number>> = {}
 
-        if (!exerciseMemory.setMemories.has(setType)) {
-          exerciseMemory.setMemories.set(setType, [])
-        }
+          exercise?.sets?.forEach((set) => {
+            const setType = set?.setType
+            if (typeof setType !== "string" || !SET_TYPE_IDS.includes(setType as SetTypeId)) return
 
-        const memories = exerciseMemory.setMemories.get(setType)!
-        memories.push({
-          setType,
-          typeOrder,
-          weight: isFiniteNumber(performance.weight) ? performance.weight : undefined,
-          reps: isFiniteNumber(performance.reps) ? performance.reps : undefined,
-          time: isFiniteNumber(performance.time) ? performance.time : undefined,
-          distance: isFiniteNumber(performance.distance) ? performance.distance : undefined,
-          performedAt: now,
+            counters[setType] = (counters[setType] ?? 0) + 1
+            const order = counters[setType]!
+
+            self.patternMemories.set(
+              buildKey({ exerciseId: exercise.exerciseId, category: exercise.category, setType, order }),
+              {
+              exerciseId: exercise.exerciseId,
+              category: exercise.category,
+              setType,
+              order,
+              performedAt: now,
+              weight: isFiniteNumber(set.weight) ? set.weight : undefined,
+              reps: isFiniteNumber(set.reps) ? set.reps : undefined,
+              time: isFiniteNumber(set.time) ? set.time : undefined,
+              distance: isFiniteNumber(set.distance) ? set.distance : undefined,
+              restTime: isFiniteNumber(set.restTime) ? set.restTime : undefined,
+            })
+
+            updatePersonalRecord(exercise.exerciseId, set, now)
+          })
         })
-
-        while (memories.length > 20) memories.shift()
-
-        updatePersonalRecord(exerciseId, performance, now)
       },
     }
   })
+
+export function migratePerformanceMemoryStoreSnapshotToV2(
+  input: unknown,
+  exerciseStoreSnapshot: any,
+): PerformanceMemoryStoreSnapshotIn {
+  const base: PerformanceMemoryStoreSnapshotIn = {
+    schemaVersion: 2,
+    patternMemories: {},
+    personalRecords: {},
+  }
+
+  const maybe = input as any
+
+  const categories = new Set(EXERCISE_CATEGORY_VALUES)
+
+  const personalRecords: Record<string, any> = {}
+  const prs = maybe?.personalRecords
+  if (prs && typeof prs === "object") {
+    Object.entries(prs).forEach(([exerciseId, pr]) => {
+      if (!exerciseId) return
+      const updatedAt = toDate((pr as any)?.updatedAt)
+      if (!updatedAt) return
+
+      personalRecords[exerciseId] = {
+        maxWeight: isFiniteNumber((pr as any)?.maxWeight) ? (pr as any).maxWeight : undefined,
+        maxReps: isFiniteNumber((pr as any)?.maxReps) ? (pr as any).maxReps : undefined,
+        maxTime: isFiniteNumber((pr as any)?.maxTime) ? (pr as any).maxTime : undefined,
+        maxDistance: isFiniteNumber((pr as any)?.maxDistance) ? (pr as any).maxDistance : undefined,
+        updatedAt,
+      }
+    })
+  }
+
+  if (maybe?.schemaVersion === 2 && maybe?.patternMemories && typeof maybe.patternMemories === "object") {
+    const v2PatternMemories: Record<string, any> = {}
+    Object.entries(maybe.patternMemories).forEach(([key, entry]) => {
+      const e = entry as any
+      if (!key || typeof key !== "string") return
+      if (!e || typeof e !== "object") return
+
+      if (typeof e.exerciseId !== "string" || !e.exerciseId) return
+      if (typeof e.category !== "string" || !categories.has(e.category)) return
+      if (typeof e.setType !== "string" || !SET_TYPE_IDS.includes(e.setType as SetTypeId)) return
+      if (!isFiniteNumber(e.order) || e.order <= 0) return
+      const performedAt = toDate(e.performedAt)
+      if (!performedAt) return
+
+      v2PatternMemories[key] = {
+        exerciseId: e.exerciseId,
+        category: e.category,
+        setType: e.setType,
+        order: e.order,
+        performedAt,
+        weight: isFiniteNumber(e.weight) ? e.weight : undefined,
+        reps: isFiniteNumber(e.reps) ? e.reps : undefined,
+        time: isFiniteNumber(e.time) ? e.time : undefined,
+        distance: isFiniteNumber(e.distance) ? e.distance : undefined,
+        restTime: isFiniteNumber(e.restTime) ? e.restTime : undefined,
+      }
+    })
+
+    return {
+      schemaVersion: 2,
+      patternMemories: v2PatternMemories,
+      personalRecords,
+    }
+  }
+
+  const patternMemories: Record<string, any> = {}
+
+  const exerciseMemories = maybe?.exerciseMemories
+  if (exerciseMemories && typeof exerciseMemories === "object") {
+    Object.entries(exerciseMemories).forEach(([exerciseId, exerciseMemory]) => {
+      if (!exerciseId) return
+
+      const category = exerciseStoreSnapshot?.exercises?.[exerciseId]?.category
+      if (typeof category !== "string" || !categories.has(category as any)) return
+
+      const setMemories = (exerciseMemory as any)?.setMemories
+      if (!setMemories || typeof setMemories !== "object") return
+
+      Object.entries(setMemories).forEach(([setType, memories]) => {
+        if (typeof setType !== "string" || !SET_TYPE_IDS.includes(setType as SetTypeId)) return
+        if (!Array.isArray(memories)) return
+
+        memories.forEach((m: any) => {
+          const performedAt = toDate(m?.performedAt)
+          const typeOrder = m?.typeOrder
+          if (!performedAt || !isFiniteNumber(typeOrder)) return
+
+          const order = typeOrder + 1
+          if (!Number.isFinite(order) || order <= 0) return
+
+          const key = `${exerciseId}::${category}|${setType}|${order}`
+
+          const existing = patternMemories[key]
+          const existingAt = existing?.performedAt instanceof Date ? existing.performedAt : undefined
+          if (existingAt && existingAt.getTime() >= performedAt.getTime()) return
+
+          patternMemories[key] = {
+            exerciseId,
+            category,
+            setType,
+            order,
+            performedAt,
+            weight: isFiniteNumber(m?.weight) ? m.weight : undefined,
+            reps: isFiniteNumber(m?.reps) ? m.reps : undefined,
+            time: isFiniteNumber(m?.time) ? m.time : undefined,
+            distance: isFiniteNumber(m?.distance) ? m.distance : undefined,
+            restTime: undefined,
+          }
+        })
+      })
+    })
+  }
+
+  return {
+    ...base,
+    patternMemories,
+    personalRecords,
+  }
+}
 
 export interface PerformanceMemoryStore extends Instance<typeof PerformanceMemoryStoreModel> {}
 export interface PerformanceMemoryStoreSnapshotIn extends SnapshotIn<typeof PerformanceMemoryStoreModel> {}
