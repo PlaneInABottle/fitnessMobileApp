@@ -39,18 +39,13 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 const prefix = Linking.createURL("/")
 const config = {
   screens: {
-    Login: {
-      path: "",
-    },
-    Welcome: "welcome",
-    Demo: {
+    Workout: {
+      path: "workout",
       screens: {
-        DemoShowroom: {
-          path: "showroom/:queryIndex?/:itemIndex?",
-        },
-        DemoDebug: "debug",
-        DemoPodcastList: "podcast",
-        DemoCommunity: "community",
+        WorkoutTab: "",
+        ActiveWorkout: "active",
+        ExerciseLibrary: "exercises",
+        WorkoutComplete: "complete",
       },
     },
   },

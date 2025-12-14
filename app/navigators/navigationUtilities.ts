@@ -36,10 +36,10 @@ export function getActiveRouteName(state: NavigationState | PartialState<Navigat
   const route = state.routes[state.index ?? 0]
 
   // Found the active route -- return the name
-  if (!route.state) return route.name as keyof AppStackParamList
+  if (!route.state) return String(route.name)
 
   // Recursive call to deal with nested routers
-  return getActiveRouteName(route.state as NavigationState<AppStackParamList>)
+  return getActiveRouteName(route.state as NavigationState | PartialState<NavigationState>)
 }
 
 const iosExit = () => false
@@ -123,7 +123,7 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
   const initNavState = navigationRestoredDefaultState(Config.persistNavigation)
   const [isRestored, setIsRestored] = useState(initNavState)
 
-  const routeNameRef = useRef<keyof AppStackParamList | undefined>(undefined)
+  const routeNameRef = useRef<string | undefined>(undefined)
 
   const onNavigationStateChange = (state: NavigationState | undefined) => {
     const previousRouteName = routeNameRef.current
@@ -138,7 +138,7 @@ export function useNavigationPersistence(storage: Storage, persistenceKey: strin
       }
 
       // Save the current route name for later comparison
-      routeNameRef.current = currentRouteName as keyof AppStackParamList
+      routeNameRef.current = currentRouteName
 
       // Persist state to storage
       storage.save(persistenceKey, state)

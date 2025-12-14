@@ -5,14 +5,18 @@
  * and a "main" flow which the user will use once logged in.
  */
 import { NavigationContainer } from "@react-navigation/native"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 import Config from "@/config"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
-import { WelcomeScreen } from "@/screens/WelcomeScreen"
+import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
+import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
+import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
+import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { useAppTheme } from "@/theme/context"
 
-import type { AppStackParamList, NavigationProps } from "./navigationTypes"
+import type { AppStackParamList, NavigationProps, WorkoutStackParamList } from "./navigationTypes"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 
 /**
@@ -21,16 +25,19 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
  */
 const exitRoutes = Config.exitRoutes
 
-// Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Stack = createNativeStackNavigator<AppStackParamList>()
+// Documentation: https://reactnavigation.org/docs/bottom-tab-navigator
+const Tab = createBottomTabNavigator<AppStackParamList>()
 
-const AppStack = () => {
+// Documentation: https://reactnavigation.org/docs/stack-navigator/
+const WorkoutStack = createNativeStackNavigator<WorkoutStackParamList>()
+
+const WorkoutStackNavigator = () => {
   const {
     theme: { colors },
   } = useAppTheme()
 
   return (
-    <Stack.Navigator
+    <WorkoutStack.Navigator
       screenOptions={{
         headerShown: false,
         navigationBarColor: colors.background,
@@ -39,22 +46,42 @@ const AppStack = () => {
         },
       }}
     >
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      {/** 🔥 Your screens go here */}
-      {/* IGNITE_GENERATOR_ANCHOR_APP_STACK_SCREENS */}
-    </Stack.Navigator>
+      <WorkoutStack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
+      <WorkoutStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} />
+      <WorkoutStack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
+      <WorkoutStack.Screen name="WorkoutComplete" component={WorkoutCompleteScreen} />
+    </WorkoutStack.Navigator>
+  )
+}
+
+const AppTabs = () => {
+  const {
+    theme: { colors },
+  } = useAppTheme()
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
+        tabBarStyle: { backgroundColor: colors.background },
+      }}
+    >
+      <Tab.Screen name="Workout" component={WorkoutStackNavigator} options={{ title: "Workout" }} />
+    </Tab.Navigator>
   )
 }
 
 export const AppNavigator = (props: NavigationProps) => {
   const { navigationTheme } = useAppTheme()
 
-  useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
+  const exitRouteNames = [...exitRoutes, "WorkoutTab"]
+  useBackButtonHandler((routeName) => exitRouteNames.includes(routeName))
 
   return (
     <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
       <ErrorBoundary catchErrors={Config.catchErrors}>
-        <AppStack />
+        <AppTabs />
       </ErrorBoundary>
     </NavigationContainer>
   )

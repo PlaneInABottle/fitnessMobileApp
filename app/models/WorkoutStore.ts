@@ -78,6 +78,7 @@ export const WorkoutTemplateModel = types.model("WorkoutTemplate", {
   id: types.identifier,
   name: types.string,
   exerciseIds: types.optional(types.array(types.string), []),
+  lastUsedAt: types.maybe(types.Date),
 })
 
 export interface WorkoutTemplate extends Instance<typeof WorkoutTemplateModel> {}
@@ -143,34 +144,12 @@ export const WorkoutStoreModel = types
 
       const session = requireCurrentSession()
       const workoutExerciseId = generateId()
-      const sets: ExerciseSetSnapshotIn[] = []
-
-      const lastMemory = root.performanceMemoryStore.getSetMemories(exerciseId)[0]
-      if (lastMemory) {
-        const seedSetData: Partial<SetData> = {
-          setType: "working",
-          weight: lastMemory.weight,
-          reps: lastMemory.reps,
-          time: lastMemory.time,
-          distance: lastMemory.distance,
-        }
-
-        const required = root.exerciseStore.getRequiredFieldsForExercise(exerciseId)
-        const hasRequired = required.every((field) => typeof seedSetData[field] === "number")
-
-        if (hasRequired && root.setStore.validateSetData(exerciseId, seedSetData).ok) {
-          sets.push({
-            id: generateId(),
-            ...buildSetSnapshot(seedSetData),
-          })
-        }
-      }
 
       session.exercises.push(
         cast({
           id: workoutExerciseId,
           exerciseId,
-          sets,
+          sets: [],
         }),
       )
       return workoutExerciseId
@@ -253,6 +232,7 @@ export const WorkoutStoreModel = types
         id,
         name: sanitizedName,
         exerciseIds: sanitizedExerciseIds,
+        lastUsedAt: new Date(),
       })
 
       return id
@@ -285,6 +265,10 @@ export const WorkoutStoreModel = types
       startSessionFromTemplate(templateId: string): boolean {
         try {
           startSessionFromTemplateUnsafe(templateId)
+
+          const template = self.templates.get(templateId)
+          if (template) template.lastUsedAt = new Date()
+
           self.lastError = undefined
           return true
         } catch (e) {

@@ -30,16 +30,14 @@ describe("WorkoutStore", () => {
     expect(memories[0]?.weight).toBe(100)
     expect(memories[0]?.reps).toBe(5)
 
-    // New session should prefill a working set from memory.
+    // New session starts with no prefilled sets; UI can offer suggestions from memory after a set is completed.
     jest.setSystemTime(new Date("2025-01-01T00:01:00Z"))
     root.workoutStore.startNewSession()
     const we2 = root.workoutStore.addExerciseToSession("bench-press")
     expect(we2).toBeDefined()
 
-    const prefilled = root.workoutStore.currentSession?.exercises.find((e) => e.id === we2!)?.sets[0]
-    expect(prefilled?.setType).toBe("working")
-    expect(prefilled?.weight).toBe(100)
-    expect(prefilled?.reps).toBe(5)
+    const sets = root.workoutStore.currentSession?.exercises.find((e) => e.id === we2!)?.sets
+    expect(sets).toHaveLength(0)
   })
 
   it("creates a template from a session and can start a session from it", () => {
@@ -62,6 +60,24 @@ describe("WorkoutStore", () => {
       "bench-press",
       "squat",
     ])
+  })
+
+  it("tracks template lastUsedAt", () => {
+    const root = RootStoreModel.create({})
+
+    jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+    const a = root.workoutStore.createTemplate("A", ["bench-press"])!
+
+    expect(root.workoutStore.templates.get(a)?.lastUsedAt?.toISOString()).toBe(
+      "2025-01-01T00:00:00.000Z",
+    )
+
+    jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
+    root.workoutStore.startSessionFromTemplate(a)
+
+    expect(root.workoutStore.templates.get(a)?.lastUsedAt?.toISOString()).toBe(
+      "2025-01-01T00:00:10.000Z",
+    )
   })
 
   it("sets lastError and returns false/undefined on failures", () => {

@@ -1,37 +1,27 @@
 import { ComponentProps } from "react"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
-import {
-  CompositeScreenProps,
-  NavigationContainer,
-  NavigatorScreenParams,
-} from "@react-navigation/native"
+import { NavigationContainer, NavigatorScreenParams } from "@react-navigation/native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-// Demo Tab Navigator types
-export type DemoTabParamList = {
-  DemoCommunity: undefined
-  DemoShowroom: { queryIndex?: string; itemIndex?: string }
-  DemoDebug: undefined
-  DemoPodcastList: undefined
+export type WorkoutStackParamList = {
+  WorkoutTab: undefined
+  ActiveWorkout: undefined
+  ExerciseLibrary: undefined
+  WorkoutComplete: undefined
 }
 
-// App Stack Navigator types
 export type AppStackParamList = {
-  Welcome: undefined
-  Login: undefined
-  Demo: NavigatorScreenParams<DemoTabParamList>
-  // 🔥 Your screens go here
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  Workout: NavigatorScreenParams<WorkoutStackParamList>
 }
 
-export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<
-  AppStackParamList,
+export type WorkoutStackScreenProps<T extends keyof WorkoutStackParamList> = NativeStackScreenProps<
+  WorkoutStackParamList,
   T
 >
 
-export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<DemoTabParamList, T>,
-  AppStackScreenProps<keyof AppStackParamList>
+export type AppTabScreenProps<T extends keyof AppStackParamList> = BottomTabScreenProps<
+  AppStackParamList,
+  T
 >
 
 export interface NavigationProps extends Partial<
