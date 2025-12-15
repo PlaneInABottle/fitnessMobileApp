@@ -50,7 +50,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     }
 
     return (
-      <Screen preset="scroll" contentContainerStyle={$styles.flex1}>
+      <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
         <WorkoutHeader title="Add Exercise" leftActionLabel="Back" onLeftActionPress={navigation.goBack} />
 
         <View style={themed($content)}>
@@ -122,7 +122,6 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
 )
 
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...$styles.flex1,
   padding: spacing.lg,
   gap: spacing.md,
 })

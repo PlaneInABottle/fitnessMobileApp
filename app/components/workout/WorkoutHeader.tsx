@@ -46,6 +46,7 @@ export function WorkoutHeader({
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
   paddingHorizontal: spacing.lg,
   paddingVertical: spacing.md,
   borderBottomWidth: 1,

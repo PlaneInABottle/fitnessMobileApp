@@ -76,7 +76,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
     }
 
     return (
-      <Screen preset="scroll" contentContainerStyle={$styles.flex1}>
+      <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
         <WorkoutHeader title="Workout Complete" />
 
         <View style={themed($content)}>
@@ -132,7 +132,6 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 )
 
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...$styles.flex1,
   padding: spacing.lg,
   gap: spacing.md,
 })
