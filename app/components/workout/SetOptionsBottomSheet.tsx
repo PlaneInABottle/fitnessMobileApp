@@ -54,7 +54,9 @@ export function SetOptionsBottomSheet({
       useNativeDriver: true,
     }).start(() => {
       onClose()
-      afterClose?.()
+      if (typeof afterClose === "function") {
+        afterClose()
+      }
     })
   }
 
@@ -68,7 +70,7 @@ export function SetOptionsBottomSheet({
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
-      <Pressable style={themed($backdrop)} onPress={handleClose}>
+      <Pressable testID="backdrop" style={themed($backdrop)} onPress={handleClose}>
         <Animated.View
           style={[themed($sheet), { transform: [{ translateY: slideAnim }] }]}
           onStartShouldSetResponder={() => true}

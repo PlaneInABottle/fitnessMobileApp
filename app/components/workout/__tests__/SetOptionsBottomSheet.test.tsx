@@ -71,6 +71,18 @@ describe("SetOptionsBottomSheet", () => {
 
       expect(onChangeType).toHaveBeenCalled()
     })
+
+    it("calls onClose when backdrop is pressed", () => {
+      const onClose = jest.fn()
+      const { getByTestId } = renderBottomSheet({ onClose })
+
+      fireEvent.press(getByTestId("backdrop"), { nativeEvent: {} })
+
+      // Run animation timers
+      jest.advanceTimersByTime(500)
+
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 
   describe("accessibility", () => {
