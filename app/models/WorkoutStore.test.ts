@@ -142,4 +142,60 @@ describe("WorkoutStore", () => {
       expect(root.workoutStore.sessionHistory).toHaveLength(0)
     })
   })
+
+  describe("deleteSetFromWorkoutExercise", () => {
+    it("removes a set from a workout exercise", () => {
+      const root = RootStoreModel.create({})
+
+      root.workoutStore.startNewSession()
+      const weId = root.workoutStore.addExerciseToSession("bench-press")!
+      root.workoutStore.addSetToWorkoutExercise(weId, {
+        setType: "warmup",
+        weight: 50,
+        reps: 10,
+      })
+      root.workoutStore.addSetToWorkoutExercise(weId, {
+        setType: "working",
+        weight: 100,
+        reps: 5,
+      })
+
+      const sets = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets
+      expect(sets).toHaveLength(2)
+      const setToDelete = sets![0].id
+
+      const result = root.workoutStore.deleteSetFromWorkoutExercise(weId, setToDelete)
+      expect(result).toBe(true)
+
+      const updatedSets = root.workoutStore.currentSession?.exercises.find(
+        (e) => e.id === weId,
+      )?.sets
+      expect(updatedSets).toHaveLength(1)
+      expect(updatedSets![0].setType).toBe("working")
+    })
+
+    it("returns false when set not found", () => {
+      const root = RootStoreModel.create({})
+
+      root.workoutStore.startNewSession()
+      const weId = root.workoutStore.addExerciseToSession("bench-press")!
+      root.workoutStore.addSetToWorkoutExercise(weId, {
+        setType: "working",
+        weight: 100,
+        reps: 5,
+      })
+
+      const result = root.workoutStore.deleteSetFromWorkoutExercise(weId, "nonexistent")
+      expect(result).toBe(false)
+      expect(root.workoutStore.lastError).toBe("Set not found")
+    })
+
+    it("returns false when no active session", () => {
+      const root = RootStoreModel.create({})
+
+      const result = root.workoutStore.deleteSetFromWorkoutExercise("weId", "setId")
+      expect(result).toBe(false)
+      expect(root.workoutStore.lastError).toBe("No active session")
+    })
+  })
 })

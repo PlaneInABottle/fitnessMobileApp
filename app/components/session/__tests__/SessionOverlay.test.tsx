@@ -13,6 +13,13 @@ const Stack = createNativeStackNavigator()
 
 // Mock navigation
 const mockNavigate = jest.fn()
+const mockIsReady = jest.fn(() => true)
+const mockGetRootState = jest.fn(() => ({
+  index: 0,
+  routes: [{ name: "WorkoutTab" }],
+}))
+const mockAddListener = jest.fn(() => jest.fn())
+
 jest.mock("@react-navigation/native", () => {
   const actualNav = jest.requireActual("@react-navigation/native")
   return {
@@ -22,6 +29,18 @@ jest.mock("@react-navigation/native", () => {
     }),
   }
 })
+
+jest.mock("@/navigators/navigationUtilities", () => ({
+  navigationRef: {
+    isReady: () => mockIsReady(),
+    getRootState: () => mockGetRootState(),
+    addListener: (event: string, callback: () => void) => mockAddListener(event, callback),
+  },
+  getActiveRouteName: (state: { routes: { name: string }[]; index?: number }) => {
+    const route = state.routes[state.index ?? 0]
+    return route.name
+  },
+}))
 
 function MockScreen() {
   return (
@@ -52,6 +71,12 @@ describe("SessionOverlay", () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
+    // Default to WorkoutTab route (where overlay should be visible)
+    mockIsReady.mockReturnValue(true)
+    mockGetRootState.mockReturnValue({
+      index: 0,
+      routes: [{ name: "WorkoutTab" }],
+    })
   })
 
   afterEach(() => {
@@ -179,6 +204,105 @@ describe("SessionOverlay", () => {
 
       // Session should be discarded
       expect(store.workoutStore.currentSession).toBeUndefined()
+    })
+  })
+
+  describe("route-based visibility", () => {
+    it("hides overlay on ActiveWorkout screen", () => {
+      mockGetRootState.mockReturnValue({
+        index: 0,
+        routes: [{ name: "ActiveWorkout" }],
+      })
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      const { queryByText } = renderSessionOverlay(store)
+
+      expect(queryByText("Continue")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
+    })
+
+    it("hides overlay on ExerciseLibrary screen", () => {
+      mockGetRootState.mockReturnValue({
+        index: 0,
+        routes: [{ name: "ExerciseLibrary" }],
+      })
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      const { queryByText } = renderSessionOverlay(store)
+
+      expect(queryByText("Continue")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
+    })
+
+    it("hides overlay on WorkoutComplete screen", () => {
+      mockGetRootState.mockReturnValue({
+        index: 0,
+        routes: [{ name: "WorkoutComplete" }],
+      })
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      const { queryByText } = renderSessionOverlay(store)
+
+      expect(queryByText("Continue")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
+    })
+
+    it("shows overlay on WorkoutTab screen", () => {
+      mockGetRootState.mockReturnValue({
+        index: 0,
+        routes: [{ name: "WorkoutTab" }],
+      })
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      const { getByText } = renderSessionOverlay(store)
+
+      expect(getByText("Continue")).toBeTruthy()
+      expect(getByText("Discard")).toBeTruthy()
+    })
+
+    it("shows overlay on other tab screens", () => {
+      mockGetRootState.mockReturnValue({
+        index: 0,
+        routes: [{ name: "ProfileTab" }],
+      })
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      const { getByText } = renderSessionOverlay(store)
+
+      expect(getByText("Continue")).toBeTruthy()
+      expect(getByText("Discard")).toBeTruthy()
+    })
+
+    it("subscribes to navigation state changes", () => {
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      renderSessionOverlay(store)
+
+      expect(mockAddListener).toHaveBeenCalledWith("state", expect.any(Function))
+    })
+
+    it("handles navigation ref not ready gracefully", () => {
+      mockIsReady.mockReturnValue(false)
+
+      const store = RootStoreModel.create({})
+      store.workoutStore.startNewSession()
+
+      // Should not throw error when navigationRef is not ready
+      const { getByText } = renderSessionOverlay(store)
+
+      // Since route is empty string (not in hidden routes), overlay should show
+      expect(getByText("Continue")).toBeTruthy()
     })
   })
 })

@@ -1,5 +1,12 @@
 import { useMemo } from "react"
-import { Pressable, TextInput, TextStyle, View, ViewStyle } from "react-native"
+import {
+  Pressable,
+  // eslint-disable-next-line no-restricted-imports
+  TextInput,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native"
 
 import type { ExerciseCategory } from "@/models/ExerciseStore"
 import type { SetData, SetTypeId } from "@/models/SetStore"
@@ -24,6 +31,9 @@ export interface SetRowProps {
   availableSetTypes?: Array<{ id: SetTypeId; name: string }>
   onChange?: (next: Partial<SetData>, touchedKey?: EditableFieldKey | "setType") => void
   onDone?: () => void
+  index?: number
+  isDone?: boolean
+  onLongPress?: () => void
 }
 
 function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
@@ -66,6 +76,9 @@ export function SetRow({
   availableSetTypes,
   onChange,
   onDone,
+  index,
+  isDone,
+  onLongPress,
 }: SetRowProps) {
   const {
     theme: { colors, typography },
@@ -105,8 +118,8 @@ export function SetRow({
           <TextInput
             value={toText(current)}
             accessibilityLabel={field.label}
-            placeholder={placeholders?.[key] ?? "-"}
-            placeholderTextColor="#999"
+            placeholder={placeholders?.[key] ?? "0"}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             onChangeText={(t) => onChange({ ...value, [key]: toNumberOrUndefined(t) }, key)}
             style={[
@@ -126,11 +139,27 @@ export function SetRow({
     )
   }
 
-  const rowStyle: ThemedStyle<ViewStyle> = ({ colors }) => ({
-    backgroundColor: mode === "completed" ? colors.palette.accent100 : "transparent",
-    borderRadius: 6,
-    paddingVertical: 6,
-  })
+  const rowStyle: ThemedStyle<ViewStyle> = ({ colors }) => {
+    if (isDone) {
+      return {
+        backgroundColor: colors.palette.success100,
+        borderRadius: 6,
+        paddingVertical: 6,
+      }
+    }
+    if (mode === "completed" && typeof index === "number") {
+      return {
+        backgroundColor: index % 2 === 0 ? colors.palette.neutral300 : colors.palette.neutral200,
+        borderRadius: 6,
+        paddingVertical: 6,
+      }
+    }
+    return {
+      backgroundColor: "transparent",
+      borderRadius: 6,
+      paddingVertical: 6,
+    }
+  }
 
   if (mode === "header") {
     return (
@@ -154,7 +183,7 @@ export function SetRow({
   const isSetTypeTouched = !!touched?.setType
   const isSetTypeSuggested = mode === "edit" && !isSetTypeTouched && !!value?.setType
 
-  return (
+  const rowContent = (
     <View style={themed([$styles.row, $row, rowStyle])}>
       <View style={$cell}>
         {mode === "edit" ? (
@@ -182,11 +211,21 @@ export function SetRow({
             <Text text="✓" style={themed($doneText)} />
           </Pressable>
         ) : (
-          <Text text="✓" style={themed($doneText)} />
+          <Text text="✓" style={themed($completedDoneText)} />
         )}
       </View>
     </View>
   )
+
+  if (mode === "completed" && onLongPress) {
+    return (
+      <Pressable onLongPress={onLongPress} delayLongPress={500} accessibilityRole="button">
+        {rowContent}
+      </Pressable>
+    )
+  }
+
+  return rowContent
 }
 
 const $row: ViewStyle = {
@@ -259,6 +298,13 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $doneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.tint,
+  fontFamily: typography.primary.bold,
+  fontSize: 18,
+  lineHeight: 18,
+})
+
+const $completedDoneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  color: colors.palette.success500,
   fontFamily: typography.primary.bold,
   fontSize: 18,
   lineHeight: 18,

@@ -280,6 +280,13 @@ export const WorkoutStoreModel = types
       )
     }
 
+    function deleteSetFromWorkoutExerciseUnsafe(workoutExerciseId: string, setId: string) {
+      const workoutExercise = requireWorkoutExercise(workoutExerciseId)
+      const setIndex = workoutExercise.sets.findIndex((s) => s.id === setId)
+      if (setIndex === -1) throw new Error("Set not found")
+      workoutExercise.sets.splice(setIndex, 1)
+    }
+
     return {
       clearError() {
         self.lastError = undefined
@@ -370,6 +377,17 @@ export const WorkoutStoreModel = types
         try {
           if (!self.currentSession) throw new Error("No active session")
           self.currentSession = undefined
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      deleteSetFromWorkoutExercise(workoutExerciseId: string, setId: string): boolean {
+        try {
+          deleteSetFromWorkoutExerciseUnsafe(workoutExerciseId, setId)
           self.lastError = undefined
           return true
         } catch (e) {

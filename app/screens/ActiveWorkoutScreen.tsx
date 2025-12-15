@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react"
+import { FC, useEffect, useMemo, useState } from "react"
 import { View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
@@ -7,13 +7,13 @@ import { ErrorMessage } from "@/components/common/ErrorMessage"
 import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
+import { SetOptionsBottomSheet } from "@/components/workout/SetOptionsBottomSheet"
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
 import type { SetData } from "@/models/SetStore"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
-import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
 type TouchedMap = Partial<Record<"setType" | "weight" | "reps" | "time" | "distance", boolean>>
@@ -30,8 +30,34 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     const [draftSetData, setDraftSetData] = useState<Partial<SetData>>({ setType: "working" })
     const [draftTouched, setDraftTouched] = useState<TouchedMap>({})
     const [inlineError, setInlineError] = useState<string | undefined>(undefined)
+    const [selectedSetInfo, setSelectedSetInfo] = useState<{
+      workoutExerciseId: string
+      setIndex: number
+      setId: string
+      setType: string
+    } | null>(null)
+    const [undoableSet, setUndoableSet] = useState<{
+      workoutExerciseId: string
+      setId: string
+      timestamp: number
+    } | null>(null)
+
+    // Auto-expiry effect for undo
+    useEffect(() => {
+      if (!undoableSet) return
+
+      const elapsed = Date.now() - undoableSet.timestamp
+      const remaining = Math.max(0, 5000 - elapsed)
+
+      const timeout = setTimeout(() => {
+        setUndoableSet(null)
+      }, remaining)
+
+      return () => clearTimeout(timeout)
+    }, [undoableSet])
 
     function handleStartAddSet(workoutExerciseId: string, setType?: SetData["setType"]) {
+      setUndoableSet(null) // Clear any pending undo
       setEditingWorkoutExerciseId(workoutExerciseId)
       setDraftSetData({ setType: (setType as any) ?? "working" })
       setDraftTouched({})
@@ -71,10 +97,70 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         return
       }
 
+      // Get the newly added set ID (last set in the array)
+      const workoutExercise = session?.exercises.find((e) => e.id === workoutExerciseId)
+      const newSetId = workoutExercise?.sets[workoutExercise.sets.length - 1]?.id
+
+      if (newSetId) {
+        setUndoableSet({
+          workoutExerciseId,
+          setId: newSetId,
+          timestamp: Date.now(),
+        })
+      }
+
       setEditingWorkoutExerciseId(null)
       setDraftSetData({ setType: "working" })
       setDraftTouched({})
       setInlineError(undefined)
+    }
+
+    function handleSetLongPress(
+      workoutExerciseId: string,
+      setIndex: number,
+      setId: string,
+      setType: string,
+    ) {
+      setSelectedSetInfo({ workoutExerciseId, setIndex, setId, setType })
+    }
+
+    function handleCloseSetOptions() {
+      setSelectedSetInfo(null)
+    }
+
+    function handleEditSet() {
+      // Edit functionality - would need more complex state management
+      // For now, just close the sheet
+      setSelectedSetInfo(null)
+    }
+
+    function handleDeleteSet() {
+      if (!selectedSetInfo) return
+      workoutStore.deleteSetFromWorkoutExercise(
+        selectedSetInfo.workoutExerciseId,
+        selectedSetInfo.setId,
+      )
+      // Clear undo if this was the undoable set
+      if (
+        undoableSet &&
+        undoableSet.workoutExerciseId === selectedSetInfo.workoutExerciseId &&
+        undoableSet.setId === selectedSetInfo.setId
+      ) {
+        setUndoableSet(null)
+      }
+      setSelectedSetInfo(null)
+    }
+
+    function handleChangeSetType() {
+      // Change type functionality - would cycle through set types
+      // For now, just close the sheet
+      setSelectedSetInfo(null)
+    }
+
+    function handleUndoLastSet() {
+      if (!undoableSet) return
+      workoutStore.deleteSetFromWorkoutExercise(undoableSet.workoutExerciseId, undoableSet.setId)
+      setUndoableSet(null)
     }
 
     return (
@@ -122,12 +208,14 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                     <View style={themed($setsContainer)}>
                       <SetRow category={exercise.category} mode="header" />
 
-                      {we.sets.map((s) => (
+                      {we.sets.map((s, idx) => (
                         <SetRow
                           key={s.id}
                           category={exercise.category}
                           mode="completed"
                           availableSetTypes={availableSetTypes}
+                          index={idx}
+                          onLongPress={() => handleSetLongPress(we.id, idx, s.id, s.setType)}
                           value={{
                             setType: s.setType,
                             weight: s.weight,
@@ -137,6 +225,16 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                           }}
                         />
                       ))}
+
+                      {/* Undo button - shows briefly after adding a set */}
+                      {undoableSet?.workoutExerciseId === we.id && (
+                        <Button
+                          text="Undo Last Set"
+                          preset="default"
+                          onPress={handleUndoLastSet}
+                          style={themed($undoButton)}
+                        />
+                      )}
 
                       {editingWorkoutExerciseId === we.id ? (
                         <>
@@ -183,6 +281,15 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
             </>
           )}
         </View>
+
+        <SetOptionsBottomSheet
+          visible={!!selectedSetInfo}
+          onClose={handleCloseSetOptions}
+          onEdit={handleEditSet}
+          onDelete={handleDeleteSet}
+          onChangeType={handleChangeSetType}
+          setTypeName={selectedSetInfo?.setType ?? "Working"}
+        />
       </Screen>
     )
   },
@@ -198,9 +305,15 @@ const $exerciseSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $setsContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  borderWidth: 1,
-  borderColor: colors.palette.neutral300,
+  backgroundColor: colors.palette.neutral300,
   borderRadius: 8,
   padding: spacing.sm,
   gap: spacing.sm,
+})
+
+const $undoButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.palette.neutral200,
+  borderColor: colors.palette.accent300,
+  borderWidth: 1,
+  paddingVertical: spacing.xs,
 })

@@ -22,14 +22,18 @@ const palette = {
   secondary200: "#626894",
   secondary100: "#41476E",
 
-  accent500: "#FFEED4",
-  accent400: "#FFE1B2",
-  accent300: "#FDD495",
-  accent200: "#FBC878",
-  accent100: "#FFBB50",
+  accent500: "#2D2418", // Darkest - subtle background
+  accent400: "#4A3B28", // Dark accent background
+  accent300: "#6B5638", // Medium - borders
+  accent200: "#8C7148", // Light - hover states
+  accent100: "#AD8C58", // Brightest - muted, professional
 
   angry100: "#F2D6CD",
   angry500: "#C03403",
+
+  success100: "#1B4332",
+  success200: "#2D6A4F",
+  success500: "#40916C",
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
