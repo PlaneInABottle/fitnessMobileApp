@@ -10,11 +10,15 @@ import { RootStore, RootStoreModel, RootStoreSnapshotIn, RootStoreSnapshotOut } 
 export const ROOT_STORE_PERSISTENCE_KEY = "ROOT_STORE"
 export const ROOT_STORE_SECURE_PERSISTENCE_KEY = "ROOT_STORE_SECURE"
 
-export async function setupRootStore(): Promise<{ rootStore: RootStore; dispose: IDisposer }> {
+let setupPromise: Promise<{ rootStore: RootStore; dispose: IDisposer }> | null = null
+
+async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: IDisposer }> {
   const rootStore = RootStoreModel.create({})
 
   const persistedState = storage.load<RootStoreSnapshotIn>(ROOT_STORE_PERSISTENCE_KEY)
-  const persistedSecureState = secureStorage.load<Partial<RootStoreSnapshotIn>>(ROOT_STORE_SECURE_PERSISTENCE_KEY)
+  const persistedSecureState = secureStorage.load<Partial<RootStoreSnapshotIn>>(
+    ROOT_STORE_SECURE_PERSISTENCE_KEY,
+  )
 
   const merged = {
     ...(persistedState ?? {}),
@@ -90,6 +94,13 @@ export async function setupRootStore(): Promise<{ rootStore: RootStore; dispose:
   })
 
   return { rootStore, dispose }
+}
+
+export async function setupRootStore(): Promise<{ rootStore: RootStore; dispose: IDisposer }> {
+  if (!setupPromise) {
+    setupPromise = setupRootStoreImpl()
+  }
+  return setupPromise
 }
 
 export function useInitialRootStore(): { rootStore: RootStore | null; rehydrated: boolean } {

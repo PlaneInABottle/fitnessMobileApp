@@ -1,14 +1,14 @@
 import React from "react"
-import { render } from "@testing-library/react-native"
+import { ScrollView, StyleSheet } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { ScrollView, StyleSheet } from "react-native"
+import { render } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
-import { ThemeProvider } from "@/theme/context"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
+import { ThemeProvider } from "@/theme/context"
 
 const Stack = createNativeStackNavigator<WorkoutStackParamList>()
 

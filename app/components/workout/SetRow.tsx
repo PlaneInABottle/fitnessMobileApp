@@ -53,7 +53,8 @@ function toNumberOrUndefined(text: string): number | undefined {
   const trimmed = text.trim()
   if (!trimmed) return undefined
   const n = Number(trimmed)
-  return Number.isFinite(n) ? n : undefined
+  if (!Number.isFinite(n) || n < 0) return undefined
+  return n
 }
 
 export function SetRow({

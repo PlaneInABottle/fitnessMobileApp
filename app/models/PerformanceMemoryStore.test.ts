@@ -30,19 +30,39 @@ describe("PerformanceMemoryStore (v2)", () => {
     })
 
     expect(
-      store.getPlaceholdersForSet({ exerciseId: "bench-press", category: "STRENGTH", setType: "working", order: 1 }),
+      store.getPlaceholdersForSet({
+        exerciseId: "bench-press",
+        category: "STRENGTH",
+        setType: "working",
+        order: 1,
+      }),
     ).toMatchObject({ weight: "100", reps: "5" })
 
     expect(
-      store.getPlaceholdersForSet({ exerciseId: "bench-press", category: "STRENGTH", setType: "working", order: 2 }),
+      store.getPlaceholdersForSet({
+        exerciseId: "bench-press",
+        category: "STRENGTH",
+        setType: "working",
+        order: 2,
+      }),
     ).toMatchObject({ weight: "110", reps: "3" })
 
     expect(
-      store.getPlaceholdersForSet({ exerciseId: "bench-press", category: "STRENGTH", setType: "warmup", order: 1 }),
+      store.getPlaceholdersForSet({
+        exerciseId: "bench-press",
+        category: "STRENGTH",
+        setType: "warmup",
+        order: 1,
+      }),
     ).toMatchObject({ weight: "45", reps: "10" })
 
     expect(
-      store.getPlaceholdersForSet({ exerciseId: "bench-press", category: "STRENGTH", setType: "working", order: 3 }),
+      store.getPlaceholdersForSet({
+        exerciseId: "bench-press",
+        category: "STRENGTH",
+        setType: "working",
+        order: 3,
+      }),
     ).toMatchObject({ weight: "-", reps: "-" })
   })
 
@@ -51,23 +71,45 @@ describe("PerformanceMemoryStore (v2)", () => {
 
     store.recordCompletedWorkout({
       completedAt: new Date("2025-01-01T00:00:00Z"),
-      exercises: [{ exerciseId: "bench-press", category: "STRENGTH", sets: [{ setType: "working", weight: 100, reps: 5 }] }],
+      exercises: [
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [{ setType: "working", weight: 100, reps: 5 }],
+        },
+      ],
     })
 
     store.recordCompletedWorkout({
       completedAt: new Date("2025-01-01T00:00:10Z"),
-      exercises: [{ exerciseId: "bench-press", category: "STRENGTH", sets: [{ setType: "working", weight: 120, reps: 3 }] }],
+      exercises: [
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [{ setType: "working", weight: 120, reps: 3 }],
+        },
+      ],
     })
 
     store.recordCompletedWorkout({
       completedAt: new Date("2025-01-01T00:00:20Z"),
-      exercises: [{ exerciseId: "bench-press", category: "STRENGTH", sets: [{ setType: "working", reps: 8 }] }],
+      exercises: [
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [{ setType: "working", reps: 8 }],
+        },
+      ],
     })
 
     store.recordCompletedWorkout({
       completedAt: new Date("2025-01-01T00:00:30Z"),
       exercises: [
-        { exerciseId: "bench-press", category: "STRENGTH", sets: [{ setType: "working", time: 60, distance: 1.5 }] },
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [{ setType: "working", time: 60, distance: 1.5 }],
+        },
       ],
     })
 

@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, useState } from "react"
 import { TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
@@ -16,6 +16,9 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
   function WorkoutTabScreen({ navigation }) {
     const { workoutStore } = useStores()
     const { themed } = useAppTheme()
+    const [isStarting, setIsStarting] = useState(false)
+
+    const hasActiveSession = !!workoutStore.currentSession
 
     const recentTemplates = Array.from(workoutStore.templates.values())
       .slice()
@@ -23,11 +26,23 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
       .slice(0, 3)
 
     function handleStartEmptyWorkout() {
-      if (workoutStore.startNewSession()) navigation.navigate("ActiveWorkout")
+      if (isStarting) return
+      setIsStarting(true)
+      try {
+        if (workoutStore.startNewSession()) navigation.navigate("ActiveWorkout")
+      } finally {
+        setIsStarting(false)
+      }
     }
 
     function handleStartFromTemplate(templateId: string) {
-      if (workoutStore.startSessionFromTemplate(templateId)) navigation.navigate("ActiveWorkout")
+      if (isStarting) return
+      setIsStarting(true)
+      try {
+        if (workoutStore.startSessionFromTemplate(templateId)) navigation.navigate("ActiveWorkout")
+      } finally {
+        setIsStarting(false)
+      }
     }
 
     return (
@@ -41,7 +56,15 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
           </View>
         )}
 
-        <Button text="Start Empty Workout" preset="filled" onPress={handleStartEmptyWorkout} />
+        {hasActiveSession ? (
+          <Button
+            text="Resume Workout"
+            preset="filled"
+            onPress={() => navigation.navigate("ActiveWorkout")}
+          />
+        ) : (
+          <Button text="Start Empty Workout" preset="filled" onPress={handleStartEmptyWorkout} />
+        )}
 
         <View style={themed($section)}>
           <Text text="Recent Templates" preset="subheading" />

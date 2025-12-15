@@ -28,7 +28,12 @@ export function WorkoutHeader({
     <View style={themed($container)}>
       <View style={themed([$styles.row, $row])}>
         {!!leftActionLabel && !!onLeftActionPress ? (
-          <Button text={leftActionLabel} preset="default" onPress={onLeftActionPress} style={$button} />
+          <Button
+            text={leftActionLabel}
+            preset="default"
+            onPress={onLeftActionPress}
+            style={$button}
+          />
         ) : (
           <View style={$leftFiller} />
         )}
@@ -36,7 +41,12 @@ export function WorkoutHeader({
         <Text text={title} preset="heading" style={themed($title)} />
 
         {!!rightActionLabel && !!onRightActionPress ? (
-          <Button text={rightActionLabel} preset="default" onPress={onRightActionPress} style={$button} />
+          <Button
+            text={rightActionLabel}
+            preset="default"
+            onPress={onRightActionPress}
+            style={$button}
+          />
         ) : (
           <View style={$rightFiller} />
         )}

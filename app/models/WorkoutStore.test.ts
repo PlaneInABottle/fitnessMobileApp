@@ -17,14 +17,20 @@ describe("WorkoutStore", () => {
 
     const workoutExerciseId = root.workoutStore.addExerciseToSession("bench-press")
     expect(workoutExerciseId).toBeDefined()
-    root.workoutStore.addSetToWorkoutExercise(workoutExerciseId!, { setType: "working", weight: 100, reps: 5 })
+    root.workoutStore.addSetToWorkoutExercise(workoutExerciseId!, {
+      setType: "working",
+      weight: 100,
+      reps: 5,
+    })
 
     jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
     root.workoutStore.completeSession()
 
     expect(root.workoutStore.currentSession).toBeUndefined()
     expect(root.workoutStore.sessionHistory).toHaveLength(1)
-    expect(root.workoutStore.sessionHistory[0].completedAt?.toISOString()).toBe("2025-01-01T00:00:10.000Z")
+    expect(root.workoutStore.sessionHistory[0].completedAt?.toISOString()).toBe(
+      "2025-01-01T00:00:10.000Z",
+    )
 
     const placeholders = root.performanceMemoryStore.getPlaceholdersForSet({
       exerciseId: "bench-press",
@@ -94,9 +100,46 @@ describe("WorkoutStore", () => {
     root.workoutStore.clearError()
     expect(root.workoutStore.lastError).toBeUndefined()
 
-    expect(root.workoutStore.addSetToWorkoutExercise("nope", { setType: "working", weight: 100, reps: 5 })).toBe(
-      false,
-    )
+    expect(
+      root.workoutStore.addSetToWorkoutExercise("nope", {
+        setType: "working",
+        weight: 100,
+        reps: 5,
+      }),
+    ).toBe(false)
     expect(root.workoutStore.lastError).toBe("No active session")
+  })
+
+  describe("discardSession", () => {
+    it("clears currentSession when active", () => {
+      const root = RootStoreModel.create({})
+
+      root.workoutStore.startNewSession()
+      root.workoutStore.addExerciseToSession("bench-press")
+      expect(root.workoutStore.currentSession).toBeDefined()
+
+      const result = root.workoutStore.discardSession()
+      expect(result).toBe(true)
+      expect(root.workoutStore.currentSession).toBeUndefined()
+      expect(root.workoutStore.lastError).toBeUndefined()
+    })
+
+    it("returns false when no session", () => {
+      const root = RootStoreModel.create({})
+
+      const result = root.workoutStore.discardSession()
+      expect(result).toBe(false)
+      expect(root.workoutStore.lastError).toBe("No active session")
+    })
+
+    it("does not add to sessionHistory", () => {
+      const root = RootStoreModel.create({})
+
+      root.workoutStore.startNewSession()
+      root.workoutStore.addExerciseToSession("bench-press")
+      root.workoutStore.discardSession()
+
+      expect(root.workoutStore.sessionHistory).toHaveLength(0)
+    })
   })
 })

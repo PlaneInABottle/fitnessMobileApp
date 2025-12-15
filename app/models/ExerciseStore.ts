@@ -116,7 +116,9 @@ export const ExerciseStoreModel = types
     },
 
     getExercisesByCategory(category: ExerciseCategory): Exercise[] {
-      return Array.from(self.exercises.values()).filter((exercise) => exercise.category === category)
+      return Array.from(self.exercises.values()).filter(
+        (exercise) => exercise.category === category,
+      )
     },
 
     searchExercises(query: string): Exercise[] {
@@ -157,7 +159,12 @@ export const ExerciseStoreModel = types
           id = `${providedId}-${suffix++}`
         }
       } else {
+        let attempts = 0
+        const maxAttempts = 100
         while (self.exercises.has(id)) {
+          if (++attempts >= maxAttempts) {
+            throw new Error("Failed to generate unique exercise ID after maximum attempts")
+          }
           id = generateId()
         }
       }

@@ -84,7 +84,9 @@ export const PatternMemoryEntryModel = types.model("PatternMemoryEntry", {
 
 export interface PatternMemoryEntry extends Instance<typeof PatternMemoryEntryModel> {}
 export interface PatternMemoryEntrySnapshotIn extends SnapshotIn<typeof PatternMemoryEntryModel> {}
-export interface PatternMemoryEntrySnapshotOut extends SnapshotOut<typeof PatternMemoryEntryModel> {}
+export interface PatternMemoryEntrySnapshotOut extends SnapshotOut<
+  typeof PatternMemoryEntryModel
+> {}
 
 export const PersonalRecordModel = types.model("PersonalRecord", {
   maxWeight: types.maybe(types.number),
@@ -151,7 +153,13 @@ export const PerformanceMemoryStoreModel = types
       const maxDistance = isFiniteNumber(performance.distance) ? performance.distance : undefined
 
       if (!current) {
-        if (maxWeight === undefined && maxReps === undefined && maxTime === undefined && maxDistance === undefined) return
+        if (
+          maxWeight === undefined &&
+          maxReps === undefined &&
+          maxTime === undefined &&
+          maxDistance === undefined
+        )
+          return
 
         self.personalRecords.set(exerciseId, {
           maxWeight,
@@ -165,7 +173,10 @@ export const PerformanceMemoryStoreModel = types
 
       let didUpdate = false
 
-      if (maxWeight !== undefined && (current.maxWeight === undefined || maxWeight > current.maxWeight)) {
+      if (
+        maxWeight !== undefined &&
+        (current.maxWeight === undefined || maxWeight > current.maxWeight)
+      ) {
         current.maxWeight = maxWeight
         didUpdate = true
       }
@@ -180,7 +191,10 @@ export const PerformanceMemoryStoreModel = types
         didUpdate = true
       }
 
-      if (maxDistance !== undefined && (current.maxDistance === undefined || maxDistance > current.maxDistance)) {
+      if (
+        maxDistance !== undefined &&
+        (current.maxDistance === undefined || maxDistance > current.maxDistance)
+      ) {
         current.maxDistance = maxDistance
         didUpdate = true
       }
@@ -205,19 +219,25 @@ export const PerformanceMemoryStoreModel = types
             const order = counters[setType]!
 
             self.patternMemories.set(
-              buildKey({ exerciseId: exercise.exerciseId, category: exercise.category, setType, order }),
+              buildKey({
+                exerciseId: exercise.exerciseId,
+                category: exercise.category,
+                setType,
+                order,
+              }),
               {
-              exerciseId: exercise.exerciseId,
-              category: exercise.category,
-              setType,
-              order,
-              performedAt: now,
-              weight: isFiniteNumber(set.weight) ? set.weight : undefined,
-              reps: isFiniteNumber(set.reps) ? set.reps : undefined,
-              time: isFiniteNumber(set.time) ? set.time : undefined,
-              distance: isFiniteNumber(set.distance) ? set.distance : undefined,
-              restTime: isFiniteNumber(set.restTime) ? set.restTime : undefined,
-            })
+                exerciseId: exercise.exerciseId,
+                category: exercise.category,
+                setType,
+                order,
+                performedAt: now,
+                weight: isFiniteNumber(set.weight) ? set.weight : undefined,
+                reps: isFiniteNumber(set.reps) ? set.reps : undefined,
+                time: isFiniteNumber(set.time) ? set.time : undefined,
+                distance: isFiniteNumber(set.distance) ? set.distance : undefined,
+                restTime: isFiniteNumber(set.restTime) ? set.restTime : undefined,
+              },
+            )
 
             updatePersonalRecord(exercise.exerciseId, set, now)
           })
@@ -258,7 +278,11 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
     })
   }
 
-  if (maybe?.schemaVersion === 2 && maybe?.patternMemories && typeof maybe.patternMemories === "object") {
+  if (
+    maybe?.schemaVersion === 2 &&
+    maybe?.patternMemories &&
+    typeof maybe.patternMemories === "object"
+  ) {
     const v2PatternMemories: Record<string, any> = {}
     Object.entries(maybe.patternMemories).forEach(([key, entry]) => {
       const e = entry as any
@@ -321,7 +345,8 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
           const key = `${exerciseId}::${category}|${setType}|${order}`
 
           const existing = patternMemories[key]
-          const existingAt = existing?.performedAt instanceof Date ? existing.performedAt : undefined
+          const existingAt =
+            existing?.performedAt instanceof Date ? existing.performedAt : undefined
           if (existingAt && existingAt.getTime() >= performedAt.getTime()) return
 
           patternMemories[key] = {
@@ -349,5 +374,9 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
 }
 
 export interface PerformanceMemoryStore extends Instance<typeof PerformanceMemoryStoreModel> {}
-export interface PerformanceMemoryStoreSnapshotIn extends SnapshotIn<typeof PerformanceMemoryStoreModel> {}
-export interface PerformanceMemoryStoreSnapshotOut extends SnapshotOut<typeof PerformanceMemoryStoreModel> {}
+export interface PerformanceMemoryStoreSnapshotIn extends SnapshotIn<
+  typeof PerformanceMemoryStoreModel
+> {}
+export interface PerformanceMemoryStoreSnapshotOut extends SnapshotOut<
+  typeof PerformanceMemoryStoreModel
+> {}

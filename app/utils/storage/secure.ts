@@ -2,6 +2,17 @@ import { MMKV } from "react-native-mmkv"
 
 import { loadString as loadPlainString, saveString as savePlainString } from "."
 
+function dateReviver(_key: string, value: unknown): unknown {
+  if (typeof value === "string") {
+    const iso8601 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/
+    if (iso8601.test(value)) {
+      const date = new Date(value)
+      if (!isNaN(date.getTime())) return date
+    }
+  }
+  return value
+}
+
 const ENCRYPTION_KEY_STORAGE_KEY = "MMKV_SECURE_ENCRYPTION_KEY"
 
 function generateEncryptionKey16(): string {
@@ -15,8 +26,7 @@ function generateEncryptionKey16(): string {
   if (useCrypto) {
     cryptoObj.getRandomValues(bytes)
   } else {
-    // Fallback only when no crypto is available.
-    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256)
+    throw new Error("Secure random generation not available. crypto.getRandomValues is required.")
   }
 
   let key = ""
@@ -75,7 +85,7 @@ export function load<T>(key: string): T | null {
   if (str == null) return null
 
   try {
-    return JSON.parse(str) as T
+    return JSON.parse(str, dateReviver) as T
   } catch {
     return null
   }

@@ -7,7 +7,6 @@ import { ErrorMessage } from "@/components/common/ErrorMessage"
 import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
-
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
@@ -90,8 +89,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           {!session ? (
             <ErrorMessage
               message="No active workout session."
-              actionLabel="Back"
-              onActionPress={() => navigation.navigate("WorkoutTab")}
+              actionLabel="Start Workout"
+              onActionPress={() => navigation.popToTop()}
             />
           ) : session.exercises.length === 0 ? (
             <EmptyState
@@ -151,7 +150,9 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               category: exercise.category,
                               setType: (draftSetData.setType as any) ?? "working",
                               order:
-                                we.sets.filter((s) => s.setType === ((draftSetData.setType as any) ?? "working")).length + 1,
+                                we.sets.filter(
+                                  (s) => s.setType === ((draftSetData.setType as any) ?? "working"),
+                                ).length + 1,
                             })}
                             touched={draftTouched}
                             onChange={handleDraftChange}
@@ -174,7 +175,11 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                 )
               })}
 
-              <Button text="Add Exercise" preset="filled" onPress={() => navigation.navigate("ExerciseLibrary")} />
+              <Button
+                text="Add Exercise"
+                preset="filled"
+                onPress={() => navigation.navigate("ExerciseLibrary")}
+              />
             </>
           )}
         </View>

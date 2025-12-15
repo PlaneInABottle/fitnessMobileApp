@@ -4,13 +4,15 @@
  * Generally speaking, it will contain an auth flow (registration, login, forgot password)
  * and a "main" flow which the user will use once logged in.
  */
-import { NavigationContainer } from "@react-navigation/native"
+import { View, ViewStyle } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
+import { SessionOverlay } from "@/components/session"
 import Config from "@/config"
-import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
+import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
@@ -81,8 +83,15 @@ export const AppNavigator = (props: NavigationProps) => {
   return (
     <NavigationContainer ref={navigationRef} theme={navigationTheme} {...props}>
       <ErrorBoundary catchErrors={Config.catchErrors}>
-        <AppTabs />
+        <View style={$container}>
+          <AppTabs />
+          <SessionOverlay />
+        </View>
       </ErrorBoundary>
     </NavigationContainer>
   )
+}
+
+const $container: ViewStyle = {
+  flex: 1,
 }

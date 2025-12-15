@@ -3,28 +3,41 @@ import { RootStoreModel } from "./RootStore"
 describe("SetStore", () => {
   it("validates strength sets require weight + reps", () => {
     const root = RootStoreModel.create({})
-    expect(root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 5 }).ok).toBe(
-      true,
+    expect(
+      root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 5 }).ok,
+    ).toBe(true)
+    expect(root.setStore.validateSetData("bench-press", { setType: "working", reps: 5 }).ok).toBe(
+      false,
     )
-    expect(root.setStore.validateSetData("bench-press", { setType: "working", reps: 5 }).ok).toBe(false)
   })
 
   it("enforces numeric ranges for required and optional fields", () => {
     const root = RootStoreModel.create({})
 
-    expect(root.setStore.validateSetData("bench-press", { setType: "working", weight: 501, reps: 5 }).ok).toBe(
-      false,
-    )
-    expect(root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 101 }).ok).toBe(
-      false,
-    )
-
     expect(
-      root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 5, restTime: 3601 }).ok,
+      root.setStore.validateSetData("bench-press", { setType: "working", weight: 501, reps: 5 }).ok,
+    ).toBe(false)
+    expect(
+      root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 101 })
+        .ok,
     ).toBe(false)
 
     expect(
-      root.setStore.validateSetData("bench-press", { setType: "working", weight: 100, reps: 5, restTime: 60 }).ok,
+      root.setStore.validateSetData("bench-press", {
+        setType: "working",
+        weight: 100,
+        reps: 5,
+        restTime: 3601,
+      }).ok,
+    ).toBe(false)
+
+    expect(
+      root.setStore.validateSetData("bench-press", {
+        setType: "working",
+        weight: 100,
+        reps: 5,
+        restTime: 60,
+      }).ok,
     ).toBe(true)
   })
 
@@ -42,7 +55,9 @@ describe("SetStore", () => {
 
   it("validates cardio sets require time", () => {
     const root = RootStoreModel.create({})
-    expect(root.setStore.validateSetData("running", { setType: "working", time: 600 }).ok).toBe(true)
+    expect(root.setStore.validateSetData("running", { setType: "working", time: 600 }).ok).toBe(
+      true,
+    )
     expect(root.setStore.validateSetData("running", { setType: "working" }).ok).toBe(false)
   })
 })

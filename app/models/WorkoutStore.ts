@@ -1,4 +1,12 @@
-import { cast, getRoot, getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import {
+  cast,
+  getRoot,
+  getSnapshot,
+  Instance,
+  SnapshotIn,
+  SnapshotOut,
+  types,
+} from "mobx-state-tree"
 
 import { ExerciseSetFieldKey } from "./ExerciseStore"
 import { SetData, SetTypeId } from "./SetStore"
@@ -24,10 +32,15 @@ type RootWithWorkoutDeps = {
     getExerciseCategory(id: string): "STRENGTH" | "BODYWEIGHT" | "TIMED" | "CARDIO" | undefined
   }
   setStore: {
-    validateSetData(exerciseId: string, setData: Partial<SetData> | null | undefined): { ok: true } | {
-      ok: false
-      error: string
-    }
+    validateSetData(
+      exerciseId: string,
+      setData: Partial<SetData> | null | undefined,
+    ):
+      | { ok: true }
+      | {
+          ok: false
+          error: string
+        }
   }
   performanceMemoryStore: {
     recordCompletedWorkout(workout: {
@@ -350,6 +363,18 @@ export const WorkoutStoreModel = types
         } catch (e) {
           setError(e)
           return undefined
+        }
+      },
+
+      discardSession(): boolean {
+        try {
+          if (!self.currentSession) throw new Error("No active session")
+          self.currentSession = undefined
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
         }
       },
     }

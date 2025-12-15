@@ -47,7 +47,10 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
     ]
   },
 
-  validateSetData(exerciseId: string, setData: Partial<SetData> | null | undefined): SetValidationResult {
+  validateSetData(
+    exerciseId: string,
+    setData: Partial<SetData> | null | undefined,
+  ): SetValidationResult {
     if (!setData) return { ok: false, error: "Set data is required" }
 
     const setType = setData.setType
@@ -79,7 +82,10 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
       }
 
       if (typeof value !== "number" || !Number.isFinite(value)) {
-        return { ok: false, error: isRequired ? `${field} is required` : `${field} must be a finite number` }
+        return {
+          ok: false,
+          error: isRequired ? `${field} is required` : `${field} must be a finite number`,
+        }
       }
 
       const { min, max } = FIELD_RANGES[field]

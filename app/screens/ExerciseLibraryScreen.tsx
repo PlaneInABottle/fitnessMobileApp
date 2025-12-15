@@ -51,11 +51,19 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
 
     return (
       <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
-        <WorkoutHeader title="Add Exercise" leftActionLabel="Back" onLeftActionPress={navigation.goBack} />
+        <WorkoutHeader
+          title="Add Exercise"
+          leftActionLabel="Back"
+          onLeftActionPress={navigation.goBack}
+        />
 
         <View style={themed($content)}>
           {!session ? (
-            <ErrorMessage message="No active workout session." actionLabel="Back" onActionPress={navigation.goBack} />
+            <ErrorMessage
+              message="No active workout session."
+              actionLabel="Start New"
+              onActionPress={() => navigation.popToTop()}
+            />
           ) : (
             <>
               {!!workoutStore.lastError && (

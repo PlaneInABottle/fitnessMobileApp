@@ -66,7 +66,13 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       if (!id) return
 
       const ok = workoutStore.completeSession()
-      if (ok) navigation.popToTop()
+      if (!ok) {
+        // Session completion failed but template was created - navigate anyway
+        // to avoid leaving user stuck on this screen
+        navigation.popToTop()
+        return
+      }
+      navigation.popToTop()
     }
 
     function handleDontSave() {
@@ -119,7 +125,11 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                 </View>
               ) : (
                 <View style={themed($actions)}>
-                  <Button text="Save as Template" preset="filled" onPress={handleStartSaveTemplate} />
+                  <Button
+                    text="Save as Template"
+                    preset="filled"
+                    onPress={handleStartSaveTemplate}
+                  />
                   <Button text="Don't Save" preset="default" onPress={handleDontSave} />
                 </View>
               )}
