@@ -213,6 +213,36 @@ export const WorkoutStoreModel = types
       })
     }
 
+    function updateSetInWorkoutExerciseUnsafe(
+      workoutExerciseId: string,
+      setId: string,
+      patch: Partial<SetData>,
+    ) {
+      const root = getAttachedRoot()
+      const workoutExercise = requireWorkoutExercise(workoutExerciseId)
+      const set = workoutExercise.sets.find((s) => s.id === setId)
+      if (!set) throw new Error("Set not found")
+
+      const merged: Partial<SetData> = {
+        setType: patch.setType ?? set.setType,
+        weight: patch.weight ?? set.weight,
+        reps: patch.reps ?? set.reps,
+        time: patch.time ?? set.time,
+        distance: patch.distance ?? set.distance,
+        restTime: patch.restTime ?? set.restTime,
+      }
+
+      const validation = root.setStore.validateSetData(workoutExercise.exerciseId, merged)
+      if (!validation.ok) throw new Error(validation.error)
+
+      set.setType = merged.setType as SetTypeId
+      set.weight = merged.weight as any
+      set.reps = merged.reps as any
+      set.time = merged.time as any
+      set.distance = merged.distance as any
+      set.restTime = merged.restTime as any
+    }
+
     function completeSessionUnsafe() {
       const root = getAttachedRoot()
       const session = requireCurrentSession()
@@ -332,6 +362,21 @@ export const WorkoutStoreModel = types
       addSetToWorkoutExercise(workoutExerciseId: string, setData: Partial<SetData>): boolean {
         try {
           addSetToWorkoutExerciseUnsafe(workoutExerciseId, setData)
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      updateSetInWorkoutExercise(
+        workoutExerciseId: string,
+        setId: string,
+        patch: Partial<SetData>,
+      ): boolean {
+        try {
+          updateSetInWorkoutExerciseUnsafe(workoutExerciseId, setId, patch)
           self.lastError = undefined
           return true
         } catch (e) {

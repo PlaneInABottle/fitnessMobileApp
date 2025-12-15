@@ -104,8 +104,15 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText, queryByText } =
-      renderWorkoutFlow()
+    const {
+      store,
+      getByText,
+      getByTestId,
+      getByLabelText,
+      getAllByLabelText,
+      getByPlaceholderText,
+      queryByText,
+    } = renderWorkoutFlow()
 
     fireEvent.press(getByText("Start Empty Workout"))
 
@@ -124,23 +131,22 @@ describe("Workout MVP flow", () => {
 
     const reps1 = getByLabelText("Reps")
     const kg1 = getByLabelText("Kg")
-    expect(reps1.props.placeholder).toBe("5")
-    expect(kg1.props.placeholder).toBe("100")
 
     fireEvent.changeText(reps1, "5")
     fireEvent.changeText(kg1, "60")
 
-    fireEvent.press(getByText("✓"))
+    await waitFor(() => {
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(1)
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets[0]?.reps).toBe(5)
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets[0]?.weight).toBe(60)
+    })
 
-    await waitFor(() => expect(queryByText("weight is required")).toBeNull())
-
-    // Add second set; placeholders should be pattern-specific (working #2).
+    // Add second set
     fireEvent.press(getByText("Add Set"))
 
-    const reps2 = getByLabelText("Reps")
-    const kg2 = getByLabelText("Kg")
-    expect(reps2.props.placeholder).toBe("3")
-    expect(kg2.props.placeholder).toBe("110")
+    await waitFor(() => {
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(2)
+    })
 
     fireEvent.press(getByText("End"))
 

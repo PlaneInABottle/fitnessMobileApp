@@ -17,7 +17,6 @@ import type { ThemedStyle } from "@/theme/types"
 export interface SetOptionsBottomSheetProps {
   visible: boolean
   onClose: () => void
-  onEdit: () => void
   onDelete: () => void
   onChangeType: () => void
   setTypeName: string
@@ -28,7 +27,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window")
 export function SetOptionsBottomSheet({
   visible,
   onClose,
-  onEdit,
   onDelete,
   onChangeType,
   setTypeName,
@@ -49,27 +47,23 @@ export function SetOptionsBottomSheet({
     }
   }, [visible, slideAnim])
 
-  function handleClose() {
+  function handleClose(afterClose?: () => void) {
     Animated.timing(slideAnim, {
       toValue: SCREEN_HEIGHT,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => onClose())
-  }
-
-  function handleEdit() {
-    handleClose()
-    setTimeout(onEdit, 200)
+    }).start(() => {
+      onClose()
+      afterClose?.()
+    })
   }
 
   function handleDelete() {
-    handleClose()
-    setTimeout(onDelete, 200)
+    handleClose(onDelete)
   }
 
   function handleChangeType() {
-    handleClose()
-    setTimeout(onChangeType, 200)
+    handleClose(onChangeType)
   }
 
   return (
@@ -80,15 +74,6 @@ export function SetOptionsBottomSheet({
           onStartShouldSetResponder={() => true}
         >
           <View style={$handle} />
-
-          <Pressable
-            style={themed($option)}
-            onPress={handleEdit}
-            accessibilityRole="button"
-            accessibilityLabel="Edit set"
-          >
-            <Text text="Edit Set" style={themed($optionText)} />
-          </Pressable>
 
           <Pressable
             style={themed($option)}

@@ -73,10 +73,9 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     const addSetButtons = getAllByText("Add Set")
     fireEvent.press(addSetButtons[0])
 
-    // Fill in set values
+    // Fill in set values (sets are always editable; no "Add set" action)
     fireEvent.changeText(getByLabelText("Reps"), "5")
     fireEvent.changeText(getByLabelText("Kg"), "60")
-    fireEvent.press(getByText("✓"))
 
     // Verify set was added to correct exercise
     const benchExercise = store.workoutStore.currentSession?.exercises[0]
@@ -117,15 +116,15 @@ describe("Edge Cases - Validation", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    // Add set with valid values
+    // Add set (it is immediately added with defaults) and then edit values
     fireEvent.press(getByText("Add Set"))
     fireEvent.changeText(getByLabelText("Reps"), "10")
     fireEvent.changeText(getByLabelText("Kg"), "100")
-    fireEvent.press(getByText("✓"))
 
-    // Should save successfully
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(1)
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets[0]?.reps).toBe(10)
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets[0]?.weight).toBe(100)
     })
   })
 })

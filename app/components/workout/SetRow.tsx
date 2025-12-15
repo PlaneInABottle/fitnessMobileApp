@@ -31,6 +31,13 @@ export interface SetRowProps {
   availableSetTypes?: Array<{ id: SetTypeId; name: string }>
   onChange?: (next: Partial<SetData>, touchedKey?: EditableFieldKey | "setType") => void
   onDone?: () => void
+  doneButtonLabel?: string
+  onPressSetType?: () => void
+  /**
+   * When false, empty numeric inputs are coerced to 0 (keeps persisted sets valid).
+   * Keep true for draft/new-set entry.
+   */
+  allowEmptyNumbers?: boolean
   index?: number
   isDone?: boolean
   onLongPress?: () => void
@@ -59,9 +66,9 @@ function toText(value: unknown): string {
   return typeof value === "number" && Number.isFinite(value) ? String(value) : ""
 }
 
-function toNumberOrUndefined(text: string): number | undefined {
+function toNumberOrUndefined(text: string, allowEmpty: boolean): number | undefined {
   const trimmed = text.trim()
-  if (!trimmed) return undefined
+  if (!trimmed) return allowEmpty ? undefined : 0
   const n = Number(trimmed)
   if (!Number.isFinite(n) || n < 0) return undefined
   return n
@@ -76,6 +83,9 @@ export function SetRow({
   availableSetTypes,
   onChange,
   onDone,
+  doneButtonLabel,
+  onPressSetType,
+  allowEmptyNumbers = true,
   index,
   isDone,
   onLongPress,
@@ -101,6 +111,11 @@ export function SetRow({
     onChange({ ...value, setType: next.id }, "setType")
   }
 
+  function handlePressSetType() {
+    if (onPressSetType) return onPressSetType()
+    cycleSetType()
+  }
+
   function renderFieldCell(field: FieldConfig) {
     if (!field.label) return <View style={$cell} />
 
@@ -121,7 +136,9 @@ export function SetRow({
             placeholder={placeholders?.[key] ?? "0"}
             placeholderTextColor={colors.textDim}
             keyboardType="numeric"
-            onChangeText={(t) => onChange({ ...value, [key]: toNumberOrUndefined(t) }, key)}
+            onChangeText={(t) =>
+              onChange({ ...value, [key]: toNumberOrUndefined(t, allowEmptyNumbers) }, key)
+            }
             style={[
               themed($input),
               isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
@@ -187,7 +204,12 @@ export function SetRow({
     <View style={themed([$styles.row, $row, rowStyle])}>
       <View style={$cell}>
         {mode === "edit" ? (
-          <Pressable onPress={cycleSetType} style={themed($typePill)}>
+          <Pressable
+            onPress={handlePressSetType}
+            style={themed($typePill)}
+            accessibilityRole="button"
+            accessibilityLabel={`Set type: ${setTypeName || "Working"}`}
+          >
             <Text
               text={setTypeName || "Working"}
               style={themed([
@@ -207,8 +229,14 @@ export function SetRow({
 
       <View style={$doneCell}>
         {mode === "edit" ? (
-          <Pressable onPress={onDone} style={themed($doneButton)} accessibilityRole="button">
-            <Text text="✓" style={themed($doneText)} />
+          <Pressable
+            onPress={onDone}
+            style={[themed($doneButton), isDone && themed($doneButtonDone)]}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: !!isDone }}
+            accessibilityLabel={doneButtonLabel ?? "Done"}
+          >
+            <Text text="✓" style={[themed($doneText), isDone && themed($doneTextDone)]} />
           </Pressable>
         ) : (
           <Text text="✓" style={themed($completedDoneText)} />
@@ -296,11 +324,20 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.accent100,
 })
 
+const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  borderColor: colors.palette.success500,
+  backgroundColor: colors.palette.success200,
+})
+
 const $doneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.tint,
   fontFamily: typography.primary.bold,
   fontSize: 18,
   lineHeight: 18,
+})
+
+const $doneTextDone: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.success500,
 })
 
 const $completedDoneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
