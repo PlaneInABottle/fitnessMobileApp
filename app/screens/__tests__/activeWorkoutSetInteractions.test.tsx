@@ -1,7 +1,7 @@
+import { Modal } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { render, fireEvent, waitFor } from "@testing-library/react-native"
-import { Modal } from "react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"

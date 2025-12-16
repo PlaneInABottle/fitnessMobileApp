@@ -56,7 +56,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
     function handleDeleteSet() {
       if (!selectedSetInfo) return
-      workoutStore.deleteSetFromWorkoutExercise(selectedSetInfo.workoutExerciseId, selectedSetInfo.setId)
+      workoutStore.deleteSetFromWorkoutExercise(
+        selectedSetInfo.workoutExerciseId,
+        selectedSetInfo.setId,
+      )
       setDoneSetIds((prev) => {
         const next = { ...prev }
         delete next[selectedSetInfo.setId]
@@ -70,11 +73,16 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
       const current = selectedSetInfo.setType
       const idx = availableSetTypes.findIndex((s) => s.id === (current as any))
-      const next = availableSetTypes[(idx + 1 + availableSetTypes.length) % availableSetTypes.length]
+      const next =
+        availableSetTypes[(idx + 1 + availableSetTypes.length) % availableSetTypes.length]
 
-      workoutStore.updateSetInWorkoutExercise(selectedSetInfo.workoutExerciseId, selectedSetInfo.setId, {
-        setType: next.id,
-      })
+      workoutStore.updateSetInWorkoutExercise(
+        selectedSetInfo.workoutExerciseId,
+        selectedSetInfo.setId,
+        {
+          setType: next.id,
+        },
+      )
       setSelectedSetInfo(null)
     }
 
@@ -183,7 +191,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           onDelete={handleDeleteSet}
           onChangeType={handleChangeSetType}
           setTypeName={
-            availableSetTypes.find((t) => t.id === (selectedSetInfo?.setType as any))?.name ?? "Working"
+            availableSetTypes.find((t) => t.id === (selectedSetInfo?.setType as any))?.name ??
+            "Working"
           }
         />
       </Screen>
