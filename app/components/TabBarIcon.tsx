@@ -45,6 +45,8 @@ const $container: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   justifyContent: "center",
   paddingTop: 8,
+  minWidth: 60,
+  maxWidth: 80,
 })
 
 const $label: ThemedStyle<TextStyle> = () => ({

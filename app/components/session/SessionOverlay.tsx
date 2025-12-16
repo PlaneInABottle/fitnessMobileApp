@@ -74,7 +74,7 @@ export const SessionOverlay = observer(function SessionOverlay() {
 
   return (
     <>
-      <View style={[$overlay, { bottom: bottomOffset }]}>
+      <View style={[$overlay, { bottom: bottomOffset }]} pointerEvents="box-none">
         <SessionOverlayBar
           duration={duration}
           exerciseCount={exerciseCount}
