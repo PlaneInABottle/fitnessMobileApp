@@ -8,6 +8,7 @@ import { View, ViewStyle } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { SessionOverlay } from "@/components/session"
 import { TabBarIcon } from "@/components/TabBarIcon"
@@ -115,6 +116,11 @@ const AppTabs = () => {
   const {
     theme: { colors },
   } = useAppTheme()
+  const insets = useSafeAreaInsets()
+
+  const tabBarBaseHeight = 60
+  const tabBarPaddingTop = 6
+  const tabBarPaddingBottom = Math.max(insets.bottom, 8)
 
   return (
     <Tab.Navigator
@@ -125,9 +131,9 @@ const AppTabs = () => {
           backgroundColor: colors.background,
           borderTopColor: colors.separator,
           borderTopWidth: 1,
-          height: 68,
-          paddingTop: 6,
-          paddingBottom: 8,
+          height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
+          paddingTop: tabBarPaddingTop,
+          paddingBottom: tabBarPaddingBottom,
         },
         tabBarItemStyle: {
           paddingVertical: 0,
