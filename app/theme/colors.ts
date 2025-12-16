@@ -1,89 +1,103 @@
+/**
+ * Fitness App Light Theme Color Palette
+ * A lighter variant of the dark fitness theme for accessibility options
+ */
 const palette = {
+  // Neutrals - Light mode grays
   neutral100: "#FFFFFF",
-  neutral200: "#F4F2F1",
-  neutral300: "#D7CEC9",
-  neutral400: "#B6ACA6",
-  neutral500: "#978F8A",
-  neutral600: "#564E4A",
-  neutral700: "#3C3836",
-  neutral800: "#191015",
-  neutral900: "#000000",
+  neutral200: "#F5F5F7",
+  neutral300: "#E5E5EA",
+  neutral400: "#D1D1D6",
+  neutral500: "#8E8E93",
+  neutral600: "#636366",
+  neutral700: "#48484A",
+  neutral800: "#2C2C2E",
+  neutral900: "#1C1C1E",
 
-  primary100: "#F4E0D9",
-  primary200: "#E8C1B4",
-  primary300: "#DDA28E",
-  primary400: "#D28468",
-  primary500: "#C76542",
-  primary600: "#A54F31",
+  // Primary - iOS Blue
+  primary100: "#E3F2FF",
+  primary200: "#B3DAFF",
+  primary300: "#66B8FF",
+  primary400: "#3399FF",
+  primary500: "#007AFF",
+  primary600: "#0066CC",
 
-  secondary100: "#DCDDE9",
-  secondary200: "#BCC0D6",
-  secondary300: "#9196B9",
-  secondary400: "#626894",
-  secondary500: "#41476E",
-
-  accent100: "#FFEED4",
-  accent200: "#FFE1B2",
-  accent300: "#FDD495",
-  accent400: "#FBC878",
-  accent500: "#FFBB50",
-
-  angry100: "#F2D6CD",
-  angry500: "#C03403",
-
+  // Success - Completed sets green
   success100: "#D1FAE5",
   success200: "#A7F3D0",
-  success500: "#10B981",
+  success500: "#30D158",
 
-  overlay20: "rgba(25, 16, 21, 0.2)",
-  overlay50: "rgba(25, 16, 21, 0.5)",
+  // Warning - Warmup set yellow
+  warning100: "#FFF9E6",
+  warning200: "#FFF0B3",
+  warning500: "#FFD60A",
+
+  // Info - Drop set cyan
+  info100: "#E6F9FF",
+  info200: "#B3EEFF",
+  info500: "#64D2FF",
+
+  // Error/Failure - Red-orange
+  error100: "#FFE5E3",
+  error200: "#FFBAB5",
+  error500: "#FF453A",
+  errorDark: "#FF3B30",
+
+  // PRO Badge
+  proBadge: "#FFD60A",
+
+  // Overlays
+  overlay20: "rgba(0, 0, 0, 0.2)",
+  overlay50: "rgba(0, 0, 0, 0.5)",
+} as const
+
+/**
+ * Set type colors for workout tracking
+ */
+export const setTypeColors = {
+  warmup: palette.warning500,
+  working: palette.neutral100,
+  dropset: palette.info500,
+  failure: palette.error500,
+  completed: palette.success500,
 } as const
 
 export const colors = {
-  /**
-   * The palette is available to use, but prefer using the name.
-   * This is only included for rare, one-off cases. Try to use
-   * semantic names as much as possible.
-   */
   palette,
-  /**
-   * A helper for making something see-thru.
-   */
   transparent: "rgba(0, 0, 0, 0)",
-  /**
-   * The default text color in many components.
-   */
-  text: palette.neutral800,
-  /**
-   * Secondary text information.
-   */
+
+  // Text colors
+  text: palette.neutral900,
   textDim: palette.neutral600,
-  /**
-   * The default color of the screen background.
-   */
+  textMuted: palette.neutral500,
+
+  // Backgrounds
   background: palette.neutral200,
-  /**
-   * The default border color.
-   */
-  border: palette.neutral400,
-  /**
-   * The main tinting color.
-   */
+  backgroundSecondary: palette.neutral100,
+  card: palette.neutral100,
+  cardSecondary: palette.neutral200,
+
+  // Interactive elements
   tint: palette.primary500,
-  /**
-   * The inactive tinting color.
-   */
-  tintInactive: palette.neutral300,
-  /**
-   * A subtle color used for lines.
-   */
+  tintInactive: palette.neutral400,
+
+  // Borders and separators
+  border: palette.neutral400,
   separator: palette.neutral300,
-  /**
-   * Error messages.
-   */
-  error: palette.angry500,
-  /**
-   * Error Background.
-   */
-  errorBackground: palette.angry100,
+
+  // Status colors
+  error: palette.error500,
+  errorBackground: palette.error100,
+  success: palette.success500,
+  successBackground: palette.success100,
+  warning: palette.warning500,
+  warningBackground: palette.warning100,
+  info: palette.info500,
+  infoBackground: palette.info100,
+
+  // Set type colors (exposed at top level for convenience)
+  setTypeColors,
+
+  // PRO badge
+  proBadge: palette.proBadge,
 } as const

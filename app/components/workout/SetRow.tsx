@@ -321,7 +321,7 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.tint,
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: colors.palette.accent100,
+  backgroundColor: colors.tint,
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({

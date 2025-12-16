@@ -1,54 +1,106 @@
+/**
+ * Fitness App Dark Theme Color Palette
+ * PRIMARY theme designed for gym environment readability
+ * Based on Hevy/Antrenman app design patterns
+ */
 const palette = {
-  neutral900: "#FFFFFF",
-  neutral800: "#F4F2F1",
-  neutral700: "#D7CEC9",
-  neutral600: "#B6ACA6",
-  neutral500: "#978F8A",
-  neutral400: "#564E4A",
-  neutral300: "#3C3836",
-  neutral200: "#191015",
-  neutral100: "#000000",
+  // Neutrals - Dark mode (true black base for OLED optimization)
+  neutral100: "#000000",    // True black - main background
+  neutral200: "#1C1C1E",    // Card background
+  neutral300: "#2C2C2E",    // Card secondary / elevated surfaces
+  neutral400: "#38383A",    // Separator
+  neutral500: "#48484A",    // Border
+  neutral600: "#636366",    // Text tertiary
+  neutral700: "#8E8E93",    // Text secondary
+  neutral800: "#EBEBF5",    // Text primary (slightly off-white)
+  neutral900: "#FFFFFF",    // Pure white for emphasis
 
-  primary600: "#F4E0D9",
-  primary500: "#E8C1B4",
-  primary400: "#DDA28E",
-  primary300: "#D28468",
-  primary200: "#C76542",
-  primary100: "#A54F31",
+  // Primary - iOS Blue (main action color)
+  primary100: "#003366",
+  primary200: "#004C99",
+  primary300: "#0066CC",
+  primary400: "#0077ED",
+  primary500: "#007AFF",    // iOS system blue
+  primary600: "#3399FF",
 
-  secondary500: "#DCDDE9",
-  secondary400: "#BCC0D6",
-  secondary300: "#9196B9",
-  secondary200: "#626894",
-  secondary100: "#41476E",
+  // Success - Completed sets green
+  success100: "#0D3320",
+  success200: "#1A6640",
+  success500: "#30D158",    // iOS system green
 
-  accent500: "#2D2418", // Darkest - subtle background
-  accent400: "#4A3B28", // Dark accent background
-  accent300: "#6B5638", // Medium - borders
-  accent200: "#8C7148", // Light - hover states
-  accent100: "#AD8C58", // Brightest - muted, professional
+  // Warning - Warmup set yellow (W indicator)
+  warning100: "#332B00",
+  warning200: "#665500",
+  warning500: "#FFD60A",    // iOS system yellow
 
-  angry100: "#F2D6CD",
-  angry500: "#C03403",
+  // Info - Drop set cyan (D indicator)
+  info100: "#003344",
+  info200: "#006688",
+  info500: "#64D2FF",       // iOS system cyan
 
-  success100: "#1B4332",
-  success200: "#2D6A4F",
-  success500: "#40916C",
+  // Error/Failure - Red-orange (F indicator)
+  error100: "#330F0D",
+  error200: "#661F1A",
+  error500: "#FF453A",      // iOS system red-orange
+  errorDark: "#FF3B30",     // Standard iOS red
 
-  overlay20: "rgba(25, 16, 21, 0.2)",
-  overlay50: "rgba(25, 16, 21, 0.5)",
+  // PRO Badge
+  proBadge: "#FFD60A",
+
+  // Overlays
+  overlay20: "rgba(0, 0, 0, 0.2)",
+  overlay50: "rgba(0, 0, 0, 0.5)",
+  overlay80: "rgba(0, 0, 0, 0.8)",
+} as const
+
+/**
+ * Set type colors for workout tracking
+ * These match the visual indicators in the Hevy/Antrenman screenshots
+ */
+export const setTypeColors = {
+  warmup: palette.warning500,     // Yellow "W" indicator
+  working: palette.neutral900,    // White text for regular sets
+  dropset: palette.info500,       // Cyan "D" indicator
+  failure: palette.error500,      // Red-orange "F" indicator
+  completed: palette.success500,  // Green checkmark for completed
 } as const
 
 export const colors = {
   palette,
   transparent: "rgba(0, 0, 0, 0)",
-  text: palette.neutral800,
-  textDim: palette.neutral600,
-  background: palette.neutral200,
-  border: palette.neutral400,
-  tint: palette.primary500,
-  tintInactive: palette.neutral300,
-  separator: palette.neutral300,
-  error: palette.angry500,
-  errorBackground: palette.angry100,
+
+  // Text colors
+  text: palette.neutral900,           // White for primary text
+  textDim: palette.neutral700,        // Gray for secondary text
+  textMuted: palette.neutral600,      // Darker gray for tertiary/disabled
+
+  // Backgrounds
+  background: palette.neutral100,     // True black main background
+  backgroundSecondary: palette.neutral200, // Slightly elevated background
+  card: palette.neutral200,           // Card background
+  cardSecondary: palette.neutral300,  // Elevated card / nested elements
+
+  // Interactive elements
+  tint: palette.primary500,           // iOS blue for buttons/links
+  tintInactive: palette.neutral600,   // Inactive state
+
+  // Borders and separators
+  border: palette.neutral500,         // Border color
+  separator: palette.neutral400,      // Line separators
+
+  // Status colors
+  error: palette.error500,
+  errorBackground: palette.error100,
+  success: palette.success500,
+  successBackground: palette.success100,
+  warning: palette.warning500,
+  warningBackground: palette.warning100,
+  info: palette.info500,
+  infoBackground: palette.info100,
+
+  // Set type colors (exposed at top level for convenience)
+  setTypeColors,
+
+  // PRO badge
+  proBadge: palette.proBadge,
 } as const

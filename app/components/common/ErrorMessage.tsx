@@ -28,11 +28,11 @@ export function ErrorMessage({ message, actionLabel, onActionPress }: ErrorMessa
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   padding: spacing.md,
   borderWidth: 1,
-  borderColor: colors.palette.angry500,
+  borderColor: colors.error,
   borderRadius: 8,
   gap: spacing.sm,
 })
 
 const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.angry500,
+  color: colors.error,
 })

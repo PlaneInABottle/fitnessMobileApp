@@ -176,20 +176,20 @@ export function Card(props: CardProps) {
   ]
   const $headingStyle = [
     themed($headingPresets[preset]),
-    (isFooterPresent || isContentPresent) && { marginBottom: spacing.xxxs },
+    (isFooterPresent || isContentPresent) && { marginBottom: spacing.xxs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ]
   const $contentStyle = [
     themed($contentPresets[preset]),
-    isHeadingPresent && { marginTop: spacing.xxxs },
-    isFooterPresent && { marginBottom: spacing.xxxs },
+    isHeadingPresent && { marginTop: spacing.xxs },
+    isFooterPresent && { marginBottom: spacing.xxs },
     $contentStyleOverride,
     ContentTextProps?.style,
   ]
   const $footerStyle = [
     themed($footerPresets[preset]),
-    (isHeadingPresent || isContentPresent) && { marginTop: spacing.xxxs },
+    (isHeadingPresent || isContentPresent) && { marginTop: spacing.xxs },
     $footerStyleOverride,
     FooterTextProps?.style,
   ]

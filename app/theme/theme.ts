@@ -6,7 +6,10 @@ import { timing } from "./timing"
 import type { Theme } from "./types"
 import { typography } from "./typography"
 
-// Here we define our themes.
+/**
+ * Light theme configuration
+ * Secondary theme - available for accessibility preferences
+ */
 export const lightTheme: Theme = {
   colors: colorsLight,
   spacing: spacingLight,
@@ -14,6 +17,12 @@ export const lightTheme: Theme = {
   timing,
   isDark: false,
 }
+
+/**
+ * Dark theme configuration
+ * PRIMARY theme - optimized for gym environment and OLED screens
+ * Based on Hevy/Antrenman app design patterns
+ */
 export const darkTheme: Theme = {
   colors: colorsDark,
   spacing: spacingDark,
@@ -21,3 +30,9 @@ export const darkTheme: Theme = {
   timing,
   isDark: true,
 }
+
+/**
+ * Default theme for the fitness app
+ * Dark theme is the primary experience
+ */
+export const defaultTheme = darkTheme

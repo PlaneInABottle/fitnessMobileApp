@@ -117,11 +117,11 @@ const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $errorContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   padding: spacing.md,
   borderWidth: 1,
-  borderColor: colors.palette.angry500,
+  borderColor: colors.error,
   borderRadius: 8,
   gap: spacing.sm,
 })
 
 const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.angry500,
+  color: colors.error,
 })

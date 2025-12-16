@@ -22,6 +22,7 @@ import { darkTheme, lightTheme } from "./theme"
 import type {
   AllowedStylesT,
   ImmutableThemeContextModeT,
+  SetType,
   Theme,
   ThemeContextModeT,
   ThemedFnT,
@@ -34,6 +35,10 @@ export type ThemeContextType = {
   theme: Theme
   themeContext: ImmutableThemeContextModeT
   themed: ThemedFnT
+  /**
+   * Get the color for a specific set type (warmup, working, dropset, failure, completed)
+   */
+  getSetTypeColor: (setType: SetType) => string
 }
 
 export const ThemeContext = createContext<ThemeContextType | null>(null)
@@ -48,6 +53,8 @@ export interface ThemeProviderProps {
  *
  * To get started, you want to wrap your entire app's JSX hierarchy in `ThemeProvider`
  * and then use the `useAppTheme()` hook to access the theme context.
+ *
+ * NOTE: Dark theme is the DEFAULT for this fitness app, optimized for gym environment readability.
  *
  * Documentation: https://docs.infinite.red/ignite-cli/boilerplate/app/theme/Theming/
  */
@@ -74,30 +81,30 @@ export const ThemeProvider: FC<PropsWithChildren<ThemeProviderProps>> = ({
   )
 
   /**
-   * initialContext is the theme context passed in from the app.tsx file and always takes precedence.
-   * themeScheme is the value from MMKV. If undefined, we fall back to the system theme
-   * systemColorScheme is the value from the device. If undefined, we fall back to "light"
+   * Determine the active theme context.
+   * Priority: initialContext > saved theme > system theme > "dark" (default)
+   * NOTE: Default is "dark" for this fitness app (gym environment optimization)
    */
   const themeContext: ImmutableThemeContextModeT = useMemo(() => {
-    const t = initialContext || themeScheme || (!!systemColorScheme ? systemColorScheme : "light")
-    return t === "dark" ? "dark" : "light"
+    const t = initialContext || themeScheme || (systemColorScheme ?? "dark")
+    return t === "light" ? "light" : "dark"
   }, [initialContext, themeScheme, systemColorScheme])
 
   const navigationTheme: NavTheme = useMemo(() => {
     switch (themeContext) {
-      case "dark":
-        return NavDarkTheme
-      default:
+      case "light":
         return NavDefaultTheme
+      default:
+        return NavDarkTheme
     }
   }, [themeContext])
 
   const theme: Theme = useMemo(() => {
     switch (themeContext) {
-      case "dark":
-        return darkTheme
-      default:
+      case "light":
         return lightTheme
+      default:
+        return darkTheme
     }
   }, [themeContext])
 
@@ -121,12 +128,24 @@ export const ThemeProvider: FC<PropsWithChildren<ThemeProviderProps>> = ({
     [theme],
   )
 
+  /**
+   * Helper function to get the color for a specific set type
+   * Used for workout set indicators (warmup, working, dropset, failure, completed)
+   */
+  const getSetTypeColor = useCallback(
+    (setType: SetType): string => {
+      return theme.colors.setTypeColors[setType]
+    },
+    [theme],
+  )
+
   const value = {
     navigationTheme,
     theme,
     themeContext,
     setThemeContextOverride,
     themed,
+    getSetTypeColor,
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

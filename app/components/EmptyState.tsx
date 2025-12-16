@@ -166,21 +166,21 @@ export function EmptyState(props: EmptyStateProps) {
   const $containerStyles = [$containerStyleOverride]
   const $imageStyles = [
     $image,
-    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxs },
     $imageStyleOverride,
     ImageProps?.style,
   ]
   const $headingStyles = [
     themed($heading),
-    isImagePresent && { marginTop: spacing.xxxs },
-    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
+    isImagePresent && { marginTop: spacing.xxs },
+    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ]
   const $contentStyles = [
     themed($content),
-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
-    isButtonPresent && { marginBottom: spacing.xxxs },
+    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxs },
+    isButtonPresent && { marginBottom: spacing.xxs },
     $contentStyleOverride,
     ContentTextProps?.style,
   ]

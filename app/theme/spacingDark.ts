@@ -1,14 +1,20 @@
-const SPACING_MULTIPLIER = 1.0
-
-// This is an example of how you can have different spacing values for different themes.
+/**
+ * Spacing scale for margins, paddings, and whitespace
+ * Same values as light theme - spacing is consistent across themes
+ */
 export const spacing = {
-  xxxs: 2 * SPACING_MULTIPLIER,
-  xxs: 4 * SPACING_MULTIPLIER,
-  xs: 8 * SPACING_MULTIPLIER,
-  sm: 12 * SPACING_MULTIPLIER,
-  md: 16 * SPACING_MULTIPLIER,
-  lg: 24 * SPACING_MULTIPLIER,
-  xl: 32 * SPACING_MULTIPLIER,
-  xxl: 48 * SPACING_MULTIPLIER,
-  xxxl: 64 * SPACING_MULTIPLIER,
+  /** 2px - Micro spacing for tight elements */
+  xxs: 2,
+  /** 4px - Extra small spacing */
+  xs: 4,
+  /** 8px - Small spacing */
+  sm: 8,
+  /** 16px - Medium/default spacing */
+  md: 16,
+  /** 24px - Large spacing */
+  lg: 24,
+  /** 32px - Extra large spacing */
+  xl: 32,
+  /** 48px - XXL spacing for major sections */
+  xxl: 48,
 } as const

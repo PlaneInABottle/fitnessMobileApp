@@ -1,7 +1,7 @@
 import type { StyleProp } from "react-native"
 
-import { colors as colorsLight } from "./colors"
-import { colors as colorsDark } from "./colorsDark"
+import { colors as colorsLight, setTypeColors as setTypeColorsLight } from "./colors"
+import { colors as colorsDark, setTypeColors as setTypeColorsDark } from "./colorsDark"
 import { spacing as spacingLight } from "./spacing"
 import { spacing as spacingDark } from "./spacingDark"
 import { timing } from "./timing"
@@ -16,6 +16,12 @@ export type ThemeContextModeT = ImmutableThemeContextModeT | undefined
 export type Colors = typeof colorsLight | typeof colorsDark
 // The spacing type needs to take into account the different spacing values for light and dark themes.
 export type Spacing = typeof spacingLight | typeof spacingDark
+
+// Set type colors for workout tracking
+export type SetTypeColors = typeof setTypeColorsLight | typeof setTypeColorsDark
+
+// Set type identifiers used in workout tracking
+export type SetType = "warmup" | "working" | "dropset" | "failure" | "completed"
 
 // These two are consistent across themes.
 export type Timing = typeof timing
