@@ -104,7 +104,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
                 Rutinler
               </Text>
               <Pressable
-                onPress={() => {}}
+                onPress={() => navigation.navigate("CreateRoutine")}
                 style={$addButton}
                 accessibilityRole="button"
                 accessibilityLabel="Add routine"
@@ -117,7 +117,10 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
 
             {/* Filter Pills */}
             <View style={$pillsRow}>
-              <Pressable style={themed($pill)}>
+              <Pressable
+                style={themed($pill)}
+                onPress={() => navigation.navigate("CreateRoutine")}
+              >
                 <Text weight="medium" size="sm" style={themed($pillText)}>
                   Yeni Rutin
                 </Text>
@@ -142,7 +145,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
                     title={t.name}
                     exercisePreview={getExercisePreview([...t.exerciseIds])}
                     onStart={() => handleStartFromTemplate(t.id)}
-                    onMenu={() => {}}
+                    onMenu={() => navigation.navigate("RoutineDetail", { templateId: t.id })}
                   />
                 ))}
               </View>

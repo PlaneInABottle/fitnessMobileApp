@@ -123,6 +123,10 @@ export const iconRegistry = {
   settings: require("@assets/icons/settings.png"),
   view: require("@assets/icons/view.png"),
   x: require("@assets/icons/x.png"),
+  // Tab bar icons (using existing icons as placeholders until custom icons are added)
+  home: require("@assets/icons/menu.png"),
+  dumbbell: require("@assets/icons/more.png"),
+  person: require("@assets/icons/settings.png"),
 }
 
 const $imageStyleBase: ImageStyle = {

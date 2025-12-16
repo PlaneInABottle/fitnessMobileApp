@@ -17,6 +17,8 @@ export interface ExerciseListItemProps {
   onPress?: () => void
   /** Optional callback for the add button */
   onAdd?: () => void
+  /** Label for the add button (default: "+") */
+  addLabel?: string
   /** Optional style override */
   style?: StyleProp<ViewStyle>
 }
@@ -26,7 +28,7 @@ export interface ExerciseListItemProps {
  * Shows thumbnail, title, subtitle, and optional add button.
  */
 export function ExerciseListItem(props: ExerciseListItemProps) {
-  const { title, subtitle, imageUrl, onPress, onAdd, style: $styleOverride } = props
+  const { title, subtitle, imageUrl, onPress, onAdd, addLabel = "+", style: $styleOverride } = props
   const { themed, theme } = useAppTheme()
 
   return (
@@ -62,7 +64,7 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
           accessibilityLabel="Add exercise"
         >
           <View style={themed($addIconContainer)}>
-            <Text style={themed($addIcon)}>+</Text>
+            <Text style={themed($addIcon)}>{addLabel}</Text>
           </View>
         </Pressable>
       )}
