@@ -1,139 +1,162 @@
-import { useEffect, useRef } from "react"
-import {
-  Animated,
-  Dimensions,
-  Easing,
-  Modal,
-  Pressable,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native"
+import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 
+import { BottomSheet } from "@/components/BottomSheet"
 import { Text } from "@/components/Text"
+import { SetTypeId } from "@/models/SetStore"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+
+export interface SetTypeOption {
+  id: SetTypeId | "remove"
+  letter: string
+  label: string
+  color: string
+}
 
 export interface SetOptionsBottomSheetProps {
   visible: boolean
   onClose: () => void
+  onSelectType: (typeId: SetTypeId) => void
   onDelete: () => void
-  onChangeType: () => void
-  setTypeName: string
+  currentTypeId?: SetTypeId
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window")
+const SET_TYPE_OPTIONS: Omit<SetTypeOption, "color">[] = [
+  { id: "warmup", letter: "W", label: "Isınma Seti" },
+  { id: "working", letter: "1", label: "Normal Set" },
+  { id: "failure", letter: "F", label: "Tükeniş Seti" },
+  { id: "dropset", letter: "D", label: "Drop Set" },
+  { id: "remove", letter: "X", label: "Seti Kaldır" },
+]
 
 export function SetOptionsBottomSheet({
   visible,
   onClose,
+  onSelectType,
   onDelete,
-  onChangeType,
-  setTypeName,
+  currentTypeId,
 }: SetOptionsBottomSheetProps) {
-  const { themed, theme } = useAppTheme()
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current
+  const { themed, getSetTypeColor, theme } = useAppTheme()
 
-  useEffect(() => {
-    if (visible) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-        easing: Easing.out(Easing.ease),
-      }).start()
-    } else {
-      slideAnim.setValue(SCREEN_HEIGHT)
-    }
-  }, [visible, slideAnim])
+  function getOptionColor(id: SetTypeOption["id"]): string {
+    if (id === "remove") return theme.colors.error
+    if (id === "working") return theme.colors.text
+    return getSetTypeColor(id as any)
+  }
 
-  function handleClose(afterClose?: () => void) {
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
+  function handleSelect(option: Omit<SetTypeOption, "color">) {
+    if (option.id === "remove") {
       onClose()
-      if (typeof afterClose === "function") {
-        afterClose()
-      }
-    })
-  }
-
-  function handleDelete() {
-    handleClose(onDelete)
-  }
-
-  function handleChangeType() {
-    handleClose(onChangeType)
+      onDelete()
+    } else {
+      onClose()
+      onSelectType(option.id as SetTypeId)
+    }
   }
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
-      <Pressable testID="backdrop" style={themed($backdrop)} onPress={handleClose}>
-        <Animated.View
-          style={[themed($sheet), { transform: [{ translateY: slideAnim }] }]}
-          onStartShouldSetResponder={() => true}
-        >
-          <View style={$handle} />
+    <BottomSheet visible={visible} onClose={onClose} title="Set Türünü Seç">
+      <View style={themed($optionsContainer)}>
+        {SET_TYPE_OPTIONS.map((option) => {
+          const color = getOptionColor(option.id)
+          const isSelected = option.id === currentTypeId
+          const isRemove = option.id === "remove"
 
-          <Pressable
-            style={themed($option)}
-            onPress={handleDelete}
-            accessibilityRole="button"
-            accessibilityLabel="Delete set"
-          >
-            <Text text="Delete Set" style={[themed($optionText), { color: theme.colors.error }]} />
-          </Pressable>
-
-          <Pressable
-            style={themed($option)}
-            onPress={handleChangeType}
-            accessibilityRole="button"
-            accessibilityLabel={`Change set type, currently ${setTypeName}`}
-          >
-            <Text text={`Change Type (${setTypeName})`} style={themed($optionText)} />
-          </Pressable>
-        </Animated.View>
-      </Pressable>
-    </Modal>
+          return (
+            <Pressable
+              key={option.id}
+              style={({ pressed }) => [
+                themed($optionRow),
+                isSelected && themed($optionRowSelected),
+                pressed && themed($optionRowPressed),
+              ]}
+              onPress={() => handleSelect(option)}
+              accessibilityRole="button"
+              accessibilityLabel={option.label}
+              accessibilityState={{ selected: isSelected }}
+            >
+              <View style={[themed($letterBadge), { borderColor: color }]}>
+                <Text weight="bold" style={[themed($letterText), { color }]}>
+                  {option.letter}
+                </Text>
+              </View>
+              <Text
+                weight={isSelected ? "semiBold" : "normal"}
+                style={[themed($optionLabel), isRemove && { color: theme.colors.error }]}
+              >
+                {option.label}
+              </Text>
+              <Pressable
+                style={$helpButton}
+                accessibilityRole="button"
+                accessibilityLabel={`Help for ${option.label}`}
+              >
+                <Text style={themed($helpIcon)}>?</Text>
+              </Pressable>
+            </Pressable>
+          )
+        })}
+      </View>
+    </BottomSheet>
   )
 }
 
-const $backdrop: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.palette.overlay50,
-  justifyContent: "flex-end",
+const $optionsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
+  gap: spacing.xs,
 })
 
-const $sheet: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
-  padding: spacing.lg,
-  paddingBottom: spacing.xl,
-  gap: spacing.md,
-})
-
-const $handle: ViewStyle = {
-  width: 40,
-  height: 4,
-  borderRadius: 2,
-  backgroundColor: "#978F8A",
-  alignSelf: "center",
-  marginBottom: 8,
-}
-
-const $option: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  paddingVertical: spacing.md,
+const $optionRow: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  paddingVertical: spacing.sm,
   paddingHorizontal: spacing.sm,
   borderRadius: 8,
-  backgroundColor: colors.palette.neutral300,
+  backgroundColor: colors.cardSecondary,
 })
 
-const $optionText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+const $optionRowSelected: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.palette.primary100,
+  borderWidth: 1,
+  borderColor: colors.tint,
+})
+
+const $optionRowPressed: ThemedStyle<ViewStyle> = () => ({
+  opacity: 0.8,
+})
+
+const $letterBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 32,
+  height: 32,
+  borderRadius: 6,
+  borderWidth: 2,
+  backgroundColor: colors.card,
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 12,
+})
+
+const $letterText: ThemedStyle<TextStyle> = () => ({
+  fontSize: 14,
+  fontWeight: "700",
+})
+
+const $optionLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
+  flex: 1,
   color: colors.text,
-  fontFamily: typography.primary.medium,
+  fontSize: 15,
+})
+
+const $helpButton: ViewStyle = {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  justifyContent: "center",
+  alignItems: "center",
+}
+
+const $helpIcon: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
   fontSize: 16,
-  textAlign: "center",
+  fontWeight: "600",
 })

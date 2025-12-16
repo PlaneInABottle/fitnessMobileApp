@@ -1,5 +1,5 @@
-import { FC, useEffect, useMemo, useState } from "react"
-import { View, ViewStyle } from "react-native"
+import { FC, useEffect, useMemo, useRef, useState } from "react"
+import { ScrollView, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -11,7 +11,7 @@ import { SetOptionsBottomSheet } from "@/components/workout/SetOptionsBottomShee
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
-import type { SetData } from "@/models/SetStore"
+import type { SetData, SetTypeId } from "@/models/SetStore"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -27,10 +27,33 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     const [selectedSetInfo, setSelectedSetInfo] = useState<{
       workoutExerciseId: string
       setId: string
-      setType: string
+      setType: SetTypeId
     } | null>(null)
 
     const [doneSetIds, setDoneSetIds] = useState<Record<string, boolean>>({})
+
+    // Timer state
+    const [elapsedSeconds, setElapsedSeconds] = useState(0)
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+    useEffect(() => {
+      // Start timer when session exists
+      if (session) {
+        const startTime = session.startedAt.getTime()
+        const updateTimer = () => {
+          const now = Date.now()
+          setElapsedSeconds(Math.floor((now - startTime) / 1000))
+        }
+        updateTimer()
+        timerRef.current = setInterval(updateTimer, 1000)
+      }
+      return () => {
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session?.id])
 
     useEffect(() => {
       // Reset UI-only done state when session changes.
@@ -38,7 +61,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       setSelectedSetInfo(null)
     }, [session?.id])
 
-    function handleOpenSetOptions(workoutExerciseId: string, setId: string, setType: string) {
+    // Calculate completed sets count (only sets marked as done in UI)
+    const completedSetsCount = useMemo(() => {
+      return Object.values(doneSetIds).filter(Boolean).length
+    }, [doneSetIds])
+
+    function handleOpenSetOptions(workoutExerciseId: string, setId: string, setType: SetTypeId) {
       setSelectedSetInfo({ workoutExerciseId, setId, setType })
     }
 
@@ -68,22 +96,13 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       setSelectedSetInfo(null)
     }
 
-    function handleChangeSetType() {
-      if (!selectedSetInfo || !availableSetTypes.length) return
-
-      const current = selectedSetInfo.setType
-      const idx = availableSetTypes.findIndex((s) => s.id === (current as any))
-      const next =
-        availableSetTypes[(idx + 1 + availableSetTypes.length) % availableSetTypes.length]
-
+    function handleSelectSetType(typeId: SetTypeId) {
+      if (!selectedSetInfo) return
       workoutStore.updateSetInWorkoutExercise(
         selectedSetInfo.workoutExerciseId,
         selectedSetInfo.setId,
-        {
-          setType: next.id,
-        },
+        { setType: typeId },
       )
-      setSelectedSetInfo(null)
     }
 
     function buildDefaultSetData(exerciseId: string): Partial<SetData> {
@@ -101,14 +120,20 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     }
 
     return (
-      <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
+      <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Workout"
-          rightActionLabel="End"
+          title="Antrenman Kaydet"
+          leftActionLabel="Back"
+          onLeftActionPress={() => navigation.goBack()}
+          rightActionLabel="Bitir"
           onRightActionPress={() => navigation.navigate("WorkoutComplete")}
+          showStats
+          timeSeconds={elapsedSeconds}
+          volumeKg={workoutStore.totalVolume}
+          setsCount={completedSetsCount}
         />
 
-        <View style={themed($content)}>
+        <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
           {!session ? (
             <ErrorMessage
               message="No active workout session."
@@ -138,7 +163,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard exercise={exercise} />
+                    <ExerciseCard
+                      exercise={exercise}
+                      note="Aynı devam"
+                      onPress={() => {}}
+                      onMenuPress={() => {}}
+                    />
 
                     <View style={themed($setsContainer)}>
                       <SetRow category={exercise.category} mode="header" />
@@ -150,9 +180,11 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                           mode="edit"
                           availableSetTypes={availableSetTypes}
                           allowEmptyNumbers={false}
-                          index={idx}
+                          index={idx + 1}
                           isDone={!!doneSetIds[s.id]}
-                          onPressSetType={() => handleOpenSetOptions(we.id, s.id, s.setType)}
+                          onPressSetType={() =>
+                            handleOpenSetOptions(we.id, s.id, s.setType as SetTypeId)
+                          }
                           onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                           onDone={() => handleToggleDone(s.id)}
                           doneButtonLabel="Toggle done"
@@ -167,9 +199,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                       ))}
 
                       <Button
-                        text="Add Set"
+                        text="+ Set Ekle"
                         preset="default"
                         onPress={() => handleAddSet(we.id, we.exerciseId)}
+                        style={themed($addSetButton)}
                       />
                     </View>
                   </View>
@@ -177,41 +210,57 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               })}
 
               <Button
-                text="Add Exercise"
+                text="+ Egzersiz Ekle"
                 preset="filled"
                 onPress={() => navigation.navigate("ExerciseLibrary")}
+                style={themed($addExerciseButton)}
               />
             </>
           )}
-        </View>
+        </ScrollView>
 
         <SetOptionsBottomSheet
           visible={!!selectedSetInfo}
           onClose={handleCloseSetOptions}
           onDelete={handleDeleteSet}
-          onChangeType={handleChangeSetType}
-          setTypeName={
-            availableSetTypes.find((t) => t.id === (selectedSetInfo?.setType as any))?.name ??
-            "Working"
-          }
+          onSelectType={handleSelectSetType}
+          currentTypeId={selectedSetInfo?.setType}
         />
       </Screen>
     )
   },
 )
 
+const $scrollView: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+})
+
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.lg,
-  gap: spacing.md,
+  padding: spacing.md,
+  gap: spacing.lg,
+  paddingBottom: spacing.xl,
 })
 
-const $exerciseSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  borderRadius: 12,
+  padding: spacing.md,
   gap: spacing.sm,
 })
 
-const $setsContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.palette.neutral300,
+const $setsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.xs,
+})
+
+const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: "transparent",
+  borderWidth: 1,
+  borderColor: colors.border,
   borderRadius: 8,
-  padding: spacing.sm,
-  gap: spacing.sm,
+  marginTop: spacing.sm,
+})
+
+const $addExerciseButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.tint,
+  borderRadius: 8,
 })

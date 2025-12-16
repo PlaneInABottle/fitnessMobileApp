@@ -51,7 +51,8 @@ describe("Edge Cases - Empty Session State", () => {
 
     await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
 
-    fireEvent.press(getByText("End"))
+    // Button text is now "Bitir" in Turkish
+    fireEvent.press(getByText("Bitir"))
 
     // Workout Complete screen should show
     await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
@@ -69,8 +70,8 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
     expect(getByText("Squat")).toBeTruthy()
 
-    // Add set to first exercise
-    const addSetButtons = getAllByText("Add Set")
+    // Add set to first exercise - button text is now Turkish
+    const addSetButtons = getAllByText("+ Set Ekle")
     fireEvent.press(addSetButtons[0])
 
     // Fill in set values (sets are always editable; no "Add set" action)
@@ -116,8 +117,8 @@ describe("Edge Cases - Validation", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    // Add set (it is immediately added with defaults) and then edit values
-    fireEvent.press(getByText("Add Set"))
+    // Add set (it is immediately added with defaults) and then edit values - Turkish button text
+    fireEvent.press(getByText("+ Set Ekle"))
     fireEvent.changeText(getByLabelText("Reps"), "10")
     fireEvent.changeText(getByLabelText("Kg"), "100")
 

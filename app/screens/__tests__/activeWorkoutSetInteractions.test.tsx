@@ -43,13 +43,14 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
 
     expect(UNSAFE_getByType(Modal).props.visible).toBe(false)
 
-    fireEvent.press(getByLabelText("Set type: Working"))
+    // Press on the set type indicator (now uses SetTypeIndicator component)
+    fireEvent.press(getByLabelText("Set type: working"))
     await waitFor(() => expect(UNSAFE_getByType(Modal).props.visible).toBe(true))
 
     fireEvent.press(getByLabelText("Toggle done"))
 
-    // Still editable (inputs remain)
-    expect(getByLabelText("Reps")).toBeTruthy()
+    // Still editable (inputs remain) - labels updated to match new SetRow design
     expect(getByLabelText("Kg")).toBeTruthy()
+    expect(getByLabelText("Reps")).toBeTruthy()
   })
 })

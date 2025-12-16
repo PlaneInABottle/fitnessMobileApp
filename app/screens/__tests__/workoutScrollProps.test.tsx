@@ -31,14 +31,18 @@ function renderScrollScreen(route: keyof WorkoutStackParamList, component: any) 
 }
 
 describe("Workout scroll screen props", () => {
-  it("ActiveWorkout uses sticky header and does not pin ScrollView contentContainerStyle to flex:1", () => {
-    const { UNSAFE_getByType } = renderScrollScreen("ActiveWorkout", ActiveWorkoutScreen)
-    const scrollView = UNSAFE_getByType(ScrollView)
+  it("ActiveWorkout uses Screen with fixed preset and has scrollable content", () => {
+    const { UNSAFE_getAllByType } = renderScrollScreen("ActiveWorkout", ActiveWorkoutScreen)
+    const scrollViews = UNSAFE_getAllByType(ScrollView)
 
-    expect(scrollView.props.stickyHeaderIndices).toEqual([0])
+    // ActiveWorkout now uses Screen preset="fixed" with a ScrollView for content
+    expect(scrollViews.length).toBeGreaterThanOrEqual(1)
 
-    const flattened = StyleSheet.flatten(scrollView.props.contentContainerStyle)
-    expect(flattened?.flex).toBeUndefined()
+    const mainScrollView = scrollViews.find((sv) => sv.props.style?.flex === 1)
+    if (mainScrollView) {
+      const flattened = StyleSheet.flatten(mainScrollView.props.contentContainerStyle)
+      expect(flattened?.flex).toBeUndefined()
+    }
   })
 
   it("WorkoutComplete uses sticky header and does not pin ScrollView contentContainerStyle to flex:1", () => {

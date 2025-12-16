@@ -23,7 +23,7 @@ function toFiniteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined
 }
 
-const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset"] as const
+const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset", "failure"] as const
 
 type RootWithWorkoutDeps = {
   exerciseStore: {
@@ -114,6 +114,32 @@ export const WorkoutStoreModel = types
     sessionHistory: types.optional(types.array(WorkoutSessionModel), []),
     lastError: types.maybe(types.string),
   })
+  .views((self) => ({
+    /**
+     * Calculate total volume (kg) for the current session
+     * Volume = sum of (weight * reps) for all completed sets
+     */
+    get totalVolume(): number {
+      if (!self.currentSession) return 0
+      let total = 0
+      for (const exercise of self.currentSession.exercises) {
+        for (const set of exercise.sets) {
+          if (set.weight !== undefined && set.reps !== undefined) {
+            total += set.weight * set.reps
+          }
+        }
+      }
+      return total
+    },
+
+    /**
+     * Count of all sets in the current session
+     */
+    get totalSetsCount(): number {
+      if (!self.currentSession) return 0
+      return self.currentSession.exercises.reduce((sum, ex) => sum + ex.sets.length, 0)
+    },
+  }))
   .actions((self) => {
     function requireCurrentSession(): WorkoutSession {
       if (!self.currentSession) throw new Error("No active session")

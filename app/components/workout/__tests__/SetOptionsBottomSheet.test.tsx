@@ -1,5 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native"
 
+import { SetTypeId } from "@/models/SetStore"
 import { ThemeProvider } from "@/theme/context"
 
 import { SetOptionsBottomSheet, SetOptionsBottomSheetProps } from "../SetOptionsBottomSheet"
@@ -9,8 +10,8 @@ function renderBottomSheet(props: Partial<SetOptionsBottomSheetProps> = {}) {
     visible: true,
     onClose: jest.fn(),
     onDelete: jest.fn(),
-    onChangeType: jest.fn(),
-    setTypeName: "Working",
+    onSelectType: jest.fn(),
+    currentTypeId: "working" as SetTypeId,
     ...props,
   }
 
@@ -24,64 +25,45 @@ function renderBottomSheet(props: Partial<SetOptionsBottomSheetProps> = {}) {
 }
 
 describe("SetOptionsBottomSheet", () => {
-  beforeEach(() => {
-    jest.useFakeTimers()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   describe("rendering", () => {
-    it("renders all option buttons when visible", () => {
+    it("renders all set type options when visible", () => {
       const { getByText } = renderBottomSheet()
 
-      expect(getByText("Delete Set")).toBeTruthy()
-      expect(getByText("Change Type (Working)")).toBeTruthy()
+      expect(getByText("Isınma Seti")).toBeTruthy()
+      expect(getByText("Normal Set")).toBeTruthy()
+      expect(getByText("Tükeniş Seti")).toBeTruthy()
+      expect(getByText("Drop Set")).toBeTruthy()
+      expect(getByText("Seti Kaldır")).toBeTruthy()
     })
 
-    it("displays current set type name", () => {
-      const { getByText } = renderBottomSheet({ setTypeName: "Warmup" })
+    it("displays title", () => {
+      const { getByText } = renderBottomSheet()
 
-      expect(getByText("Change Type (Warmup)")).toBeTruthy()
+      expect(getByText("Set Türünü Seç")).toBeTruthy()
     })
   })
 
   describe("callbacks", () => {
-    it("calls onDelete after animation when Delete Set is pressed", () => {
+    it("calls onDelete when Seti Kaldır is pressed", () => {
       const onDelete = jest.fn()
-      const { getByText } = renderBottomSheet({ onDelete })
+      const onClose = jest.fn()
+      const { getByText } = renderBottomSheet({ onDelete, onClose })
 
-      fireEvent.press(getByText("Delete Set"))
+      fireEvent.press(getByText("Seti Kaldır"))
 
-      // Run animation timers
-      jest.advanceTimersByTime(500)
-
+      expect(onClose).toHaveBeenCalled()
       expect(onDelete).toHaveBeenCalled()
     })
 
-    it("calls onChangeType after animation when Change Type is pressed", () => {
-      const onChangeType = jest.fn()
-      const { getByText } = renderBottomSheet({ onChangeType })
-
-      fireEvent.press(getByText("Change Type (Working)"))
-
-      // Run animation timers
-      jest.advanceTimersByTime(500)
-
-      expect(onChangeType).toHaveBeenCalled()
-    })
-
-    it("calls onClose when backdrop is pressed", () => {
+    it("calls onSelectType when a set type is selected", () => {
+      const onSelectType = jest.fn()
       const onClose = jest.fn()
-      const { getByTestId } = renderBottomSheet({ onClose })
+      const { getByText } = renderBottomSheet({ onSelectType, onClose })
 
-      fireEvent.press(getByTestId("backdrop"), { nativeEvent: {} })
-
-      // Run animation timers
-      jest.advanceTimersByTime(500)
+      fireEvent.press(getByText("Drop Set"))
 
       expect(onClose).toHaveBeenCalled()
+      expect(onSelectType).toHaveBeenCalledWith("dropset")
     })
   })
 
@@ -89,8 +71,11 @@ describe("SetOptionsBottomSheet", () => {
     it("has proper accessibility labels", () => {
       const { getByLabelText } = renderBottomSheet()
 
-      expect(getByLabelText("Delete set")).toBeTruthy()
-      expect(getByLabelText("Change set type, currently Working")).toBeTruthy()
+      expect(getByLabelText("Isınma Seti")).toBeTruthy()
+      expect(getByLabelText("Normal Set")).toBeTruthy()
+      expect(getByLabelText("Tükeniş Seti")).toBeTruthy()
+      expect(getByLabelText("Drop Set")).toBeTruthy()
+      expect(getByLabelText("Seti Kaldır")).toBeTruthy()
     })
   })
 })

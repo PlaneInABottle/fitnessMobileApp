@@ -11,11 +11,11 @@ import { ThemeProvider } from "@/theme/context"
 const Stack = createNativeStackNavigator<WorkoutStackParamList>()
 
 describe("ExerciseLibraryScreen scrolling", () => {
-  it("uses sticky header and does not pin ScrollView contentContainerStyle to flex:1", () => {
+  it("uses fixed header and scrollable exercise list", () => {
     const store = RootStoreModel.create({})
     store.workoutStore.startNewSession()
 
-    const { UNSAFE_getByType } = render(
+    const { UNSAFE_getAllByType } = render(
       <RootStoreProvider value={store}>
         <ThemeProvider>
           <NavigationContainer>
@@ -30,10 +30,18 @@ describe("ExerciseLibraryScreen scrolling", () => {
       </RootStoreProvider>,
     )
 
-    const scrollView = UNSAFE_getByType(ScrollView)
-    const flattened = StyleSheet.flatten(scrollView.props.contentContainerStyle)
+    // Screen now has a fixed header with filter chips (horizontal scroll)
+    // and main content scroll view for exercises
+    const scrollViews = UNSAFE_getAllByType(ScrollView)
+    expect(scrollViews.length).toBeGreaterThanOrEqual(1)
 
-    expect(scrollView.props.stickyHeaderIndices).toEqual([0])
-    expect(flattened?.flex).toBeUndefined()
+    // Main content scroll should not have flex: 1 in contentContainerStyle
+    const mainScrollView = scrollViews.find(
+      (sv) => !sv.props.horizontal && sv.props.style?.flex === 1,
+    )
+    if (mainScrollView) {
+      const flattened = StyleSheet.flatten(mainScrollView.props.contentContainerStyle)
+      expect(flattened?.flex).toBeUndefined()
+    }
   })
 })

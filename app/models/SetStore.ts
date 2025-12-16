@@ -3,14 +3,15 @@ import { getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tr
 import { ExerciseSetFieldKey } from "./ExerciseStore"
 
 export const SET_TYPES = {
-  WARMUP: { name: "Warmup" },
-  WORKING: { name: "Working" },
-  DROPSET: { name: "Drop Set" },
+  WARMUP: { name: "Warmup", label: "Isınma Seti", letter: "W" },
+  WORKING: { name: "Working", label: "Normal Set", letter: "" },
+  DROPSET: { name: "Drop Set", label: "Drop Set", letter: "D" },
+  FAILURE: { name: "Failure", label: "Tükeniş Seti", letter: "F" },
 } as const
 
-export type SetTypeId = "warmup" | "working" | "dropset"
+export type SetTypeId = "warmup" | "working" | "dropset" | "failure"
 
-const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset"] as const
+const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset", "failure"] as const
 
 export type SetData = {
   setType: SetTypeId | string
@@ -39,11 +40,32 @@ type RootWithExerciseStore = {
 }
 
 export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
-  getAvailableSetTypes(): Array<{ id: SetTypeId; name: string }> {
+  getAvailableSetTypes(): Array<{ id: SetTypeId; name: string; label: string; letter: string }> {
     return [
-      { id: "warmup", name: SET_TYPES.WARMUP.name },
-      { id: "working", name: SET_TYPES.WORKING.name },
-      { id: "dropset", name: SET_TYPES.DROPSET.name },
+      {
+        id: "warmup",
+        name: SET_TYPES.WARMUP.name,
+        label: SET_TYPES.WARMUP.label,
+        letter: SET_TYPES.WARMUP.letter,
+      },
+      {
+        id: "working",
+        name: SET_TYPES.WORKING.name,
+        label: SET_TYPES.WORKING.label,
+        letter: SET_TYPES.WORKING.letter,
+      },
+      {
+        id: "dropset",
+        name: SET_TYPES.DROPSET.name,
+        label: SET_TYPES.DROPSET.label,
+        letter: SET_TYPES.DROPSET.letter,
+      },
+      {
+        id: "failure",
+        name: SET_TYPES.FAILURE.name,
+        label: SET_TYPES.FAILURE.label,
+        letter: SET_TYPES.FAILURE.letter,
+      },
     ]
   },
 

@@ -56,10 +56,7 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
       </View>
       {onAdd && (
         <Pressable
-          onPress={(e) => {
-            e.stopPropagation?.()
-            onAdd()
-          }}
+          onPress={() => onAdd()}
           style={themed($addButton)}
           accessibilityRole="button"
           accessibilityLabel="Add exercise"

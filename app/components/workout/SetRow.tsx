@@ -14,21 +14,24 @@ import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
+import { SetTypeIndicator, SetType } from "../SetTypeIndicator"
 import { Text } from "../Text"
 
 export type SetRowMode = "header" | "completed" | "edit"
 
 type EditableFieldKey = "weight" | "reps" | "time" | "distance"
 
-type FieldConfig = { key?: EditableFieldKey; label: string }
+type FieldConfig = { key?: EditableFieldKey; label: string; header?: string }
 
 export interface SetRowProps {
   category: ExerciseCategory
   mode: SetRowMode
   value?: Partial<SetData>
+  /** Previous workout data for reference */
+  previousValue?: { weight?: number; reps?: number; time?: number; distance?: number }
   placeholders?: Partial<Record<EditableFieldKey, string>>
   touched?: Partial<Record<EditableFieldKey | "setType", boolean>>
-  availableSetTypes?: Array<{ id: SetTypeId; name: string }>
+  availableSetTypes?: Array<{ id: SetTypeId; name: string; letter?: string }>
   onChange?: (next: Partial<SetData>, touchedKey?: EditableFieldKey | "setType") => void
   onDone?: () => void
   doneButtonLabel?: string
@@ -38,6 +41,7 @@ export interface SetRowProps {
    * Keep true for draft/new-set entry.
    */
   allowEmptyNumbers?: boolean
+  /** 1-based set index for display */
   index?: number
   isDone?: boolean
   onLongPress?: () => void
@@ -47,17 +51,23 @@ function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
   switch (category) {
     case "STRENGTH":
       return [
-        { key: "reps", label: "Reps" },
-        { key: "weight", label: "Kg" },
+        { key: "weight", label: "Kg", header: "KG" },
+        { key: "reps", label: "Reps", header: "TEKRAR" },
       ]
     case "BODYWEIGHT":
-      return [{ key: "reps", label: "Reps" }, { label: "" }]
+      return [
+        { key: "reps", label: "Reps", header: "TEKRAR" },
+        { label: "", header: "" },
+      ]
     case "TIMED":
-      return [{ key: "time", label: "Sec" }, { label: "" }]
+      return [
+        { key: "time", label: "Sec", header: "SÜRE" },
+        { label: "", header: "" },
+      ]
     case "CARDIO":
       return [
-        { key: "time", label: "Sec" },
-        { key: "distance", label: "m" },
+        { key: "time", label: "Sec", header: "SÜRE" },
+        { key: "distance", label: "m", header: "MESAFE" },
       ]
   }
 }
@@ -78,9 +88,11 @@ export function SetRow({
   category,
   mode,
   value,
+  previousValue,
   placeholders,
   touched,
-  availableSetTypes,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  availableSetTypes: _availableSetTypes,
   onChange,
   onDone,
   doneButtonLabel,
@@ -97,23 +109,30 @@ export function SetRow({
 
   const [field1, field2] = useMemo(() => getFields(category), [category])
 
-  const setTypeName = useMemo(() => {
-    const id = value?.setType as SetTypeId | undefined
-    const found = id && availableSetTypes?.find((s) => s.id === id)
-    return found?.name ?? (typeof value?.setType === "string" ? value?.setType : "")
-  }, [availableSetTypes, value?.setType])
+  const setTypeId = (value?.setType as SetTypeId | undefined) ?? "working"
 
-  function cycleSetType() {
-    if (!onChange || !availableSetTypes?.length) return
-    const current = (value?.setType as SetTypeId | undefined) ?? "working"
-    const idx = availableSetTypes.findIndex((s) => s.id === current)
-    const next = availableSetTypes[(idx + 1 + availableSetTypes.length) % availableSetTypes.length]
-    onChange({ ...value, setType: next.id }, "setType")
+  /** Format previous value for display */
+  function formatPrevious(): string {
+    if (!previousValue) return "-"
+    if (category === "STRENGTH") {
+      const w = previousValue.weight ?? 0
+      const r = previousValue.reps ?? 0
+      return `${w}kg × ${r}`
+    }
+    if (category === "BODYWEIGHT") {
+      return `${previousValue.reps ?? 0}`
+    }
+    if (category === "TIMED") {
+      return `${previousValue.time ?? 0}s`
+    }
+    if (category === "CARDIO") {
+      return `${previousValue.time ?? 0}s / ${previousValue.distance ?? 0}m`
+    }
+    return "-"
   }
 
   function handlePressSetType() {
     if (onPressSetType) return onPressSetType()
-    cycleSetType()
   }
 
   function renderFieldCell(field: FieldConfig) {
@@ -181,66 +200,65 @@ export function SetRow({
   if (mode === "header") {
     return (
       <View style={themed([$styles.row, $row, $headerRow])}>
-        <View style={$cell}>
-          <Text text="Type" style={themed($headerText)} />
+        <View style={$setTypeCell}>
+          <Text text="SET" style={themed($headerText)} />
+        </View>
+        <View style={$previousCell}>
+          <Text text="ÖNCEKİ" style={themed($headerText)} />
         </View>
         <View style={$cell}>
-          <Text text={field1.label} style={themed($headerText)} />
+          <Text text={field1.header || field1.label} style={themed($headerText)} />
         </View>
-        <View style={$cell}>
-          <Text text={field2.label} style={themed($headerText)} />
-        </View>
+        {field2.label ? (
+          <View style={$cell}>
+            <Text text={field2.header || field2.label} style={themed($headerText)} />
+          </View>
+        ) : null}
         <View style={$doneCell}>
-          <Text text="Done" style={themed($headerText)} />
+          <Text text="✓" style={themed($headerText)} />
         </View>
       </View>
     )
   }
 
-  const isSetTypeTouched = !!touched?.setType
-  const isSetTypeSuggested = mode === "edit" && !isSetTypeTouched && !!value?.setType
-
   const rowContent = (
     <View style={themed([$styles.row, $row, rowStyle])}>
-      <View style={$cell}>
-        {mode === "edit" ? (
-          <Pressable
-            onPress={handlePressSetType}
-            style={themed($typePill)}
-            accessibilityRole="button"
-            accessibilityLabel={`Set type: ${setTypeName || "Working"}`}
-          >
-            <Text
-              text={setTypeName || "Working"}
-              style={themed([
-                $typeText,
-                isSetTypeSuggested && (({ colors }) => ({ color: colors.textDim })),
-                isSetTypeTouched && (({ typography }) => ({ fontFamily: typography.primary.bold })),
-              ])}
-            />
-          </Pressable>
-        ) : (
-          <Text text={setTypeName || "—"} style={themed($cellText)} />
-        )}
+      {/* Set Type Indicator */}
+      <View style={$setTypeCell}>
+        <Pressable
+          onPress={handlePressSetType}
+          accessibilityRole="button"
+          accessibilityLabel={`Set type: ${setTypeId}`}
+        >
+          <SetTypeIndicator
+            type={setTypeId as SetType}
+            index={setTypeId === "working" ? index : undefined}
+          />
+        </Pressable>
       </View>
 
-      {renderFieldCell(field1)}
-      {renderFieldCell(field2)}
+      {/* Previous Value */}
+      <View style={$previousCell}>
+        <Text text={formatPrevious()} style={themed($previousText)} numberOfLines={1} />
+      </View>
 
+      {/* Field 1 (Weight/Time) */}
+      {renderFieldCell(field1)}
+
+      {/* Field 2 (Reps/Distance) */}
+      {field2.label ? renderFieldCell(field2) : null}
+
+      {/* Done Checkmark */}
       <View style={$doneCell}>
-        {mode === "edit" ? (
-          <Pressable
-            onPress={onDone}
-            style={[themed($doneButton), isDone && themed($doneButtonDone)]}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: !!isDone }}
-            accessibilityLabel={doneButtonLabel ?? "Done"}
-          >
-            <Text text="✓" style={[themed($doneText), isDone && themed($doneTextDone)]} />
-          </Pressable>
-        ) : (
-          <Text text="✓" style={themed($completedDoneText)} />
-        )}
+        <Pressable
+          onPress={onDone}
+          style={[themed($doneButton), isDone && themed($doneButtonDone)]}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: !!isDone }}
+          accessibilityLabel={doneButtonLabel ?? "Done"}
+        >
+          <Text text="✓" style={[themed($doneText), isDone && themed($doneTextDone)]} />
+        </Pressable>
       </View>
     </View>
   )
@@ -262,22 +280,36 @@ const $row: ViewStyle = {
 
 const $headerRow: ViewStyle = {
   paddingVertical: 4,
+  marginBottom: 4,
+}
+
+const $setTypeCell: ViewStyle = {
+  width: 36,
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $previousCell: ViewStyle = {
+  flex: 0.8,
+  paddingHorizontal: 4,
 }
 
 const $cell: ViewStyle = {
   flex: 1,
-  paddingHorizontal: 6,
+  paddingHorizontal: 4,
 }
 
 const $doneCell: ViewStyle = {
-  width: 52,
+  width: 44,
   alignItems: "center",
   justifyContent: "center",
 }
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 12,
+  fontSize: 11,
+  fontWeight: "600",
+  textAlign: "center",
 })
 
 const $cellText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -285,64 +317,46 @@ const $cellText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 14,
 })
 
+const $previousText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  fontSize: 12,
+  textAlign: "center",
+})
+
 const $input: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
-  borderWidth: 1,
-  borderColor: colors.palette.neutral400,
+  borderWidth: 0,
   borderRadius: 6,
   paddingVertical: spacing.xs,
-  paddingHorizontal: spacing.xs,
-  backgroundColor: colors.palette.neutral100,
+  paddingHorizontal: spacing.sm,
+  backgroundColor: colors.cardSecondary,
   color: colors.text,
   fontFamily: typography.primary.medium,
   fontSize: 14,
-})
-
-const $typePill: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  borderWidth: 1,
-  borderColor: colors.palette.neutral400,
-  borderRadius: 999,
-  paddingVertical: spacing.xs,
-  paddingHorizontal: spacing.sm,
-  backgroundColor: colors.palette.neutral100,
-  alignSelf: "flex-start",
-})
-
-const $typeText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  color: colors.text,
-  fontFamily: typography.primary.medium,
-  fontSize: 13,
+  textAlign: "center",
 })
 
 const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  width: 36,
-  height: 36,
-  borderRadius: 18,
+  width: 32,
+  height: 32,
+  borderRadius: 6,
   borderWidth: 1,
-  borderColor: colors.tint,
+  borderColor: colors.border,
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: colors.tint,
+  backgroundColor: "transparent",
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.palette.success500,
-  backgroundColor: colors.palette.success200,
+  borderColor: colors.success,
+  backgroundColor: colors.success,
 })
 
-const $doneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  color: colors.tint,
-  fontFamily: typography.primary.bold,
-  fontSize: 18,
-  lineHeight: 18,
+const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  fontSize: 16,
+  fontWeight: "600",
 })
 
-const $doneTextDone: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.success500,
-})
-
-const $completedDoneText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  color: colors.palette.success500,
-  fontFamily: typography.primary.bold,
-  fontSize: 18,
-  lineHeight: 18,
+const $doneTextDone: ThemedStyle<TextStyle> = () => ({
+  color: "#FFFFFF",
 })

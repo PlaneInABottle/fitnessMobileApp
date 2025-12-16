@@ -3,6 +3,21 @@ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 export const EXERCISE_CATEGORY_VALUES = ["STRENGTH", "BODYWEIGHT", "TIMED", "CARDIO"] as const
 export type ExerciseCategory = (typeof EXERCISE_CATEGORY_VALUES)[number]
 
+export const MUSCLE_GROUPS = [
+  "Chest",
+  "Back",
+  "Shoulders",
+  "Biceps",
+  "Triceps",
+  "Forearms",
+  "Core",
+  "Quads",
+  "Hamstrings",
+  "Glutes",
+  "Calves",
+] as const
+export type MuscleGroup = (typeof MUSCLE_GROUPS)[number]
+
 export type ExerciseSetFieldKey = "weight" | "reps" | "time" | "distance" | "restTime"
 
 // Set fields required/optional based on exercise category.
