@@ -1,11 +1,11 @@
 import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
 
 import { useAppTheme } from "@/theme/context"
-import type { ThemedStyle } from "@/theme/types"
+import type { SetType, ThemedStyle } from "@/theme/types"
 
 import { Text } from "./Text"
 
-export type SetType = "warmup" | "working" | "dropset" | "failure"
+export type { SetType }
 
 export interface SetTypeIndicatorProps {
   /** Type of set */

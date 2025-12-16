@@ -122,7 +122,7 @@ const AppTabs = () => {
         headerShown: false,
         sceneStyle: { backgroundColor: colors.background },
         tabBarStyle: {
-          backgroundColor: "#000000",
+          backgroundColor: colors.background,
           borderTopColor: colors.separator,
           borderTopWidth: 1,
         },

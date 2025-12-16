@@ -92,7 +92,7 @@ const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   minHeight: 44,
 })
 
-const $startButtonText: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
+const $startButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.neutral100,
   fontWeight: "600",
 })

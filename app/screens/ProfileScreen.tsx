@@ -185,8 +185,8 @@ const $proBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignSelf: "flex-start",
 })
 
-const $proBadgeText: ThemedStyle<TextStyle> = () => ({
-  color: "#000000",
+const $proBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.neutral900,
 })
 
 const $proTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -204,8 +204,8 @@ const $proButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   paddingHorizontal: 20,
 })
 
-const $proButtonText: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
+const $proButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.neutral100,
   fontWeight: "600",
 })
 
