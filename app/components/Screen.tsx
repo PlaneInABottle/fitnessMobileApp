@@ -176,7 +176,9 @@ function ScreenWithoutScrolling(props: ScreenProps) {
   const { style, contentContainerStyle, children, preset } = props
   return (
     <View style={[$outerStyle, style]}>
-      <View style={[$innerStyleFixed, preset === "fixed" && $justifyFlexEnd, contentContainerStyle]}>
+      <View
+        style={[$innerStyleFixed, preset === "fixed" && $justifyFlexEnd, contentContainerStyle]}
+      >
         {children}
       </View>
     </View>
