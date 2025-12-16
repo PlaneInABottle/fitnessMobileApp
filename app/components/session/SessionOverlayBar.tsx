@@ -17,30 +17,13 @@ export interface SessionOverlayBarProps {
  * Displays "Antrenman Devam Ediyor" (Workout in Progress) with
  * blue "Devam" (Resume) button and red "Sil" (Delete) button.
  */
-export function SessionOverlayBar({
-  duration,
-  exerciseCount,
-  onContinue,
-  onDiscard,
-}: SessionOverlayBarProps) {
+export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarProps) {
   const { themed, theme } = useAppTheme()
-
-  const exerciseLabel = exerciseCount === 1 ? "egzersiz" : "egzersiz"
 
   return (
     <View style={themed($container)}>
       <View style={themed($headerSection)}>
-        <Text
-          text="Antrenman Devam Ediyor"
-          weight="semiBold"
-          size="sm"
-          style={themed($titleText)}
-        />
-        <Text
-          text={`${duration} • ${exerciseCount} ${exerciseLabel}`}
-          size="xxs"
-          style={themed($subtitleText)}
-        />
+        <Text text="workout continues" weight="semiBold" size="sm" style={themed($titleText)} />
       </View>
 
       <View style={themed($actions)}>
@@ -50,8 +33,8 @@ export function SessionOverlayBar({
           accessibilityLabel="Continue current workout session"
           accessibilityRole="button"
         >
-          <Icon icon="caretRight" size={14} color={theme.colors.tint} />
           <Text text="Devam" weight="medium" size="xs" style={themed($resumeText)} />
+          <Icon icon="caretRight" size={14} color={theme.colors.tint} />
         </Pressable>
 
         <Pressable
@@ -70,40 +53,37 @@ export function SessionOverlayBar({
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral200, // #1C1C1E in dark mode
-  paddingHorizontal: spacing.sm,
-  paddingVertical: spacing.xs,
+  paddingHorizontal: spacing.md,
+  paddingVertical: 4,
   borderTopWidth: 1,
   borderTopColor: colors.separator,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
 })
 
-const $headerSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  paddingRight: spacing.sm,
+const $headerSection: ThemedStyle<ViewStyle> = () => ({
+  alignItems: "center",
+})
+
+const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: 4,
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: spacing.lg,
 })
 
 const $titleText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-const $subtitleText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
-
-const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  gap: spacing.sm,
-})
-
 const $actionButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  minHeight: 32,
+  minWidth: 96,
   flexDirection: "row",
   alignItems: "center",
-  paddingVertical: 2,
-  paddingHorizontal: spacing.xs,
-  gap: 4,
+  justifyContent: "center",
+  paddingVertical: 4,
+  paddingHorizontal: spacing.md,
+  gap: 6,
 })
 
 const $actionButtonPressed: ViewStyle = {

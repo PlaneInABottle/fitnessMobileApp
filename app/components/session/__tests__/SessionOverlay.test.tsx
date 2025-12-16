@@ -100,28 +100,6 @@ describe("SessionOverlay", () => {
       expect(getByText("Devam")).toBeTruthy()
       expect(getByText("Sil")).toBeTruthy()
     })
-
-    it("displays exercise count correctly", () => {
-      const store = RootStoreModel.create({})
-      store.workoutStore.startNewSession()
-      store.workoutStore.addExerciseToSession("bench-press")
-      store.workoutStore.addExerciseToSession("squat")
-
-      const { getByText } = renderSessionOverlay(store)
-
-      // Exercise count is now part of a longer text like "0:00 • 2 egzersiz"
-      expect(getByText(/2 egzersiz/)).toBeTruthy()
-    })
-
-    it("displays singular exercise label for one exercise", () => {
-      const store = RootStoreModel.create({})
-      store.workoutStore.startNewSession()
-      store.workoutStore.addExerciseToSession("bench-press")
-
-      const { getByText } = renderSessionOverlay(store)
-
-      expect(getByText(/1 egzersiz/)).toBeTruthy()
-    })
   })
 
   describe("continue button", () => {
