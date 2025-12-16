@@ -99,3 +99,7 @@ web-build/
 # Dependency Graph Visualizations
 app-dependency-graph.svg
 app-dependency-graph.png
+
+# AI Assistant directories
+.claude
+.gemini
