@@ -32,19 +32,14 @@ export function SetTypeIndicator(props: SetTypeIndicatorProps) {
   const { type, index, style: $styleOverride } = props
   const { themed, getSetTypeColor } = useAppTheme()
 
-  const displayText = type === "working" && index !== undefined 
-    ? index.toString() 
-    : SET_TYPE_LETTERS[type]
+  const displayText =
+    type === "working" && index !== undefined ? index.toString() : SET_TYPE_LETTERS[type]
 
   const color = getSetTypeColor(type)
 
   return (
     <View style={[themed($container), $styleOverride]}>
-      <Text
-        weight="bold"
-        size="xs"
-        style={[themed($text), { color }]}
-      >
+      <Text weight="bold" size="xs" style={[themed($text), { color }]}>
         {displayText}
       </Text>
     </View>

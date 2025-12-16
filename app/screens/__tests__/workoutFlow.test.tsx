@@ -107,13 +107,8 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const {
-      store,
-      getByText,
-      getByLabelText,
-      getAllByLabelText,
-      getByPlaceholderText,
-    } = renderWorkoutFlow()
+    const { store, getByText, getByLabelText, getAllByLabelText, getByPlaceholderText } =
+      renderWorkoutFlow()
 
     fireEvent.press(getByText("+ Boş Antrenmana Başla"))
 

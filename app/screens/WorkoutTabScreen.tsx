@@ -117,10 +117,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
 
             {/* Filter Pills */}
             <View style={$pillsRow}>
-              <Pressable
-                style={themed($pill)}
-                onPress={() => navigation.navigate("CreateRoutine")}
-              >
+              <Pressable style={themed($pill)} onPress={() => navigation.navigate("CreateRoutine")}>
                 <Text weight="medium" size="sm" style={themed($pillText)}>
                   Yeni Rutin
                 </Text>

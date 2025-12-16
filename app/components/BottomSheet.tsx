@@ -1,13 +1,5 @@
 import { ReactNode } from "react"
-import {
-  Modal,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native"
+import { Modal, Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -36,12 +28,7 @@ export function BottomSheet(props: BottomSheetProps) {
   const { themed } = useAppTheme()
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={themed($overlay)}>
         <Pressable style={themed($backdrop)} onPress={onClose} />
         <View style={[themed($container), $styleOverride]}>

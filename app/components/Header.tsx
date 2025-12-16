@@ -207,7 +207,7 @@ export function Header(props: HeaderProps) {
               $titleContainerStyleOverride,
             ]}
           >
-          <Text
+            <Text
               weight="medium"
               size="md"
               text={titleContent}

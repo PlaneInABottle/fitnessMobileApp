@@ -45,12 +45,7 @@ export function RoutineCard(props: RoutineCardProps) {
           </Pressable>
         )}
       </View>
-      <Text
-        size="sm"
-        style={themed($exercisePreview)}
-        numberOfLines={2}
-        ellipsizeMode="tail"
-      >
+      <Text size="sm" style={themed($exercisePreview)} numberOfLines={2} ellipsizeMode="tail">
         {exercisePreview}
       </Text>
       <Button
