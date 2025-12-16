@@ -103,3 +103,11 @@ app-dependency-graph.png
 # AI Assistant directories
 .claude
 .gemini
+.qwen
+
+# Android build artifacts
+*.log
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cxx/
