@@ -75,16 +75,12 @@ export function SessionOverlayBar({
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral200, // #1C1C1E in dark mode
-  borderRadius: 12,
-  marginHorizontal: spacing.md,
-  marginBottom: spacing.xs,
+  borderTopLeftRadius: 12,
+  borderTopRightRadius: 12,
   paddingHorizontal: spacing.md,
   paddingVertical: spacing.sm,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: -2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 8,
+  borderTopWidth: 1,
+  borderTopColor: colors.separator,
 })
 
 const $headerSection: ViewStyle = {

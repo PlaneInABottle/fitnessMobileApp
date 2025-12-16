@@ -70,7 +70,10 @@ export const SessionOverlay = observer(function SessionOverlay() {
     setShowDiscardModal(false)
   }
 
-  const bottomOffset = 49 + insets.bottom
+  const tabBarBaseHeight = 60
+  const tabBarPaddingTop = 6
+  const tabBarPaddingBottom = Math.max(insets.bottom, 8)
+  const bottomOffset = tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom
 
   return (
     <>
