@@ -1,8 +1,8 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { render } from "@testing-library/react-native"
 
-import { SetTypeIndicator, SetType } from "../SetTypeIndicator"
 import { ThemeProvider } from "../../theme/context"
+import { SetTypeIndicator, SetType } from "../SetTypeIndicator"
 
 function renderSetTypeIndicator(props: { type: SetType; index?: number }) {
   return render(

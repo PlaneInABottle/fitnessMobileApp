@@ -19,10 +19,7 @@ function createStoreWithTemplate() {
   return store
 }
 
-function renderRoutineDetailScreen(
-  store = createStoreWithTemplate(),
-  templateId?: string,
-) {
+function renderRoutineDetailScreen(store = createStoreWithTemplate(), templateId?: string) {
   // Get the first template ID if not provided
   const templates = Array.from(store.workoutStore.templates.values())
   const targetTemplateId = templateId || (templates[0] as any)?.id || "non-existent"
@@ -31,10 +28,7 @@ function renderRoutineDetailScreen(
     <RootStoreProvider value={store}>
       <ThemeProvider>
         <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{ headerShown: false }}
-            initialRouteName="RoutineDetail"
-          >
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="RoutineDetail">
             <Stack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
             <Stack.Screen
               name="RoutineDetail"

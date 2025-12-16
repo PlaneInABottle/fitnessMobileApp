@@ -139,7 +139,8 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
     TouchableOpacityProps.onLongPress !== undefined
 
   // Default to caretRight icon if item is touchable and no right icon/component provided
-  const effectiveRightIcon = rightIcon ?? (isTouchable && !RightComponent ? "caretRight" : undefined)
+  const effectiveRightIcon =
+    rightIcon ?? (isTouchable && !RightComponent ? "caretRight" : undefined)
   const effectiveRightIconColor = rightIconColor ?? (isTouchable ? theme.colors.textDim : undefined)
 
   const $textStyles = [$textStyle, $textStyleOverride, TextProps?.style]

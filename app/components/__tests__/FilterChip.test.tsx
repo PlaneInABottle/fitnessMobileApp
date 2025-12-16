@@ -1,8 +1,8 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { render, fireEvent } from "@testing-library/react-native"
 
-import { FilterChip } from "../FilterChip"
 import { ThemeProvider } from "../../theme/context"
+import { FilterChip } from "../FilterChip"
 
 function renderFilterChip(props: {
   label: string

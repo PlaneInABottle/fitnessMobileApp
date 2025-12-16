@@ -1,9 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native"
-import { render, fireEvent } from "@testing-library/react-native"
+import { render } from "@testing-library/react-native"
 
-import { Text } from "../Text"
-import { BottomSheet } from "../BottomSheet"
 import { ThemeProvider } from "../../theme/context"
+import { BottomSheet } from "../BottomSheet"
+import { Text } from "../Text"
 
 function renderBottomSheet(props: {
   visible: boolean
@@ -14,9 +14,7 @@ function renderBottomSheet(props: {
   return render(
     <ThemeProvider>
       <NavigationContainer>
-        <BottomSheet {...props}>
-          {props.children ?? <Text>Test Content</Text>}
-        </BottomSheet>
+        <BottomSheet {...props}>{props.children ?? <Text>Test Content</Text>}</BottomSheet>
       </NavigationContainer>
     </ThemeProvider>,
   )
@@ -72,7 +70,7 @@ describe("BottomSheet", () => {
 
   describe("backdrop interaction", () => {
     it("calls onClose when backdrop is pressed", () => {
-      const { getByTestId } = render(
+      render(
         <ThemeProvider>
           <NavigationContainer>
             <BottomSheet visible={true} onClose={mockOnClose}>

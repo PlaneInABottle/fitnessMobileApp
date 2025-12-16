@@ -1,8 +1,8 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { render, fireEvent } from "@testing-library/react-native"
 
-import { RoutineCard } from "../RoutineCard"
 import { ThemeProvider } from "../../theme/context"
+import { RoutineCard } from "../RoutineCard"
 
 function renderRoutineCard(props: {
   title: string

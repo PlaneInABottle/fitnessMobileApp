@@ -32,7 +32,12 @@ export function SessionOverlayBar({
     <View style={themed($container)}>
       {/* Header text */}
       <View style={$headerSection}>
-        <Text text="Antrenman Devam Ediyor" weight="semiBold" size="md" style={themed($titleText)} />
+        <Text
+          text="Antrenman Devam Ediyor"
+          weight="semiBold"
+          size="md"
+          style={themed($titleText)}
+        />
         <Text
           text={`${duration} • ${exerciseCount} ${exerciseLabel}`}
           size="xs"

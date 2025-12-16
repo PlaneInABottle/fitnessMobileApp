@@ -1,8 +1,8 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { render } from "@testing-library/react-native"
 
-import { WorkoutStatsBar } from "../WorkoutStatsBar"
 import { ThemeProvider } from "../../theme/context"
+import { WorkoutStatsBar } from "../WorkoutStatsBar"
 
 function renderWorkoutStatsBar(props: {
   timeSeconds: number
