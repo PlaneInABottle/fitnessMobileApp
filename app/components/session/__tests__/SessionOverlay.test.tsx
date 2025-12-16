@@ -87,7 +87,7 @@ describe("SessionOverlay", () => {
     it("is hidden when no active session", () => {
       const { queryByText } = renderSessionOverlay()
 
-      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Devam")).toBeNull()
       expect(queryByText("Sil")).toBeNull()
     })
 
@@ -97,7 +97,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Devam")).toBeTruthy()
       expect(getByText("Sil")).toBeTruthy()
     })
 
@@ -131,7 +131,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Devam et"))
+      fireEvent.press(getByText("Devam"))
 
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith(
@@ -220,7 +220,7 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Devam")).toBeNull()
       expect(queryByText("Sil")).toBeNull()
     })
 
@@ -235,7 +235,7 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Devam")).toBeNull()
       expect(queryByText("Sil")).toBeNull()
     })
 
@@ -250,7 +250,7 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Devam")).toBeNull()
       expect(queryByText("Sil")).toBeNull()
     })
 
@@ -265,7 +265,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Devam")).toBeTruthy()
       expect(getByText("Sil")).toBeTruthy()
     })
 
@@ -280,7 +280,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Devam")).toBeTruthy()
       expect(getByText("Sil")).toBeTruthy()
     })
 
@@ -303,7 +303,7 @@ describe("SessionOverlay", () => {
       const { getByText } = renderSessionOverlay(store)
 
       // Since route is empty string (not in hidden routes), overlay should show
-      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Devam")).toBeTruthy()
     })
   })
 })

@@ -3,7 +3,6 @@ import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Icon } from "@/components/Icon"
 import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
-import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
 export interface SessionOverlayBarProps {
@@ -16,7 +15,7 @@ export interface SessionOverlayBarProps {
 /**
  * Session overlay bar with dark theme styling (#1C1C1E background).
  * Displays "Antrenman Devam Ediyor" (Workout in Progress) with
- * blue "Devam et" (Resume) button and red "Sil" (Delete) button.
+ * blue "Devam" (Resume) button and red "Sil" (Delete) button.
  */
 export function SessionOverlayBar({
   duration,
@@ -30,43 +29,39 @@ export function SessionOverlayBar({
 
   return (
     <View style={themed($container)}>
-      {/* Header text */}
-      <View style={$headerSection}>
+      <View style={themed($headerSection)}>
         <Text
           text="Antrenman Devam Ediyor"
           weight="semiBold"
-          size="md"
+          size="sm"
           style={themed($titleText)}
         />
         <Text
           text={`${duration} • ${exerciseCount} ${exerciseLabel}`}
-          size="xs"
+          size="xxs"
           style={themed($subtitleText)}
         />
       </View>
 
-      {/* Action buttons */}
-      <View style={[$styles.row, $actions]}>
-        {/* Resume button */}
+      <View style={themed($actions)}>
         <Pressable
           onPress={onContinue}
           style={({ pressed }) => [themed($actionButton), pressed && $actionButtonPressed]}
           accessibilityLabel="Continue current workout session"
           accessibilityRole="button"
         >
-          <Icon icon="caretRight" size={16} color={theme.colors.tint} />
-          <Text text="Devam et" weight="medium" size="sm" style={themed($resumeText)} />
+          <Icon icon="caretRight" size={14} color={theme.colors.tint} />
+          <Text text="Devam" weight="medium" size="xs" style={themed($resumeText)} />
         </Pressable>
 
-        {/* Delete button */}
         <Pressable
           onPress={onDiscard}
           style={({ pressed }) => [themed($actionButton), pressed && $actionButtonPressed]}
           accessibilityLabel="Discard current workout session"
           accessibilityRole="button"
         >
-          <Icon icon="x" size={16} color={theme.colors.error} />
-          <Text text="Sil" weight="medium" size="sm" style={themed($deleteText)} />
+          <Icon icon="x" size={14} color={theme.colors.error} />
+          <Text text="Sil" weight="medium" size="xs" style={themed($deleteText)} />
         </Pressable>
       </View>
     </View>
@@ -75,38 +70,40 @@ export function SessionOverlayBar({
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral200, // #1C1C1E in dark mode
-  borderTopLeftRadius: 12,
-  borderTopRightRadius: 12,
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xs,
   borderTopWidth: 1,
   borderTopColor: colors.separator,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
 })
 
-const $headerSection: ViewStyle = {
-  marginBottom: 8,
-}
+const $headerSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
+  paddingRight: spacing.sm,
+})
 
 const $titleText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  marginBottom: 2,
 })
 
 const $subtitleText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
 
-const $actions: ViewStyle = {
-  gap: 16,
-}
+const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.sm,
+})
 
 const $actionButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-  paddingVertical: spacing.xs,
-  paddingHorizontal: spacing.sm,
-  borderRadius: 8,
-  gap: 6,
+  paddingVertical: 2,
+  paddingHorizontal: spacing.xs,
+  gap: 4,
 })
 
 const $actionButtonPressed: ViewStyle = {
