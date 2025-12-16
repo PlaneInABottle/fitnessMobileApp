@@ -29,10 +29,12 @@ export function TabBarIcon(props: TabBarIconProps) {
 
   return (
     <View style={[themed($container), $styleOverride]}>
-      <Icon icon={name} size={24} color={iconColor} />
+      <Icon icon={name} size={22} color={iconColor} />
       <Text
         size="xxs"
         weight={focused ? "medium" : "normal"}
+        numberOfLines={1}
+        ellipsizeMode="tail"
         style={[themed($label), { color: iconColor }]}
       >
         {label}
@@ -44,11 +46,13 @@ export function TabBarIcon(props: TabBarIconProps) {
 const $container: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   justifyContent: "center",
-  paddingTop: 8,
-  minWidth: 60,
-  maxWidth: 80,
+  paddingTop: 6,
+  paddingBottom: 2,
+  minWidth: 72,
+  maxWidth: 120,
 })
 
 const $label: ThemedStyle<TextStyle> = () => ({
-  marginTop: 4,
+  marginTop: 2,
+  maxWidth: 110,
 })

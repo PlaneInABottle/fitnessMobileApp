@@ -125,6 +125,12 @@ const AppTabs = () => {
           backgroundColor: colors.background,
           borderTopColor: colors.separator,
           borderTopWidth: 1,
+          height: 68,
+          paddingTop: 6,
+          paddingBottom: 8,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 0,
         },
         tabBarShowLabel: false,
       }}
