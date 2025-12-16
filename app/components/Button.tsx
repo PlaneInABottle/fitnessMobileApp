@@ -14,7 +14,7 @@ import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "filled" | "reversed"
+type Presets = "default" | "filled" | "reversed" | "outline" | "pill" | "danger"
 
 export interface ButtonAccessoryProps {
   style: StyleProp<any>
@@ -220,29 +220,68 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
   filled: [
     $styles.row,
     $baseViewStyle,
-    ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
+    ({ colors }) => ({
+      backgroundColor: colors.tint,
+      borderRadius: 8,
+    }),
   ],
   reversed: [
     $styles.row,
     $baseViewStyle,
     ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
   ],
+  outline: [
+    $styles.row,
+    $baseViewStyle,
+    ({ colors }) => ({
+      borderWidth: 1,
+      borderColor: colors.tint,
+      backgroundColor: "transparent",
+    }),
+  ],
+  pill: [
+    $styles.row,
+    $baseViewStyle,
+    ({ colors }) => ({
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      minHeight: 36,
+      paddingHorizontal: 16,
+    }),
+  ],
+  danger: [
+    $styles.row,
+    $baseViewStyle,
+    ({ colors }) => ({
+      backgroundColor: colors.error,
+      borderRadius: 8,
+    }),
+  ],
 }
 
 const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseTextStyle],
-  filled: [$baseTextStyle],
+  filled: [$baseTextStyle, () => ({ color: "#FFFFFF" })],
   reversed: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
+  outline: [$baseTextStyle, ({ colors }) => ({ color: colors.tint })],
+  pill: [$baseTextStyle, ({ colors }) => ({ color: colors.text })],
+  danger: [$baseTextStyle, () => ({ color: "#FFFFFF" })],
 }
 
 const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
-  filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral400 }),
+  filled: ({ colors }) => ({ backgroundColor: colors.palette.primary600 }),
   reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
+  outline: ({ colors }) => ({ backgroundColor: colors.palette.primary100 }),
+  pill: ({ colors }) => ({ backgroundColor: colors.cardSecondary }),
+  danger: ({ colors }) => ({ backgroundColor: colors.palette.error200 }),
 }
 
 const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
   default: () => ({ opacity: 0.9 }),
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
+  outline: () => ({ opacity: 0.9 }),
+  pill: () => ({ opacity: 0.9 }),
+  danger: () => ({ opacity: 0.9 }),
 }

@@ -15,7 +15,7 @@ import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "reversed"
+type Presets = "default" | "reversed" | "dark"
 
 interface CardProps extends TouchableOpacityProps {
   /**
@@ -296,19 +296,32 @@ const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
       borderColor: theme.colors.palette.neutral500,
     }),
   ],
+  dark: [
+    $styles.row,
+    $containerBase,
+    (theme) => ({
+      backgroundColor: theme.colors.card,
+      borderColor: "transparent",
+      borderWidth: 0,
+      borderRadius: 12,
+    }),
+  ],
 }
 
 const $headingPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  dark: [(theme) => ({ color: theme.colors.text })],
 }
 
 const $contentPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  dark: [(theme) => ({ color: theme.colors.textDim })],
 }
 
 const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [],
   reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  dark: [(theme) => ({ color: theme.colors.textMuted })],
 }
