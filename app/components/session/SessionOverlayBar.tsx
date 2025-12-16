@@ -1,8 +1,9 @@
-import { View, ViewStyle } from "react-native"
+import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 
-import { Button } from "@/components/Button"
+import { Icon } from "@/components/Icon"
 import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
+import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
 export interface SessionOverlayBarProps {
@@ -12,6 +13,11 @@ export interface SessionOverlayBarProps {
   onDiscard: () => void
 }
 
+/**
+ * Session overlay bar with dark theme styling (#1C1C1E background).
+ * Displays "Antrenman Devam Ediyor" (Workout in Progress) with
+ * blue "Devam et" (Resume) button and red "Sil" (Delete) button.
+ */
 export function SessionOverlayBar({
   duration,
   exerciseCount,
@@ -20,59 +26,96 @@ export function SessionOverlayBar({
 }: SessionOverlayBarProps) {
   const { themed, theme } = useAppTheme()
 
-  const exerciseLabel = exerciseCount === 1 ? "exercise" : "exercises"
+  const exerciseLabel = exerciseCount === 1 ? "egzersiz" : "egzersiz"
 
   return (
     <View style={themed($container)}>
-      <View style={themed($info)}>
-        <Text text={duration} preset="bold" size="md" />
-        <Text text={`${exerciseCount} ${exerciseLabel}`} size="xs" />
+      {/* Header text */}
+      <View style={$headerSection}>
+        <Text text="Antrenman Devam Ediyor" weight="semiBold" size="md" style={themed($titleText)} />
+        <Text
+          text={`${duration} • ${exerciseCount} ${exerciseLabel}`}
+          size="xs"
+          style={themed($subtitleText)}
+        />
       </View>
-      <View style={themed($actions)}>
-        <Button
-          text="Discard"
-          preset="default"
-          onPress={onDiscard}
-          style={themed($discardButton)}
-          textStyle={{ color: theme.colors.error }}
-          accessibilityLabel="Discard current workout session"
-        />
-        <Button
-          text="Continue"
-          preset="reversed"
+
+      {/* Action buttons */}
+      <View style={[$styles.row, $actions]}>
+        {/* Resume button */}
+        <Pressable
           onPress={onContinue}
-          style={themed($continueButton)}
+          style={({ pressed }) => [themed($actionButton), pressed && $actionButtonPressed]}
           accessibilityLabel="Continue current workout session"
-        />
+          accessibilityRole="button"
+        >
+          <Icon icon="caretRight" size={16} color={theme.colors.tint} />
+          <Text text="Devam et" weight="medium" size="sm" style={themed($resumeText)} />
+        </Pressable>
+
+        {/* Delete button */}
+        <Pressable
+          onPress={onDiscard}
+          style={({ pressed }) => [themed($actionButton), pressed && $actionButtonPressed]}
+          accessibilityLabel="Discard current workout session"
+          accessibilityRole="button"
+        >
+          <Icon icon="x" size={16} color={theme.colors.error} />
+          <Text text="Sil" weight="medium" size="sm" style={themed($deleteText)} />
+        </Pressable>
       </View>
     </View>
   )
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  backgroundColor: colors.palette.neutral300,
+  backgroundColor: colors.palette.neutral200, // #1C1C1E in dark mode
+  borderRadius: 12,
+  marginHorizontal: spacing.md,
+  marginBottom: spacing.xs,
   paddingHorizontal: spacing.md,
   paddingVertical: spacing.sm,
-  borderTopWidth: 1,
-  borderTopColor: colors.border,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -2 },
+  shadowOpacity: 0.3,
+  shadowRadius: 4,
+  elevation: 8,
 })
 
-const $info: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "column",
+const $headerSection: ViewStyle = {
+  marginBottom: 8,
+}
+
+const $titleText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  marginBottom: 2,
 })
 
-const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $subtitleText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+})
+
+const $actions: ViewStyle = {
+  gap: 16,
+}
+
+const $actionButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: spacing.xs,
+  alignItems: "center",
+  paddingVertical: spacing.xs,
+  paddingHorizontal: spacing.sm,
+  borderRadius: 8,
+  gap: 6,
 })
 
-const $discardButton: ThemedStyle<ViewStyle> = () => ({
-  minHeight: 40,
+const $actionButtonPressed: ViewStyle = {
+  opacity: 0.7,
+}
+
+const $resumeText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
 })
 
-const $continueButton: ThemedStyle<ViewStyle> = () => ({
-  minHeight: 40,
+const $deleteText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.error,
 })

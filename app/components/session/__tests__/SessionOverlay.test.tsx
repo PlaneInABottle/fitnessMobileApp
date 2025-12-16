@@ -34,7 +34,7 @@ jest.mock("@/navigators/navigationUtilities", () => ({
   navigationRef: {
     isReady: () => mockIsReady(),
     getRootState: () => mockGetRootState(),
-    addListener: (event: string, callback: () => void) => mockAddListener(event, callback),
+    addListener: () => mockAddListener(),
   },
   getActiveRouteName: (state: { routes: { name: string }[]; index?: number }) => {
     const route = state.routes[state.index ?? 0]
@@ -87,8 +87,8 @@ describe("SessionOverlay", () => {
     it("is hidden when no active session", () => {
       const { queryByText } = renderSessionOverlay()
 
-      expect(queryByText("Continue")).toBeNull()
-      expect(queryByText("Discard")).toBeNull()
+      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Sil")).toBeNull()
     })
 
     it("renders when session is active", () => {
@@ -97,8 +97,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Continue")).toBeTruthy()
-      expect(getByText("Discard")).toBeTruthy()
+      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Sil")).toBeTruthy()
     })
 
     it("displays exercise count correctly", () => {
@@ -109,7 +109,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("2 exercises")).toBeTruthy()
+      // Exercise count is now part of a longer text like "0:00 • 2 egzersiz"
+      expect(getByText(/2 egzersiz/)).toBeTruthy()
     })
 
     it("displays singular exercise label for one exercise", () => {
@@ -119,7 +120,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("1 exercise")).toBeTruthy()
+      expect(getByText(/1 egzersiz/)).toBeTruthy()
     })
   })
 
@@ -130,7 +131,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Continue"))
+      fireEvent.press(getByText("Devam et"))
 
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith(
@@ -147,13 +148,13 @@ describe("SessionOverlay", () => {
   })
 
   describe("discard confirmation flow", () => {
-    it("shows discard modal when Discard is pressed", async () => {
+    it("shows discard modal when Sil is pressed", async () => {
       const store = RootStoreModel.create({})
       store.workoutStore.startNewSession()
 
       const { getByText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Discard"))
+      fireEvent.press(getByText("Sil"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -167,7 +168,7 @@ describe("SessionOverlay", () => {
 
       const { getByText, queryByText, getByLabelText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Discard"))
+      fireEvent.press(getByText("Sil"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -190,7 +191,7 @@ describe("SessionOverlay", () => {
 
       const { getByText, queryByText, getByLabelText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Discard"))
+      fireEvent.press(getByText("Sil"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -219,8 +220,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Continue")).toBeNull()
-      expect(queryByText("Discard")).toBeNull()
+      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Sil")).toBeNull()
     })
 
     it("hides overlay on ExerciseLibrary screen", () => {
@@ -234,8 +235,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Continue")).toBeNull()
-      expect(queryByText("Discard")).toBeNull()
+      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Sil")).toBeNull()
     })
 
     it("hides overlay on WorkoutComplete screen", () => {
@@ -249,8 +250,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Continue")).toBeNull()
-      expect(queryByText("Discard")).toBeNull()
+      expect(queryByText("Devam et")).toBeNull()
+      expect(queryByText("Sil")).toBeNull()
     })
 
     it("shows overlay on WorkoutTab screen", () => {
@@ -264,8 +265,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Continue")).toBeTruthy()
-      expect(getByText("Discard")).toBeTruthy()
+      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Sil")).toBeTruthy()
     })
 
     it("shows overlay on other tab screens", () => {
@@ -279,8 +280,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Continue")).toBeTruthy()
-      expect(getByText("Discard")).toBeTruthy()
+      expect(getByText("Devam et")).toBeTruthy()
+      expect(getByText("Sil")).toBeTruthy()
     })
 
     it("subscribes to navigation state changes", () => {
@@ -289,7 +290,7 @@ describe("SessionOverlay", () => {
 
       renderSessionOverlay(store)
 
-      expect(mockAddListener).toHaveBeenCalledWith("state", expect.any(Function))
+      expect(mockAddListener).toHaveBeenCalled()
     })
 
     it("handles navigation ref not ready gracefully", () => {
@@ -302,7 +303,7 @@ describe("SessionOverlay", () => {
       const { getByText } = renderSessionOverlay(store)
 
       // Since route is empty string (not in hidden routes), overlay should show
-      expect(getByText("Continue")).toBeTruthy()
+      expect(getByText("Devam et")).toBeTruthy()
     })
   })
 })

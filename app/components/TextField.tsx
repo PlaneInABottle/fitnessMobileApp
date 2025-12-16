@@ -1,4 +1,4 @@
-import { ComponentType, forwardRef, Ref, useImperativeHandle, useRef } from "react"
+import { ComponentType, forwardRef, Ref, useImperativeHandle, useRef, useState } from "react"
 import {
   ImageStyle,
   StyleProp,
@@ -132,6 +132,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     ...TextInputProps
   } = props
   const input = useRef<TextInput>(null)
+  const [isFocused, setIsFocused] = useState(false)
 
   const {
     themed,
@@ -152,6 +153,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     $styles.row,
     $inputWrapperStyle,
     status === "error" && { borderColor: colors.error },
+    isFocused && { borderColor: colors.tint, borderWidth: 2 }, // Blue border on focus
     TextInputProps.multiline && { minHeight: 112 },
     LeftAccessory && { paddingStart: 0 },
     RightAccessory && { paddingEnd: 0 },
@@ -171,6 +173,14 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     status === "error" && { color: colors.error },
     HelperTextProps?.style,
   ]
+
+  function handleFocus() {
+    setIsFocused(true)
+  }
+
+  function handleBlur() {
+    setIsFocused(false)
+  }
 
   /**
    *
@@ -220,6 +230,8 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
           {...TextInputProps}
           editable={!disabled}
           style={themed($inputStyles)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
         />
 
         {!!RightAccessory && (
@@ -253,9 +265,9 @@ const $labelStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignItems: "flex-start",
   borderWidth: 1,
-  borderRadius: 4,
-  backgroundColor: colors.palette.neutral200,
-  borderColor: colors.palette.neutral400,
+  borderRadius: 8,
+  backgroundColor: colors.cardSecondary, // Dark background for inputs
+  borderColor: colors.border,
   overflow: "hidden",
 })
 

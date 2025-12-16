@@ -155,11 +155,11 @@ describe("Workout MVP flow", () => {
     // End button is now "Bitir" in Turkish
     fireEvent.press(getByText("Bitir"))
 
-    await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+    await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
 
-    fireEvent.press(getByText("Save as Template"))
-    fireEvent.changeText(getByPlaceholderText("Template name"), "Upper A")
-    fireEvent.press(getByText("Confirm"))
+    fireEvent.press(getByText("Şablon Olarak Kaydet"))
+    fireEvent.changeText(getByPlaceholderText("Şablon adı"), "Upper A")
+    fireEvent.press(getByText("Kaydet"))
 
     await waitFor(() => expect(getByText("Rutinler")).toBeTruthy())
 

@@ -54,8 +54,8 @@ describe("Edge Cases - Empty Session State", () => {
     // Button text is now "Bitir" in Turkish
     fireEvent.press(getByText("Bitir"))
 
-    // Workout Complete screen should show
-    await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+    // Workout Complete screen should show - now Turkish
+    await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
   })
 })
 

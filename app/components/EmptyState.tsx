@@ -5,6 +5,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 import { Button, ButtonProps } from "./Button"
+import { Icon, IconTypes } from "./Icon"
 import { Text, TextProps } from "./Text"
 
 const sadFace = require("@assets/images/sad-face.png")
@@ -12,8 +13,14 @@ const sadFace = require("@assets/images/sad-face.png")
 interface EmptyStateProps {
   /**
    * An optional prop that specifies the text/image set to use for the empty state.
+   * "generic" - default sad face
+   * "workout" - dumbbell icon for workout-related empty states
    */
-  preset?: "generic"
+  preset?: "generic" | "workout"
+  /**
+   * Optional icon to display instead of image (takes precedence over imageSource)
+   */
+  icon?: IconTypes
   /**
    * Style override for the container.
    */
@@ -104,7 +111,8 @@ interface EmptyStateProps {
 }
 
 interface EmptyStatePresetItem {
-  imageSource: ImageProps["source"]
+  imageSource?: ImageProps["source"]
+  icon?: IconTypes
   heading: TextProps["text"]
   content: TextProps["text"]
   button: TextProps["text"]
@@ -112,6 +120,7 @@ interface EmptyStatePresetItem {
 
 /**
  * A component to use when there is no data to display. It can be utilized to direct the user what to do next.
+ * Supports presets: "generic" (sad face), "workout" (dumbbell icon)
  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/EmptyState/}
  * @param {EmptyStateProps} props - The props for the `EmptyState` component.
  * @returns {JSX.Element} The rendered `EmptyState` component.
@@ -123,18 +132,25 @@ export function EmptyState(props: EmptyStateProps) {
     theme: { spacing },
   } = useAppTheme()
 
-  const EmptyStatePresets = {
+  const EmptyStatePresets: Record<string, EmptyStatePresetItem> = {
     generic: {
       imageSource: sadFace,
       heading: translate("emptyStateComponent:generic.heading"),
       content: translate("emptyStateComponent:generic.content"),
       button: translate("emptyStateComponent:generic.button"),
-    } as EmptyStatePresetItem,
-  } as const
+    },
+    workout: {
+      icon: "dumbbell",
+      heading: "Henüz Antrenman Yok",
+      content: "İlk antrenmanını başlat ve ilerlemeni takip et",
+      button: "Antrenman Başlat",
+    },
+  }
 
   const preset = EmptyStatePresets[props.preset ?? "generic"]
 
   const {
+    icon = preset.icon,
     button = preset.button,
     buttonTx,
     buttonOnPress,
@@ -158,46 +174,55 @@ export function EmptyState(props: EmptyStateProps) {
     ImageProps,
   } = props
 
-  const isImagePresent = !!imageSource
+  const isIconPresent = !!icon
+  const isImagePresent = !isIconPresent && !!imageSource
   const isHeadingPresent = !!(heading || headingTx)
   const isContentPresent = !!(content || contentTx)
   const isButtonPresent = !!(button || buttonTx)
 
-  const $containerStyles = [$containerStyleOverride]
+  const $containerStyles = [themed($container), $containerStyleOverride]
   const $imageStyles = [
     $image,
-    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxs },
+    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.md },
     $imageStyleOverride,
     ImageProps?.style,
   ]
   const $headingStyles = [
     themed($heading),
-    isImagePresent && { marginTop: spacing.xxs },
-    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxs },
+    (isImagePresent || isIconPresent) && { marginTop: spacing.sm },
+    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xs },
     $headingStyleOverride,
     HeadingTextProps?.style,
   ]
   const $contentStyles = [
     themed($content),
-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxs },
-    isButtonPresent && { marginBottom: spacing.xxs },
+    (isImagePresent || isHeadingPresent || isIconPresent) && { marginTop: spacing.xs },
+    isButtonPresent && { marginBottom: spacing.xs },
     $contentStyleOverride,
     ContentTextProps?.style,
   ]
   const $buttonStyles = [
-    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
+    (isImagePresent || isHeadingPresent || isContentPresent || isIconPresent) && {
+      marginTop: spacing.lg,
+    },
     $buttonStyleOverride,
     ButtonProps?.style,
   ]
 
   return (
     <View style={$containerStyles}>
+      {isIconPresent && (
+        <View style={themed($iconContainer)}>
+          <Icon icon={icon} size={48} color={theme.colors.textDim} />
+        </View>
+      )}
+
       {isImagePresent && (
         <Image
           source={imageSource}
           {...ImageProps}
           style={$imageStyles}
-          tintColor={theme.colors.palette.neutral900}
+          tintColor={theme.colors.textDim}
         />
       )}
 
@@ -229,6 +254,7 @@ export function EmptyState(props: EmptyStateProps) {
           tx={buttonTx}
           txOptions={buttonTxOptions}
           textStyle={$buttonTextStyleOverride}
+          preset="filled"
           {...ButtonProps}
           style={$buttonStyles}
         />
@@ -237,12 +263,31 @@ export function EmptyState(props: EmptyStateProps) {
   )
 }
 
-const $image: ImageStyle = { alignSelf: "center" }
-const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  textAlign: "center",
+const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: spacing.xxl,
   paddingHorizontal: spacing.lg,
 })
-const $content: ThemedStyle<TextStyle> = ({ spacing }) => ({
+
+const $iconContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  backgroundColor: colors.cardSecondary,
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: spacing.md,
+})
+
+const $image: ImageStyle = { alignSelf: "center" }
+const $heading: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   textAlign: "center",
   paddingHorizontal: spacing.lg,
+  color: colors.text,
+})
+const $content: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  textAlign: "center",
+  paddingHorizontal: spacing.lg,
+  color: colors.textDim,
 })

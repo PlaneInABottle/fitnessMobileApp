@@ -130,13 +130,17 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
     containerStyle: $containerStyleOverride,
     ...TouchableOpacityProps
   } = props
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
 
   const isTouchable =
     TouchableOpacityProps.onPress !== undefined ||
     TouchableOpacityProps.onPressIn !== undefined ||
     TouchableOpacityProps.onPressOut !== undefined ||
     TouchableOpacityProps.onLongPress !== undefined
+
+  // Default to caretRight icon if item is touchable and no right icon/component provided
+  const effectiveRightIcon = rightIcon ?? (isTouchable && !RightComponent ? "caretRight" : undefined)
+  const effectiveRightIconColor = rightIconColor ?? (isTouchable ? theme.colors.textDim : undefined)
 
   const $textStyles = [$textStyle, $textStyleOverride, TextProps?.style]
 
@@ -168,8 +172,8 @@ export const ListItem = forwardRef<View, ListItemProps>(function ListItem(
         <ListItemAction
           side="right"
           size={height}
-          icon={rightIcon}
-          iconColor={rightIconColor}
+          icon={effectiveRightIcon}
+          iconColor={effectiveRightIconColor}
           Component={RightComponent}
         />
       </Wrapper>
@@ -218,11 +222,12 @@ const $separatorBottom: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderBottomColor: colors.separator,
 })
 
-const $textStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+const $textStyle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   paddingVertical: spacing.xs,
   alignSelf: "center",
   flexGrow: 1,
   flexShrink: 1,
+  color: colors.text,
 })
 
 const $touchableStyle: ViewStyle = {

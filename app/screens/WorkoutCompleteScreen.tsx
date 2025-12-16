@@ -1,10 +1,11 @@
 import { FC, useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { BackHandler, View, ViewStyle } from "react-native"
+import { BackHandler, TextStyle, View, ViewStyle } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
 import { ErrorMessage } from "@/components/common/ErrorMessage"
+import { Icon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
@@ -12,13 +13,12 @@ import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
-import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
 
 export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete">> = observer(
   function WorkoutCompleteScreen({ navigation }) {
     const { workoutStore } = useStores()
-    const { themed } = useAppTheme()
+    const { themed, theme } = useAppTheme()
 
     const session = workoutStore.currentSession
 
@@ -36,16 +36,27 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       }, []),
     )
 
-    const { durationMinutes, exerciseCount, totalSets } = useMemo(() => {
-      if (!session) return { durationMinutes: 0, exerciseCount: 0, totalSets: 0 }
+    const { durationMinutes, exerciseCount, totalSets, totalVolume } = useMemo(() => {
+      if (!session) return { durationMinutes: 0, exerciseCount: 0, totalSets: 0, totalVolume: 0 }
 
       const ms = Date.now() - session.startedAt.getTime()
       const minutes = Math.max(0, Math.round(ms / 60000))
+
+      // Calculate total volume
+      let volume = 0
+      for (const exercise of session.exercises) {
+        for (const set of exercise.sets) {
+          const weight = set.weight ?? 0
+          const reps = set.reps ?? 0
+          volume += weight * reps
+        }
+      }
 
       return {
         durationMinutes: minutes,
         exerciseCount: session.exercises.length,
         totalSets: session.exercises.reduce((sum, we) => sum + we.sets.length, 0),
+        totalVolume: volume,
       }
     }, [session])
 
@@ -83,7 +94,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
     return (
       <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
-        <WorkoutHeader title="Workout Complete" />
+        <WorkoutHeader title="Antrenman Tamamlandı" />
 
         <View style={themed($content)}>
           {!session ? (
@@ -102,35 +113,108 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                 />
               )}
 
-              <View style={themed($stats)}>
-                <Text text={`Duration: ${durationMinutes} min`} preset="subheading" />
-                <Text text={`Exercises: ${exerciseCount}`} />
-                <Text text={`Total sets: ${totalSets}`} />
+              {/* Celebration Section */}
+              <View style={themed($celebrationSection)}>
+                <View style={themed($celebrationIcon)}>
+                  <Icon icon="check" size={48} color={theme.colors.success} />
+                </View>
+                <Text text="Harika iş!" preset="heading" style={themed($celebrationTitle)} />
+                <Text
+                  text="Antrenmanını başarıyla tamamladın"
+                  style={themed($celebrationSubtitle)}
+                />
+              </View>
+
+              {/* Stats Card */}
+              <View style={themed($statsCard)}>
+                <View style={themed($statRow)}>
+                  <View style={$statItem}>
+                    <Text text="Süre" size="xs" style={themed($statLabel)} />
+                    <Text
+                      text={`${durationMinutes} dk`}
+                      weight="bold"
+                      size="lg"
+                      style={themed($statValue)}
+                    />
+                  </View>
+                  <View style={themed($statDivider)} />
+                  <View style={$statItem}>
+                    <Text text="Hacim" size="xs" style={themed($statLabel)} />
+                    <Text
+                      text={`${totalVolume.toLocaleString()} kg`}
+                      weight="bold"
+                      size="lg"
+                      style={themed($statValue)}
+                    />
+                  </View>
+                </View>
+                <View style={themed($statRowSecond)}>
+                  <View style={$statItem}>
+                    <Text text="Egzersiz" size="xs" style={themed($statLabel)} />
+                    <Text
+                      text={exerciseCount.toString()}
+                      weight="bold"
+                      size="lg"
+                      style={themed($statValue)}
+                    />
+                  </View>
+                  <View style={themed($statDivider)} />
+                  <View style={$statItem}>
+                    <Text text="Set" size="xs" style={themed($statLabel)} />
+                    <Text
+                      text={totalSets.toString()}
+                      weight="bold"
+                      size="lg"
+                      style={themed($statValue)}
+                    />
+                  </View>
+                </View>
               </View>
 
               {showTemplateSave ? (
                 <View style={themed($templateSection)}>
+                  <Text
+                    text="Şablon olarak kaydet"
+                    weight="semiBold"
+                    style={themed($templateTitle)}
+                  />
                   <TextField
                     value={templateName}
                     onChangeText={setTemplateName}
-                    placeholder="Template name"
+                    placeholder="Şablon adı"
                     autoCapitalize="words"
                     returnKeyType="done"
                   />
 
-                  <View style={themed([$styles.row, $actionsRow])}>
-                    <Button text="Confirm" preset="filled" onPress={handleConfirmSaveTemplate} />
-                    <Button text="Cancel" preset="default" onPress={handleCancelSaveTemplate} />
+                  <View style={$actionsRow}>
+                    <Button
+                      text="Kaydet"
+                      preset="filled"
+                      onPress={handleConfirmSaveTemplate}
+                      style={themed($actionButton)}
+                    />
+                    <Button
+                      text="İptal"
+                      preset="default"
+                      onPress={handleCancelSaveTemplate}
+                      style={themed($actionButton)}
+                    />
                   </View>
                 </View>
               ) : (
                 <View style={themed($actions)}>
                   <Button
-                    text="Save as Template"
-                    preset="filled"
+                    text="Şablon Olarak Kaydet"
+                    preset="default"
                     onPress={handleStartSaveTemplate}
+                    style={themed($saveTemplateButton)}
                   />
-                  <Button text="Don't Save" preset="default" onPress={handleDontSave} />
+                  <Button
+                    text="Bitti"
+                    preset="filled"
+                    onPress={handleDontSave}
+                    style={themed($doneButton)}
+                  />
                 </View>
               )}
             </>
@@ -146,8 +230,64 @@ const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.md,
 })
 
-const $stats: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.xs,
+const $celebrationSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  paddingVertical: spacing.lg,
+})
+
+const $celebrationIcon: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  backgroundColor: colors.successBackground,
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 16,
+})
+
+const $celebrationTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  marginBottom: 4,
+})
+
+const $celebrationSubtitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+})
+
+const $statsCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  borderRadius: 12,
+  padding: spacing.md,
+})
+
+const $statRow: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-around",
+  marginBottom: 16,
+}
+
+const $statRowSecond: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-around",
+}
+
+const $statItem: ViewStyle = {
+  alignItems: "center",
+  flex: 1,
+}
+
+const $statDivider: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 1,
+  backgroundColor: colors.separator,
+})
+
+const $statLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  marginBottom: 4,
+})
+
+const $statValue: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
 })
 
 const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -155,12 +295,38 @@ const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.md,
 })
 
-const $templateSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $templateSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  borderRadius: 12,
+  padding: spacing.md,
   gap: spacing.sm,
   marginTop: spacing.md,
 })
 
+const $templateTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  marginBottom: 4,
+})
+
 const $actionsRow: ViewStyle = {
+  flexDirection: "row",
   justifyContent: "space-between",
   gap: 12,
+  marginTop: 8,
 }
+
+const $actionButton: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  minHeight: 44,
+})
+
+const $saveTemplateButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  borderColor: colors.tint,
+  borderWidth: 1,
+  minHeight: 48,
+})
+
+const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.tint,
+  minHeight: 48,
+})
