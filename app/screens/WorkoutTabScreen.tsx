@@ -63,11 +63,6 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
             <Text preset="heading" style={themed($headerTitle)}>
               Antrenman
             </Text>
-            <View style={themed($proBadge)}>
-              <Text weight="bold" size="xxs" style={themed($proBadgeText)}>
-                PRO
-              </Text>
-            </View>
           </View>
           <Pressable
             onPress={() => {}}
@@ -191,16 +186,6 @@ const $headerTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-const $proBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.proBadge,
-  paddingHorizontal: 6,
-  paddingVertical: 2,
-  borderRadius: 4,
-})
-
-const $proBadgeText: ThemedStyle<TextStyle> = () => ({
-  color: "#000000",
-})
 
 const $settingsButton: ViewStyle = {
   padding: 8,

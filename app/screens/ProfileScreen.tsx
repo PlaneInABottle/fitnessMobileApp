@@ -2,7 +2,6 @@ import { FC } from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
-import { Button } from "@/components/Button"
 import { Icon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -65,31 +64,6 @@ export const ProfileScreen: FC<ProfileStackScreenProps<"ProfileTab">> = observer
             </Text>
           </View>
 
-          {/* PRO Upgrade Button */}
-          <View style={themed($proSection)}>
-            <View style={themed($proCard)}>
-              <View style={themed($proContent)}>
-                <View style={themed($proBadge)}>
-                  <Text weight="bold" size="xxs" style={themed($proBadgeText)}>
-                    PRO
-                  </Text>
-                </View>
-                <Text weight="semiBold" size="lg" style={themed($proTitle)}>
-                  Premium&apos;a Yükselt
-                </Text>
-                <Text size="sm" style={themed($proDescription)}>
-                  Sınırsız rutin, gelişmiş istatistikler ve daha fazlası
-                </Text>
-              </View>
-              <Button
-                text="Yükselt"
-                preset="filled"
-                onPress={() => {}}
-                style={themed($proButton)}
-                textStyle={themed($proButtonText)}
-              />
-            </View>
-          </View>
 
           {/* Settings List */}
           <View style={themed($settingsSection)}>
@@ -160,54 +134,6 @@ const $userEmail: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
 
-const $proSection: ThemedStyle<ViewStyle> = () => ({})
-
-const $proCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.card,
-  borderRadius: 12,
-  padding: spacing.md,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-})
-
-const $proContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  gap: spacing.xs,
-  marginRight: spacing.md,
-})
-
-const $proBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.proBadge,
-  paddingHorizontal: 6,
-  paddingVertical: 2,
-  borderRadius: 4,
-  alignSelf: "flex-start",
-})
-
-const $proBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral900,
-})
-
-const $proTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-})
-
-const $proDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
-
-const $proButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.tint,
-  borderRadius: 8,
-  minHeight: 40,
-  paddingHorizontal: 20,
-})
-
-const $proButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral100,
-  fontWeight: "600",
-})
 
 const $settingsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.md,

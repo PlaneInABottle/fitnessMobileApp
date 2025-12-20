@@ -39,20 +39,6 @@ describe("ProfileScreen", () => {
     expect(getByText("kullanici@email.com")).toBeTruthy()
   })
 
-  it("shows PRO upgrade section", () => {
-    const { getByText } = renderProfileScreen()
-
-    expect(getByText("PRO")).toBeTruthy()
-    expect(getByText("Premium'a Yükselt")).toBeTruthy()
-    expect(getByText("Sınırsız rutin, gelişmiş istatistikler ve daha fazlası")).toBeTruthy()
-  })
-
-  it("shows upgrade button", () => {
-    const { getByText } = renderProfileScreen()
-
-    expect(getByText("Yükselt")).toBeTruthy()
-  })
-
   it("shows settings section with items", () => {
     const { getByText, getByLabelText } = renderProfileScreen()
 

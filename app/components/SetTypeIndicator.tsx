@@ -22,6 +22,7 @@ const SET_TYPE_LETTERS: Record<SetType, string> = {
   working: "",
   dropset: "D",
   failure: "F",
+  completed: "✓",
 }
 
 /**
