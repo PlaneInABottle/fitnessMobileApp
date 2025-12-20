@@ -93,6 +93,18 @@ describe("WorkoutStore", () => {
     expect(template?.name).toBe("Upper A")
     expect(template?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
 
+    expect(template?.exercises).toHaveLength(2)
+    const benchTemplate = template?.exercises.find((e) => e.exerciseId === "bench-press")
+    const squatTemplate = template?.exercises.find((e) => e.exerciseId === "squat")
+    expect(benchTemplate?.sets).toHaveLength(1)
+    expect(benchTemplate?.sets?.[0].setType).toBe("working")
+    expect(benchTemplate?.sets?.[0].weight).toBe(0)
+    expect(benchTemplate?.sets?.[0].reps).toBe(0)
+    expect(squatTemplate?.sets).toHaveLength(1)
+    expect(squatTemplate?.sets?.[0].setType).toBe("working")
+    expect(squatTemplate?.sets?.[0].weight).toBe(0)
+    expect(squatTemplate?.sets?.[0].reps).toBe(0)
+
     root.workoutStore.completeSession()
     root.workoutStore.startSessionFromTemplate(templateId!)
     expect(root.workoutStore.currentSession?.templateId).toBe(templateId)
@@ -126,6 +138,84 @@ describe("WorkoutStore", () => {
     expect(ok).toBe(true)
 
     expect(root.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
+  })
+
+  it("persists sets when creating and updating templates from session", () => {
+    const root = RootStoreModel.create({})
+
+    root.workoutStore.startNewSession()
+    const weId = root.workoutStore.addExerciseToSession("bench-press")!
+
+    const firstSetId = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0].id
+    expect(firstSetId).toBeDefined()
+
+    root.workoutStore.updateSetInWorkoutExercise(weId, firstSetId!, { weight: 100, reps: 5 })
+    root.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 50, reps: 10 })
+
+    const templateId = root.workoutStore.createTemplateFromSession("Bench")!
+
+    const templateBefore = root.workoutStore.templates.get(templateId)
+    expect(templateBefore?.exercises.find((e) => e.exerciseId === "bench-press")?.sets).toHaveLength(2)
+
+    root.workoutStore.completeSession()
+    root.workoutStore.startSessionFromTemplate(templateId)
+
+    const bench1 = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    expect(bench1?.sets).toHaveLength(2)
+    expect(bench1?.sets?.[0].weight).toBe(100)
+    expect(bench1?.sets?.[0].reps).toBe(5)
+    expect(bench1?.sets?.[1].weight).toBe(50)
+    expect(bench1?.sets?.[1].reps).toBe(10)
+
+    root.workoutStore.addSetToWorkoutExercise(bench1!.id, { setType: "working", weight: 120, reps: 3 })
+    expect(root.workoutStore.updateTemplateFromCurrentSession(templateId)).toBe(true)
+
+    root.workoutStore.completeSession()
+    root.workoutStore.startSessionFromTemplate(templateId)
+
+    const bench2 = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    expect(bench2?.sets).toHaveLength(3)
+    expect(bench2?.sets?.[0].weight).toBe(100)
+    expect(bench2?.sets?.[0].reps).toBe(5)
+    expect(bench2?.sets?.[1].weight).toBe(50)
+    expect(bench2?.sets?.[1].reps).toBe(10)
+    expect(bench2?.sets?.[2].weight).toBe(120)
+    expect(bench2?.sets?.[2].reps).toBe(3)
+  })
+
+  it("uses template set counts as baseline for update summary", () => {
+    const root = RootStoreModel.create({})
+
+    root.workoutStore.startNewSession()
+    const weId = root.workoutStore.addExerciseToSession("bench-press")!
+    root.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 50, reps: 10 })
+
+    const templateId = root.workoutStore.createTemplateFromSession("Bench")!
+
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)).toEqual({
+      addedExerciseIds: [],
+      removedExerciseIds: [],
+      addedSets: 0,
+      removedSets: 0,
+    })
+
+    root.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 60, reps: 8 })
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)?.addedSets).toBe(1)
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)?.removedSets).toBe(0)
+
+    const extraSetId = root.workoutStore.currentSession?.exercises[0].sets[2].id
+    root.workoutStore.deleteSetFromWorkoutExercise(weId, extraSetId!)
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)).toEqual({
+      addedExerciseIds: [],
+      removedExerciseIds: [],
+      addedSets: 0,
+      removedSets: 0,
+    })
+
+    const setToDelete = root.workoutStore.currentSession?.exercises[0].sets[1].id
+    root.workoutStore.deleteSetFromWorkoutExercise(weId, setToDelete!)
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)?.addedSets).toBe(0)
+    expect(root.workoutStore.getTemplateUpdateSummary(templateId)?.removedSets).toBe(1)
   })
 
   it("tracks template lastUsedAt", () => {

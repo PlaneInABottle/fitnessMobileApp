@@ -112,6 +112,8 @@ export function SetRow({
 
   const [field1, field2] = useMemo(() => getFields(category), [category])
   const [localTouched, setLocalTouched] = useState<Partial<Record<EditableFieldKey, boolean>>>({})
+  const [draftText, setDraftText] = useState<Partial<Record<EditableFieldKey, string>>>({})
+  const [focusedField, setFocusedField] = useState<EditableFieldKey | null>(null)
 
   const setTypeId = (value?.setType as SetTypeId | undefined) ?? "working"
 
@@ -172,6 +174,9 @@ export function SetRow({
           : isKgOrReps
             ? toText(normalizedKgRepsCurrent)
             : toText(current)
+
+      const displayValue = focusedField === key ? (draftText[key] ?? "") : inputValue
+
       const hasEnteredValue = isKgOrReps
         ? shouldForceDoneZero ||
           (isTouched ? inputValue !== "" : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0)
@@ -181,15 +186,52 @@ export function SetRow({
       return (
         <View style={$cell}>
           <TextInput
-            value={inputValue}
+            value={displayValue}
             accessibilityLabel={field.label}
             placeholder={placeholders?.[key] ?? "0"}
             placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             underlineColorAndroid="transparent"
+            onFocus={() => {
+              setFocusedField(key)
+              setDraftText((prev) => ({ ...prev, [key]: inputValue }))
+            }}
             onChangeText={(t) => {
               setLocalTouched((prev) => ({ ...prev, [key]: true }))
-              onChange({ ...value, [key]: toNumberOrUndefined(t, allowEmptyNumbers) }, key)
+              setDraftText((prev) => ({ ...prev, [key]: t }))
+
+              if (!t.trim()) return
+
+              const parsed = toNumberOrUndefined(t, true)
+              if (parsed === undefined) return
+
+              onChange({ ...value, [key]: parsed }, key)
+            }}
+            onBlur={() => {
+              const t = (draftText[key] ?? "").trim()
+
+              if (!t) {
+                onChange({ ...value, [key]: allowEmptyNumbers ? undefined : 0 }, key)
+              } else {
+                const parsed = toNumberOrUndefined(t, true)
+                if (parsed !== undefined) onChange({ ...value, [key]: parsed }, key)
+              }
+
+              setFocusedField((prev) => (prev === key ? null : prev))
+              setDraftText((prev) => ({ ...prev, [key]: undefined }))
+            }}
+            onSubmitEditing={() => {
+              const t = (draftText[key] ?? "").trim()
+
+              if (!t) {
+                onChange({ ...value, [key]: allowEmptyNumbers ? undefined : 0 }, key)
+              } else {
+                const parsed = toNumberOrUndefined(t, true)
+                if (parsed !== undefined) onChange({ ...value, [key]: parsed }, key)
+              }
+
+              setFocusedField((prev) => (prev === key ? null : prev))
+              setDraftText((prev) => ({ ...prev, [key]: undefined }))
             }}
             style={[
               themed($input),
@@ -213,7 +255,6 @@ export function SetRow({
 
   const rowStyle: ThemedStyle<ViewStyle> = ({ colors, isDark }) => {
     const base = {
-      borderRadius: 6,
       paddingVertical: 10,
     }
 
@@ -401,8 +442,8 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.text,
-  backgroundColor: "transparent",
+  borderColor: colors.success,
+  backgroundColor: colors.success,
 })
 
 const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -412,5 +453,5 @@ const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
 })
 
 const $doneTextDone: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
+  color: colors.palette.neutral100,
 })

@@ -281,7 +281,9 @@ const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderWidth: 1,
   borderColor: colors.border,
   borderRadius: 8,
+  minHeight: 44,
   marginTop: spacing.sm,
+  marginHorizontal: spacing.md,
 })
 
 const $addExerciseButton: ThemedStyle<ViewStyle> = ({ colors }) => ({

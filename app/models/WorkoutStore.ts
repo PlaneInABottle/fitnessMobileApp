@@ -97,10 +97,33 @@ export interface WorkoutSession extends Instance<typeof WorkoutSessionModel> {}
 export interface WorkoutSessionSnapshotIn extends SnapshotIn<typeof WorkoutSessionModel> {}
 export interface WorkoutSessionSnapshotOut extends SnapshotOut<typeof WorkoutSessionModel> {}
 
+export const TemplateSetModel = types.model("TemplateSet", {
+  setType: types.enumeration("TemplateSetType", [...SET_TYPE_IDS]),
+  weight: types.maybe(types.number),
+  reps: types.maybe(types.number),
+  time: types.maybe(types.number),
+  distance: types.maybe(types.number),
+  restTime: types.maybe(types.number),
+})
+
+export interface TemplateSet extends Instance<typeof TemplateSetModel> {}
+export interface TemplateSetSnapshotIn extends SnapshotIn<typeof TemplateSetModel> {}
+export interface TemplateSetSnapshotOut extends SnapshotOut<typeof TemplateSetModel> {}
+
+export const TemplateExerciseModel = types.model("TemplateExercise", {
+  exerciseId: types.string,
+  sets: types.optional(types.array(TemplateSetModel), []),
+})
+
+export interface TemplateExercise extends Instance<typeof TemplateExerciseModel> {}
+export interface TemplateExerciseSnapshotIn extends SnapshotIn<typeof TemplateExerciseModel> {}
+export interface TemplateExerciseSnapshotOut extends SnapshotOut<typeof TemplateExerciseModel> {}
+
 export const WorkoutTemplateModel = types.model("WorkoutTemplate", {
   id: types.identifier,
   name: types.string,
   exerciseIds: types.optional(types.array(types.string), []),
+  exercises: types.optional(types.array(TemplateExerciseModel), []),
   lastUsedAt: types.maybe(types.Date),
 })
 
@@ -190,6 +213,56 @@ export const WorkoutStoreModel = types
       }
     }
 
+    function buildTemplateExercisesFromSession(session: WorkoutSession): TemplateExerciseSnapshotIn[] {
+      return session.exercises.map((we) => ({
+        exerciseId: we.exerciseId,
+        sets: (we.sets ?? []).map((s) => ({
+          setType: s.setType as SetTypeId,
+          weight: toFiniteNumber(s.weight),
+          reps: toFiniteNumber(s.reps),
+          time: toFiniteNumber(s.time),
+          distance: toFiniteNumber(s.distance),
+          restTime: toFiniteNumber(s.restTime),
+        })),
+      }))
+    }
+
+    function buildWorkoutExercisesFromTemplate(
+      template: WorkoutTemplate,
+      root: RootWithWorkoutDeps,
+    ): WorkoutExerciseSnapshotIn[] {
+      return (template.exercises ?? []).map((te) => {
+        if (!root.exerciseStore.hasExercise(te.exerciseId)) throw new Error("Invalid exerciseId")
+
+        const sets = te.sets.length
+          ? te.sets.map((s) => {
+              const setData: Partial<SetData> = {
+                setType: s.setType as SetTypeId,
+                weight: toFiniteNumber(s.weight),
+                reps: toFiniteNumber(s.reps),
+                time: toFiniteNumber(s.time),
+                distance: toFiniteNumber(s.distance),
+                restTime: toFiniteNumber(s.restTime),
+              }
+
+              const validation = root.setStore.validateSetData(te.exerciseId, setData)
+              if (!validation.ok) throw new Error(validation.error)
+
+              return {
+                id: generateId(),
+                ...buildSetSnapshot(setData),
+              }
+            })
+          : [buildDefaultWorkingSetSnapshot(te.exerciseId, root)]
+
+        return {
+          id: generateId(),
+          exerciseId: te.exerciseId,
+          sets,
+        }
+      })
+    }
+
     function setError(error: unknown) {
       self.lastError = error instanceof Error ? error.message : String(error)
     }
@@ -227,6 +300,16 @@ export const WorkoutStoreModel = types
       const root = getAttachedRoot()
       const template = self.templates.get(templateId)
       if (!template) throw new Error("Invalid templateId")
+
+      if (template.exercises.length > 0) {
+        self.currentSession = cast({
+          id: generateId(),
+          templateId,
+          exercises: buildWorkoutExercisesFromTemplate(template, root),
+          startedAt: new Date(),
+        })
+        return
+      }
 
       const ids = template.exerciseIds.slice()
       ids.forEach((exerciseId) => {
@@ -341,6 +424,7 @@ export const WorkoutStoreModel = types
         id,
         name: sanitizedName,
         exerciseIds: sanitizedExerciseIds,
+        exercises: [],
         lastUsedAt: new Date(),
       })
 
@@ -349,10 +433,15 @@ export const WorkoutStoreModel = types
 
     function createTemplateFromSessionUnsafe(name: string): string {
       const session = requireCurrentSession()
-      return createTemplateUnsafe(
+      const id = createTemplateUnsafe(
         name,
         session.exercises.map((we) => we.exerciseId),
       )
+
+      const template = self.templates.get(id)
+      if (template) template.exercises = cast(buildTemplateExercisesFromSession(session))
+
+      return id
     }
 
     function deleteSetFromWorkoutExerciseUnsafe(workoutExerciseId: string, setId: string) {
@@ -516,16 +605,25 @@ export const WorkoutStoreModel = types
           addedSets += sessionSetCounts.get(exerciseId) ?? 0
         }
 
-        // Removed exercises: baseline is 1 set per exercise.
-        removedExerciseIds.forEach(() => {
-          removedSets += 1
-        })
+        const templateBaselineSetCounts = new Map<string, number>()
+        for (const exerciseId of templateExerciseIds) {
+          const storedCount = template.exercises
+            .filter((e) => e.exerciseId === exerciseId)
+            .reduce((sum, e) => sum + e.sets.length, 0)
+          templateBaselineSetCounts.set(exerciseId, storedCount > 0 ? storedCount : 1)
+        }
 
-        // Exercises present in both: baseline is 1 set.
+        // Removed exercises: baseline is template set count when available, else 1.
+        for (const exerciseId of removedExerciseIds) {
+          removedSets += templateBaselineSetCounts.get(exerciseId) ?? 1
+        }
+
+        // Exercises present in both: baseline is template set count when available, else 1.
         for (const exerciseId of Array.from(sessionSet).filter((id) => templateSet.has(id))) {
-          const count = sessionSetCounts.get(exerciseId) ?? 0
-          if (count > 1) addedSets += count - 1
-          if (count < 1) removedSets += 1 - count
+          const baselineCount = templateBaselineSetCounts.get(exerciseId) ?? 1
+          const sessionCount = sessionSetCounts.get(exerciseId) ?? 0
+          if (sessionCount > baselineCount) addedSets += sessionCount - baselineCount
+          if (sessionCount < baselineCount) removedSets += baselineCount - sessionCount
         }
 
         return { addedExerciseIds, removedExerciseIds, addedSets, removedSets }
@@ -538,6 +636,7 @@ export const WorkoutStoreModel = types
           if (!template) throw new Error("Invalid templateId")
 
           template.exerciseIds = cast(session.exercises.map((we) => we.exerciseId))
+          template.exercises = cast(buildTemplateExercisesFromSession(session))
           template.lastUsedAt = new Date()
 
           self.lastError = undefined

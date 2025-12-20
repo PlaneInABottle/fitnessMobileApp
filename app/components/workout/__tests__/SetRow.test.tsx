@@ -42,6 +42,21 @@ describe("SetRow", () => {
     expect(getByLabelText("Reps").props.value).toBe("")
   })
 
+  it("allows clearing numeric input while focused and coerces on blur", () => {
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 12, reps: 5 }} />,
+    )
+
+    const kgInput = getByLabelText("Kg")
+
+    fireEvent(kgInput, "focus")
+    fireEvent.changeText(kgInput, "")
+    expect(getByLabelText("Kg").props.value).toBe("")
+
+    fireEvent(kgInput, "blur")
+    expect(getByLabelText("Kg").props.value).toBe("0")
+  })
+
   it("shows Kg/Reps as 0 when set is done and untouched", () => {
     const { getByLabelText } = render(
       <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} isDone />,
