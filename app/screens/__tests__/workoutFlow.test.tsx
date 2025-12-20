@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { render, fireEvent, waitFor } from "@testing-library/react-native"
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native"
+import { Alert } from "react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
@@ -160,5 +161,52 @@ describe("Workout MVP flow", () => {
       Array.from(store.workoutStore.templates.values()).some((t: any) => t.name === "Upper A"),
     ).toBe(true)
     expect(store.workoutStore.sessionHistory.length).toBe(1)
+  })
+
+  it("template completion triggers update Alert", async () => {
+    const store = RootStoreModel.create({})
+    const templateId = store.workoutStore.createTemplate("Template A", ["bench-press"])!
+
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
+
+    try {
+      const { getByText, getByPlaceholderText, getAllByLabelText } = renderWorkoutFlowWithStore(store)
+
+      fireEvent.press(getByText("Start Routine"))
+
+      await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+      fireEvent.press(getByText("+ Egzersiz Ekle"))
+      await waitFor(() => expect(getByText("Egzersiz Ekle")).toBeTruthy())
+
+      fireEvent.changeText(getByPlaceholderText("Search exercises"), "squat")
+      await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
+      fireEvent.press(getAllByLabelText("Add exercise")[0])
+
+      await waitFor(() => expect(getByText("Squat")).toBeTruthy())
+
+      fireEvent.press(getByText("Bitir"))
+      await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
+
+      fireEvent.press(getByText("Bitti"))
+
+      await waitFor(() => expect(alertSpy).toHaveBeenCalled())
+
+      const [title, message, buttons] = alertSpy.mock.calls[0]
+      expect(title).toBe("Şablonu güncelle?")
+      expect(message).toContain("Egzersiz: +1 / -0")
+      expect(message).toContain("Set: +1 / -0")
+
+      const updateButton = (buttons as any[]).find((b) => b.text === "Güncelle")
+      await act(async () => {
+        updateButton?.onPress?.()
+      })
+
+      await waitFor(() => expect(getByText("Rutinler")).toBeTruthy())
+
+      expect(store.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
+    } finally {
+      alertSpy.mockRestore()
+    }
   })
 })

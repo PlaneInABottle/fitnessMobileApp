@@ -90,6 +90,7 @@ export const WorkoutSessionModel = types.model("WorkoutSession", {
   exercises: types.optional(types.array(WorkoutExerciseModel), []),
   startedAt: types.Date,
   completedAt: types.maybe(types.Date),
+  templateId: types.maybe(types.string),
 })
 
 export interface WorkoutSession extends Instance<typeof WorkoutSessionModel> {}
@@ -234,6 +235,7 @@ export const WorkoutStoreModel = types
 
       self.currentSession = cast({
         id: generateId(),
+        templateId,
         exercises: [],
         startedAt: new Date(),
       })
@@ -470,6 +472,74 @@ export const WorkoutStoreModel = types
         try {
           if (!self.currentSession) throw new Error("No active session")
           self.currentSession = undefined
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      getTemplateUpdateSummary(
+        templateId: string,
+      ):
+        | {
+            addedExerciseIds: string[]
+            removedExerciseIds: string[]
+            addedSets: number
+            removedSets: number
+          }
+        | undefined {
+        const session = self.currentSession
+        const template = self.templates.get(templateId)
+        if (!session || !template) return undefined
+
+        const sessionExerciseIds = session.exercises.map((we) => we.exerciseId)
+        const templateExerciseIds = template.exerciseIds.slice()
+
+        const sessionSet = new Set(sessionExerciseIds)
+        const templateSet = new Set(templateExerciseIds)
+
+        const addedExerciseIds = Array.from(sessionSet).filter((id) => !templateSet.has(id))
+        const removedExerciseIds = Array.from(templateSet).filter((id) => !sessionSet.has(id))
+
+        const sessionSetCounts = new Map<string, number>()
+        for (const we of session.exercises) {
+          sessionSetCounts.set(we.exerciseId, (sessionSetCounts.get(we.exerciseId) ?? 0) + we.sets.length)
+        }
+
+        let addedSets = 0
+        let removedSets = 0
+
+        // Added exercises: baseline is 0 sets; count all session sets as added.
+        for (const exerciseId of addedExerciseIds) {
+          addedSets += sessionSetCounts.get(exerciseId) ?? 0
+        }
+
+        // Removed exercises: baseline is 1 set per exercise.
+        removedExerciseIds.forEach(() => {
+          removedSets += 1
+        })
+
+        // Exercises present in both: baseline is 1 set.
+        for (const exerciseId of Array.from(sessionSet).filter((id) => templateSet.has(id))) {
+          const count = sessionSetCounts.get(exerciseId) ?? 0
+          if (count > 1) addedSets += count - 1
+          if (count < 1) removedSets += 1 - count
+        }
+
+        return { addedExerciseIds, removedExerciseIds, addedSets, removedSets }
+      },
+
+      updateTemplateFromCurrentSession(templateId: string): boolean {
+        try {
+          const session = requireCurrentSession()
+          const template = self.templates.get(templateId)
+          if (!template) throw new Error("Invalid templateId")
+
+          template.exerciseIds = cast(session.exercises.map((we) => we.exerciseId))
+          template.lastUsedAt = new Date()
+
           self.lastError = undefined
           return true
         } catch (e) {

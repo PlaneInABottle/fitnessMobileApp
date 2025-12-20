@@ -1,5 +1,5 @@
 import { FC, useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { BackHandler, TextStyle, View, ViewStyle } from "react-native"
+import { Alert, BackHandler, TextStyle, View, ViewStyle } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
 
@@ -88,6 +88,44 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
     function handleDontSave() {
       workoutStore.clearError()
+
+      const templateId = session?.templateId
+      const summary = templateId ? workoutStore.getTemplateUpdateSummary(templateId) : undefined
+      const hasChanges =
+        !!summary &&
+        (summary.addedExerciseIds.length > 0 ||
+          summary.removedExerciseIds.length > 0 ||
+          summary.addedSets > 0 ||
+          summary.removedSets > 0)
+
+      if (templateId && hasChanges) {
+        Alert.alert(
+          "Şablonu güncelle?",
+          `Egzersiz: +${summary!.addedExerciseIds.length} / -${summary!.removedExerciseIds.length}\nSet: +${summary!.addedSets} / -${summary!.removedSets}`,
+          [
+            { text: "İptal", style: "cancel" },
+            {
+              text: "Atla",
+              style: "default",
+              onPress: () => {
+                const ok = workoutStore.completeSession()
+                if (ok) navigation.popToTop()
+              },
+            },
+            {
+              text: "Güncelle",
+              style: "default",
+              onPress: () => {
+                workoutStore.updateTemplateFromCurrentSession(templateId)
+                const ok = workoutStore.completeSession()
+                if (ok) navigation.popToTop()
+              },
+            },
+          ],
+        )
+        return
+      }
+
       const ok = workoutStore.completeSession()
       if (ok) navigation.popToTop()
     }

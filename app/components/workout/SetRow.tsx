@@ -220,7 +220,7 @@ export function SetRow({
     if (isDone) {
       return {
         ...base,
-        backgroundColor: colors.success,
+        backgroundColor: colors.warningBackground,
       }
     }
 
@@ -291,7 +291,7 @@ export function SetRow({
       <View style={$previousCell}>
         <Text
           text={formatPrevious()}
-          style={[themed($previousText), isDone && { color: "#FFFFFF" }]}
+          style={[themed($previousText), isDone && { color: colors.text }]}
           numberOfLines={1}
         />
       </View>
@@ -401,7 +401,7 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: "#FFFFFF",
+  borderColor: colors.text,
   backgroundColor: "transparent",
 })
 
@@ -411,6 +411,6 @@ const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontWeight: "600",
 })
 
-const $doneTextDone: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
+const $doneTextDone: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
 })

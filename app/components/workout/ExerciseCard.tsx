@@ -96,9 +96,13 @@ export function ExerciseCard({
   )
 }
 
-const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xs,
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
   gap: spacing.sm,
+  borderBottomWidth: 1,
+  borderBottomColor: colors.separator,
 })
 
 const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({

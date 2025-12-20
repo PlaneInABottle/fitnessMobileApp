@@ -110,14 +110,19 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
               </Pressable>
             </View>
 
-            {/* Filter Pills */}
-            <View style={$pillsRow}>
-              <Pressable style={themed($pill)} onPress={() => navigation.navigate("CreateRoutine")}>
-                <Text weight="medium" size="sm" style={themed($pillText)}>
+            <Pressable
+              style={themed($newRoutineButton)}
+              onPress={() => navigation.navigate("CreateRoutine")}
+              accessibilityRole="button"
+            >
+              <View style={$newRoutineButtonContent}>
+                <Text style={themed($newRoutineEmoji)}>✨</Text>
+                <Text weight="semiBold" style={themed($newRoutineText)}>
                   Yeni Rutin
                 </Text>
-              </Pressable>
-            </View>
+                <Icon icon="caretRight" size={18} color={theme.colors.textDim} />
+              </View>
+            </Pressable>
 
             {/* Routine Cards */}
             {recentTemplates.length === 0 ? (
@@ -228,6 +233,7 @@ const $sectionHeader: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
+  marginBottom: 12,
 }
 
 const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -237,6 +243,28 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $addButton: ViewStyle = {
   padding: 4,
 }
+
+const $newRoutineButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  padding: spacing.md,
+  borderRadius: 12,
+})
+
+const $newRoutineButtonContent: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+}
+
+const $newRoutineEmoji: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  fontSize: 16,
+})
+
+const $newRoutineText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  flex: 1,
+})
 
 const $pillsRow: ViewStyle = {
   flexDirection: "row",

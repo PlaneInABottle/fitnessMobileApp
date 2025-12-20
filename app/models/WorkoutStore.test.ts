@@ -95,6 +95,7 @@ describe("WorkoutStore", () => {
 
     root.workoutStore.completeSession()
     root.workoutStore.startSessionFromTemplate(templateId!)
+    expect(root.workoutStore.currentSession?.templateId).toBe(templateId)
     expect(root.workoutStore.currentSession?.exercises.map((e) => e.exerciseId)).toEqual([
       "bench-press",
       "squat",
@@ -111,6 +112,20 @@ describe("WorkoutStore", () => {
     expect(squat?.sets?.[0].weight).toBe(0)
     expect(squat?.sets?.[0].reps).toBe(0)
 
+  })
+
+  it("can update a template from the current session", () => {
+    const root = RootStoreModel.create({})
+
+    const templateId = root.workoutStore.createTemplate("A", ["bench-press"])!
+
+    root.workoutStore.startSessionFromTemplate(templateId)
+    root.workoutStore.addExerciseToSession("squat")
+
+    const ok = root.workoutStore.updateTemplateFromCurrentSession(templateId)
+    expect(ok).toBe(true)
+
+    expect(root.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
   })
 
   it("tracks template lastUsedAt", () => {

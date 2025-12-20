@@ -258,20 +258,22 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
   },
 )
 
-const $scrollView: ThemedStyle<ViewStyle> = () => ({
+const $scrollView: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
+  backgroundColor: colors.background,
 })
 
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.md,
+  paddingTop: spacing.md,
+  paddingHorizontal: 0,
   gap: spacing.lg,
   paddingBottom: spacing.xl,
 })
 
 const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.card,
-  borderRadius: 12,
-  padding: spacing.md,
+  backgroundColor: colors.background,
+  borderRadius: 0,
+  padding: 0,
   gap: spacing.sm,
 })
 
