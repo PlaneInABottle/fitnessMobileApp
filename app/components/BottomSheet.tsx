@@ -6,6 +6,7 @@ import {
   BottomSheetView,
   type BottomSheetModal as BottomSheetModalT,
 } from "@gorhom/bottom-sheet"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -33,7 +34,10 @@ export interface BottomSheetProps {
  */
 export function BottomSheet(props: BottomSheetProps) {
   const { visible, onClose, title, children, style: $styleOverride, snapPoints: snapPointsProp } = props
-  const { themed } = useAppTheme()
+  const { theme, themed } = useAppTheme()
+  const insets = useSafeAreaInsets()
+  const bottomInset = insets.bottom
+  const paddingBottom = theme.spacing.lg + bottomInset
 
   const snapPoints = useMemo(() => snapPointsProp ?? ["50%"], [snapPointsProp])
   const bottomSheetRef = useRef<BottomSheetModalT>(null)
@@ -61,7 +65,7 @@ export function BottomSheet(props: BottomSheetProps) {
     return (
       <View style={themed($testOverlay)}>
         <Pressable testID="bottom-sheet-backdrop" style={themed($testBackdrop)} onPress={onClose} />
-        <View style={[themed($testContainer), $styleOverride]}>
+        <View style={[themed($testContainer), { paddingBottom }, $styleOverride]}>
           {title && (
             <View style={themed($titleContainer)}>
               <Text weight="bold" size="lg" style={themed($title)}>
@@ -79,6 +83,7 @@ export function BottomSheet(props: BottomSheetProps) {
     <BottomSheetModal
       ref={bottomSheetRef}
       snapPoints={snapPoints}
+      bottomInset={bottomInset}
       onDismiss={() => {
         if (visible) onClose()
       }}
@@ -87,7 +92,7 @@ export function BottomSheet(props: BottomSheetProps) {
       backgroundStyle={themed($background)}
       handleIndicatorStyle={themed($handleIndicator)}
     >
-      <BottomSheetView style={[themed($container), $styleOverride]}>
+      <BottomSheetView style={[themed($container), { paddingBottom }, $styleOverride]}>
         {title && (
           <View style={themed($titleContainer)}>
             <Text weight="bold" size="lg" style={themed($title)}>

@@ -42,13 +42,13 @@ describe("SetTypeIndicator", () => {
   })
 
   describe("working sets", () => {
-    it("displays N for working sets even when index is provided", () => {
+    it("displays the 1-based index for working sets when index is provided", () => {
       const { getByText } = renderSetTypeIndicator({
         type: "working",
         index: 1,
       })
 
-      expect(getByText("N")).toBeTruthy()
+      expect(getByText("1")).toBeTruthy()
     })
 
     it("displays N for working set without index", () => {

@@ -51,6 +51,21 @@ jest.mock("react-native-keyboard-controller", () => {
   }
 })
 
+jest.mock("react-native-safe-area-context", () => {
+  const actual = jest.requireActual("react-native-safe-area-context")
+
+  return {
+    ...actual,
+    useSafeAreaInsets: () => {
+      try {
+        return actual.useSafeAreaInsets()
+      } catch {
+        return { top: 0, bottom: 0, left: 0, right: 0 }
+      }
+    },
+  }
+})
+
 jest.mock("@gorhom/bottom-sheet", () => {
   const React = require("react")
   const { View } = require("react-native")

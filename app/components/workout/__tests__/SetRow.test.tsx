@@ -1,0 +1,67 @@
+import { useState } from "react"
+import { StyleSheet } from "react-native"
+import { NavigationContainer } from "@react-navigation/native"
+import { fireEvent, render } from "@testing-library/react-native"
+
+import type { SetData } from "@/models/SetStore"
+import { ThemeProvider } from "@/theme/context"
+
+import { SetRow } from "../SetRow"
+
+function Harness({ initialValue }: { initialValue: Partial<SetData> }) {
+  const [value, setValue] = useState<Partial<SetData>>(initialValue)
+
+  return (
+    <ThemeProvider>
+      <NavigationContainer>
+        <SetRow
+          category="STRENGTH"
+          mode="edit"
+          value={value}
+          allowEmptyNumbers={false}
+          onChange={(next) => setValue(next)}
+        />
+      </NavigationContainer>
+    </ThemeProvider>
+  )
+}
+
+describe("SetRow", () => {
+  it("shows Kg/Reps placeholders when values are 0 and untouched", () => {
+    const { getByLabelText } = render(<Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />)
+
+    expect(getByLabelText("Kg").props.value).toBe("")
+    expect(getByLabelText("Reps").props.value).toBe("")
+  })
+
+  it("shows entered styling after user types (including 0)", () => {
+    const { getByLabelText } = render(<Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />)
+
+    fireEvent.changeText(getByLabelText("Kg"), "0")
+
+    const kgInput = getByLabelText("Kg")
+    expect(kgInput.props.value).toBe("0")
+
+    const kgStyle = StyleSheet.flatten(kgInput.props.style)
+    expect(kgStyle.fontFamily).toBe("spaceGroteskBold")
+
+    fireEvent.changeText(getByLabelText("Reps"), "5")
+    const repsInput = getByLabelText("Reps")
+    expect(repsInput.props.value).toBe("5")
+  })
+
+  it("renders non-zero Kg/Reps values as entered (no placeholder)", () => {
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 100, reps: 5 }} />,
+    )
+
+    const kgInput = getByLabelText("Kg")
+    const repsInput = getByLabelText("Reps")
+
+    expect(kgInput.props.value).toBe("100")
+    expect(repsInput.props.value).toBe("5")
+
+    expect(StyleSheet.flatten(kgInput.props.style).fontFamily).toBe("spaceGroteskBold")
+    expect(StyleSheet.flatten(repsInput.props.style).fontFamily).toBe("spaceGroteskBold")
+  })
+})

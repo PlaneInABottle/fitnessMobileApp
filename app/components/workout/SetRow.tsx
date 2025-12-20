@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import {
   Pressable,
   // eslint-disable-next-line no-restricted-imports
@@ -108,6 +108,7 @@ export function SetRow({
   } = useAppTheme()
 
   const [field1, field2] = useMemo(() => getFields(category), [category])
+  const [localTouched, setLocalTouched] = useState<Partial<Record<EditableFieldKey, boolean>>>({})
 
   const setTypeId = (value?.setType as SetTypeId | undefined) ?? "working"
 
@@ -144,24 +145,31 @@ export function SetRow({
     if (mode === "edit") {
       if (!key || !onChange) return <View style={$cell} />
 
-      const isTouched = !!touched?.[key]
+      const isTouched = !!touched?.[key] || !!localTouched[key]
+      const isKgOrReps = key === "weight" || key === "reps"
+      const shouldShowPlaceholder = isKgOrReps && !isTouched && (current === 0 || current === undefined)
+      const inputValue = shouldShowPlaceholder ? "" : toText(current)
+      const hasEnteredValue = isKgOrReps ? (isTouched ? inputValue !== "" : current !== undefined && current !== 0) : false
       const isSuggested = !isTouched && current !== undefined
 
       return (
         <View style={$cell}>
           <TextInput
-            value={toText(current)}
+            value={inputValue}
             accessibilityLabel={field.label}
             placeholder={placeholders?.[key] ?? "0"}
             placeholderTextColor={colors.textDim}
             keyboardType="numeric"
-            onChangeText={(t) =>
+            onChangeText={(t) => {
+              setLocalTouched((prev) => ({ ...prev, [key]: true }))
               onChange({ ...value, [key]: toNumberOrUndefined(t, allowEmptyNumbers) }, key)
-            }
+            }}
             style={[
               themed($input),
-              isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
-              isTouched && { color: colors.text, fontFamily: typography.primary.bold },
+              isKgOrReps && !hasEnteredValue && { color: colors.textDim, fontFamily: typography.primary.medium },
+              isKgOrReps && hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
+              !isKgOrReps && isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
+              !isKgOrReps && isTouched && { color: colors.text, fontFamily: typography.primary.bold },
             ]}
           />
         </View>
