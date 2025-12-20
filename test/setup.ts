@@ -57,6 +57,9 @@ jest.mock("react-native-safe-area-context", () => {
   return {
     ...actual,
     useSafeAreaInsets: () => {
+      const override = (globalThis as any).__SAFE_AREA_INSETS__
+      if (override) return override
+
       try {
         return actual.useSafeAreaInsets()
       } catch {

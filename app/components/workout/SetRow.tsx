@@ -147,9 +147,21 @@ export function SetRow({
 
       const isTouched = !!touched?.[key] || !!localTouched[key]
       const isKgOrReps = key === "weight" || key === "reps"
-      const shouldShowPlaceholder = isKgOrReps && !isTouched && (current === 0 || current === undefined)
-      const inputValue = shouldShowPlaceholder ? "" : toText(current)
-      const hasEnteredValue = isKgOrReps ? (isTouched ? inputValue !== "" : current !== undefined && current !== 0) : false
+      const normalizedKgRepsCurrent =
+        isKgOrReps && typeof current === "number" && Number.isFinite(current) ? current : undefined
+
+      const shouldShowPlaceholder =
+        isKgOrReps && !isTouched && (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
+      const inputValue = shouldShowPlaceholder
+        ? ""
+        : isKgOrReps
+          ? toText(normalizedKgRepsCurrent)
+          : toText(current)
+      const hasEnteredValue = isKgOrReps
+        ? isTouched
+          ? inputValue !== ""
+          : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0
+        : false
       const isSuggested = !isTouched && current !== undefined
 
       return (

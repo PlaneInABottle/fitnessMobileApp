@@ -23,7 +23,7 @@ export interface SetOptionsBottomSheetProps {
 
 const SET_TYPE_OPTIONS: Omit<SetTypeOption, "color">[] = [
   { id: "warmup", letter: "W", label: "Isınma Seti" },
-  { id: "working", letter: "1", label: "Normal Set" },
+  { id: "working", letter: "#", label: "Normal Set" },
   { id: "failure", letter: "F", label: "Tükeniş Seti" },
   { id: "dropset", letter: "D", label: "Drop Set" },
   { id: "remove", letter: "X", label: "Seti Kaldır" },

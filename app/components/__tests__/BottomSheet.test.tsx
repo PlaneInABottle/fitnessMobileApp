@@ -25,6 +25,11 @@ describe("BottomSheet", () => {
 
   beforeEach(() => {
     mockOnClose.mockClear()
+    ;(globalThis as any).__SAFE_AREA_INSETS__ = undefined
+  })
+
+  afterEach(() => {
+    ;(globalThis as any).__SAFE_AREA_INSETS__ = undefined
   })
 
   describe("visibility", () => {
@@ -78,6 +83,29 @@ describe("BottomSheet", () => {
       fireEvent.press(getByTestId("bottom-sheet-backdrop"))
 
       expect(mockOnClose).toHaveBeenCalled()
+    })
+  })
+
+  describe("safe area", () => {
+    it("adds bottom inset padding to avoid overlapping system UI", () => {
+      ;(globalThis as any).__SAFE_AREA_INSETS__ = { top: 0, bottom: 20, left: 0, right: 0 }
+
+      const { toJSON } = renderBottomSheet({
+        visible: true,
+        onClose: mockOnClose,
+      })
+
+      function hasPaddingBottom(node: any, paddingBottom: number): boolean {
+        if (!node) return false
+        const style = node.props?.style
+        const styles = Array.isArray(style) ? style : style ? [style] : []
+        if (styles.some((s) => s && typeof s === "object" && (s as any).paddingBottom === paddingBottom)) return true
+        const children = node.children ?? []
+        return children.some((c: any) => (typeof c === "object" ? hasPaddingBottom(c, paddingBottom) : false))
+      }
+
+      // spacing.lg (24) + bottom inset (20)
+      expect(hasPaddingBottom(toJSON(), 44)).toBe(true)
     })
   })
 
