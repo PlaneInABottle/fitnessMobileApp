@@ -153,7 +153,11 @@ export function SetRow({
       const normalizedKgRepsCurrent =
         isKgOrReps && typeof current === "number" && Number.isFinite(current) ? current : undefined
 
-      const shouldForceDoneZero = !!isDone && isKgOrReps && !isTouched && normalizedKgRepsCurrent === 0
+      const shouldForceDoneZero =
+        !!isDone &&
+        isKgOrReps &&
+        !isTouched &&
+        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
 
       const shouldShowPlaceholder =
         isKgOrReps &&
@@ -161,10 +165,10 @@ export function SetRow({
         !isTouched &&
         (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
 
-      const inputValue = shouldForceDoneZero
-        ? "0"
-        : shouldShowPlaceholder
-          ? ""
+      const inputValue = shouldShowPlaceholder
+        ? ""
+        : shouldForceDoneZero
+          ? "0"
           : isKgOrReps
             ? toText(normalizedKgRepsCurrent)
             : toText(current)
@@ -208,24 +212,24 @@ export function SetRow({
   }
 
   const rowStyle: ThemedStyle<ViewStyle> = ({ colors }) => {
-    if (isDone) {
-      return {
-        backgroundColor: colors.palette.success100,
-        borderRadius: 6,
-        paddingVertical: 6,
-      }
-    }
     if (typeof rowIndex === "number") {
       return {
         backgroundColor: rowIndex % 2 === 0 ? colors.palette.neutral100 : colors.palette.neutral200,
         borderRadius: 6,
-        paddingVertical: 6,
+        paddingVertical: 10,
+      }
+    }
+    if (mode === "completed" && typeof index === "number") {
+      return {
+        backgroundColor: index % 2 === 0 ? colors.palette.neutral100 : colors.palette.neutral200,
+        borderRadius: 6,
+        paddingVertical: 10,
       }
     }
     return {
       backgroundColor: "transparent",
       borderRadius: 6,
-      paddingVertical: 6,
+      paddingVertical: 10,
     }
   }
 
