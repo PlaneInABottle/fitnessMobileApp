@@ -58,14 +58,12 @@
 - `app/components/workout/SetRow.tsx`
 
 **Steps / Code changes (minimal):**
-1. Update `rowStyle` when `isDone` (currently `backgroundColor: colors.success` around lines ~220–224) to use an orange-ish color:
-   - Recommended: `backgroundColor: colors.warning` (existing theme key).
-2. Ensure done checkbox remains distinct:
-   - Update `$doneButtonDone` to use a dark border on the orange background (instead of white):
-     - `borderColor: "#000000"`
-   - Update `$doneTextDone` to black:
-     - `color: "#000000"`
-   - Update `previousValue` text color override (currently `isDone && { color: "#FFFFFF" }` around line ~294) to black for contrast.
+1. Update `rowStyle` when `isDone` (currently `backgroundColor: colors.success` around lines ~220–224) to use an orange-ish color **that’s not green** and keeps numbers readable:
+   - Recommended: `backgroundColor: colors.warningBackground`.
+2. Ensure the done checkbox remains distinct on both light/dark themes:
+   - Update `$doneButtonDone` borderColor to `colors.text` (instead of hard-coded white).
+   - Update `$doneTextDone` color to `colors.text`.
+   - Update `previousValue` text color override (currently `isDone && { color: "#FFFFFF" }`) to `colors.text`.
 
 **Notes (KISS/YAGNI):**
 - No new theme keys required; reuse `colors.warning`.
@@ -83,20 +81,20 @@
 
 **Steps / Code changes:**
 1. In `ActiveWorkoutScreen.tsx`:
-   - Change `$content` (currently `padding: spacing.md`) to remove horizontal insets:
+   - Change `$content` (currently `padding: spacing.md`) to remove horizontal insets so sections touch screen edges:
      - `paddingHorizontal: 0`
-     - keep vertical padding via `paddingTop`/`paddingBottom` so spacing remains.
-   - Update `$exerciseSection` to remove inset-card feel:
+     - keep vertical padding via `paddingTop`/`paddingBottom`.
+   - Update `$exerciseSection` to be full-width with a **black section top**:
      - set `borderRadius: 0`
      - set `padding: 0`
-     - keep `backgroundColor: colors.card` (gray-ish) so it fills full width.
-   - Set `$scrollView` background explicitly to `colors.background` to ensure the “section top background” is dark/black (in dark theme):
-     - add `backgroundColor: colors.background`.
+     - set `backgroundColor: colors.background` (true black in dark theme).
+   - Set `$scrollView` background explicitly to `colors.background`.
 2. In `ExerciseCard.tsx`:
-   - Update `$container` to have a background and internal padding so header area reads as a card and fills width:
-     - `backgroundColor: colors.card`
-     - `paddingHorizontal: spacing.md`
-     - `paddingTop/paddingBottom` (reuse existing spacing; keep minimal)
+   - Update `$container` so the exercise header area is also black and full-width:
+     - `backgroundColor: colors.background`
+     - add `paddingHorizontal: spacing.md`
+     - add `paddingTop/paddingBottom` (reuse existing spacing)
+   - (Optional) add a subtle bottom separator using `colors.separator` to distinguish header from set rows.
 
 **Validation:**
 - Manual: ActiveWorkout screen shows full-width sections without left/right gaps.
@@ -147,34 +145,31 @@ In `WorkoutCompleteScreen.tsx`:
 1. Detect template-session:
    - `const templateId = session?.templateId`
    - `const summary = templateId ? workoutStore.getTemplateUpdateSummary(templateId) : undefined`
-2. When `summary` exists:
-   - Show a new card section above the final action buttons:
+2. When user tries to finish (presses the existing “Bitti” button) and `summary` exists with any non-zero change:
+   - Show a modal prompt via `Alert.alert(...)`:
      - Title: `"Şablonu güncelle?"`
-     - Subtitle: `"Bu antrenmanda şablona göre değişiklik yaptın:"`
-     - Summary lines (simple + testable):
+     - Message (simple + readable):
        - `Egzersiz: +{added} / -{removed}`
        - `Set: +{addedSets} / -{removedSets}`
      - Buttons:
-       - Primary: `"Şablonu Güncelle"` → calls `updateTemplateFromCurrentSession(templateId)` then `completeSession()` and navigates home.
-       - Secondary: `"Bitti"` → current behavior (`completeSession()` then navigate home).
+       - `"İptal"` (cancel, stays on screen)
+       - `"Atla"` → `workoutStore.completeSession()` then navigate home
+       - `"Güncelle"` → `workoutStore.updateTemplateFromCurrentSession(templateId)` then `completeSession()` then navigate home
 3. Preserve existing “Şablon Olarak Kaydet” flow for **non-template** sessions exactly as today.
 
 **Behavior rules:**
-- If templateId exists but template missing (deleted): fall back to existing non-template UI (save as new template / done).
-- If summary has all zeros, either:
-  - hide the update section (simplest), OR
-  - show it but disable “Şablonu Güncelle” (optional); prefer hide for minimal UI.
+- If templateId exists but template missing: fall back to existing non-template completion behavior.
+- If summary is all zeros: skip the prompt and just complete like today.
 
 #### 3.4 Tests (update/add)
 1. `app/models/WorkoutStore.test.ts`:
-   - Add assertion that `startSessionFromTemplate(templateId)` sets `currentSession.templateId === templateId`.
-   - Add a new test for `updateTemplateFromCurrentSession`:
-     - Start from template with `exerciseIds=[A]`, add exercise `B` to session, call update, assert template.exerciseIds becomes `[A,B]`.
+   - Assert that `startSessionFromTemplate(templateId)` sets `currentSession.templateId === templateId`.
+   - Add a test for `updateTemplateFromCurrentSession` updating `template.exerciseIds` to match session.
 2. `app/screens/__tests__/workoutFlow.test.tsx`:
-   - Add a new test: “template completion offers update prompt”
-     - Create template, start session from template, add another exercise, navigate to complete screen.
-     - Assert texts: `Şablonu güncelle?`, `Egzersiz: +1 / -0`.
-     - Press `Şablonu Güncelle` and assert template updated in store.
+   - Add a test: “template completion triggers update Alert”
+     - Render flow: start from template, add an exercise, navigate to complete screen.
+     - Spy on `Alert.alert` and assert it was called with title `"Şablonu güncelle?"` and expected summary text.
+     - Invoke the Alert button handler for `"Güncelle"` and assert template was updated.
 
 ---
 
