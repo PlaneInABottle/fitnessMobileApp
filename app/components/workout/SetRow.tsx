@@ -289,7 +289,11 @@ export function SetRow({
 
       {/* Previous Value */}
       <View style={$previousCell}>
-        <Text text={formatPrevious()} style={themed($previousText)} numberOfLines={1} />
+        <Text
+          text={formatPrevious()}
+          style={[themed($previousText), isDone && { color: "#FFFFFF" }]}
+          numberOfLines={1}
+        />
       </View>
 
       {/* Field 1 (Weight/Time) */}
