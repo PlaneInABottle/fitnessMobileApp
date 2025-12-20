@@ -227,14 +227,15 @@ export function SetRow({
     if (typeof rowIndex === "number") {
       return {
         ...base,
-        backgroundColor: rowIndex % 2 === 0 ? colors.card : colors.cardSecondary,
+        // Always keep workout rows on a solid dark surface (per UX spec).
+        backgroundColor: rowIndex % 2 === 0 ? "#000000" : "#1C1C1E",
       }
     }
 
     if (mode === "completed" && typeof index === "number") {
       return {
         ...base,
-        backgroundColor: index % 2 === 0 ? colors.card : colors.cardSecondary,
+        backgroundColor: index % 2 === 0 ? "#000000" : "#1C1C1E",
       }
     }
 
@@ -394,8 +395,8 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.success,
-  backgroundColor: colors.success,
+  borderColor: "#FFFFFF",
+  backgroundColor: "transparent",
 })
 
 const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
