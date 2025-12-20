@@ -23,7 +23,7 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
   return (
     <View style={themed($container)}>
       <View style={themed($headerSection)}>
-        <Text text="workout continues" weight="semiBold" size="sm" style={themed($titleText)} />
+        <Text text="Devam Eden Antrenman" weight="semiBold" size="sm" style={themed($titleText)} />
       </View>
 
       <View style={themed($actions)}>
