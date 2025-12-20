@@ -402,6 +402,11 @@ export const WorkoutStoreModel = types
         }
       },
 
+      buildDefaultSetData(exerciseId: string): Partial<SetData> {
+        const root = getAttachedRoot()
+        return buildDefaultWorkingSetData(exerciseId, root)
+      },
+
       addSetToWorkoutExercise(workoutExerciseId: string, setData: Partial<SetData>): boolean {
         try {
           addSetToWorkoutExerciseUnsafe(workoutExerciseId, setData)

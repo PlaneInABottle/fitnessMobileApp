@@ -105,18 +105,9 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       )
     }
 
-    function buildDefaultSetData(exerciseId: string): Partial<SetData> {
-      const required = exerciseStore.getRequiredFieldsForExercise(exerciseId)
-      const base: Partial<SetData> = { setType: "working" }
-      required.forEach((k) => {
-        ;(base as any)[k] = 0
-      })
-      return base
-    }
-
     function handleAddSet(workoutExerciseId: string, exerciseId: string) {
       workoutStore.clearError()
-      workoutStore.addSetToWorkoutExercise(workoutExerciseId, buildDefaultSetData(exerciseId))
+      workoutStore.addSetToWorkoutExercise(workoutExerciseId, workoutStore.buildDefaultSetData(exerciseId))
     }
 
     return (

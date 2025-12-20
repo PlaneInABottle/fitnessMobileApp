@@ -48,7 +48,7 @@ describe("WorkoutStore", () => {
     expect(placeholders.weight).toBe("100")
     expect(placeholders.reps).toBe("5")
 
-    // New session starts with no prefilled sets; UI can offer suggestions from memory after a set is completed.
+    // New session starts with a default working set; UI can offer suggestions from memory after a set is completed.
     jest.setSystemTime(new Date("2025-01-01T00:01:00Z"))
     root.workoutStore.startNewSession()
     const we2 = root.workoutStore.addExerciseToSession("bench-press")
@@ -59,6 +59,24 @@ describe("WorkoutStore", () => {
     expect(sets?.[0].setType).toBe("working")
     expect(sets?.[0].weight).toBe(0)
     expect(sets?.[0].reps).toBe(0)
+  })
+
+  it("creates default sets for non-strength exercises", () => {
+    const root = RootStoreModel.create({})
+
+    root.workoutStore.startNewSession()
+
+    const pullupId = root.workoutStore.addExerciseToSession("pull-up")!
+    const pullupSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === pullupId)?.sets
+    expect(pullupSets).toHaveLength(1)
+    expect(pullupSets?.[0].setType).toBe("working")
+    expect(pullupSets?.[0].reps).toBe(0)
+
+    const plankId = root.workoutStore.addExerciseToSession("plank")!
+    const plankSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === plankId)?.sets
+    expect(plankSets).toHaveLength(1)
+    expect(plankSets?.[0].setType).toBe("working")
+    expect(plankSets?.[0].time).toBe(0)
   })
 
   it("creates a template from a session and can start a session from it", () => {
@@ -92,6 +110,7 @@ describe("WorkoutStore", () => {
     expect(squat?.sets?.[0].setType).toBe("working")
     expect(squat?.sets?.[0].weight).toBe(0)
     expect(squat?.sets?.[0].reps).toBe(0)
+
   })
 
   it("tracks template lastUsedAt", () => {
