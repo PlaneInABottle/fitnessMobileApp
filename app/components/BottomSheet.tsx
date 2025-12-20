@@ -56,7 +56,7 @@ export function BottomSheet(props: BottomSheetProps) {
     [],
   )
 
-  if (global.__TEST__) {
+  if (globalThis.__TEST__) {
     if (!visible) return null
     return (
       <View style={themed($testOverlay)}>
@@ -79,7 +79,9 @@ export function BottomSheet(props: BottomSheetProps) {
     <BottomSheetModal
       ref={bottomSheetRef}
       snapPoints={snapPoints}
-      onDismiss={onClose}
+      onDismiss={() => {
+        if (visible) onClose()
+      }}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
       backgroundStyle={themed($background)}
