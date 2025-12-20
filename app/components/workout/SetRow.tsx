@@ -211,7 +211,7 @@ export function SetRow({
     )
   }
 
-  const rowStyle: ThemedStyle<ViewStyle> = ({ colors }) => {
+  const rowStyle: ThemedStyle<ViewStyle> = ({ colors, isDark }) => {
     const base = {
       borderRadius: 6,
       paddingVertical: 10,
@@ -224,18 +224,20 @@ export function SetRow({
       }
     }
 
+    const evenBg = isDark ? colors.palette.neutral100 : colors.card
+    const oddBg = isDark ? colors.palette.neutral200 : colors.cardSecondary
+
     if (typeof rowIndex === "number") {
       return {
         ...base,
-        // Always keep workout rows on a solid dark surface (per UX spec).
-        backgroundColor: rowIndex % 2 === 0 ? "#000000" : "#1C1C1E",
+        backgroundColor: rowIndex % 2 === 0 ? evenBg : oddBg,
       }
     }
 
     if (mode === "completed" && typeof index === "number") {
       return {
         ...base,
-        backgroundColor: index % 2 === 0 ? "#000000" : "#1C1C1E",
+        backgroundColor: index % 2 === 0 ? evenBg : oddBg,
       }
     }
 
