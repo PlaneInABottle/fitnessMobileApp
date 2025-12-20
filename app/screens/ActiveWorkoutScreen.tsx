@@ -173,30 +173,38 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                     <View style={themed($setsContainer)}>
                       <SetRow category={exercise.category} mode="header" />
 
-                      {we.sets.map((s, idx) => (
-                        <SetRow
-                          key={s.id}
-                          category={exercise.category}
-                          mode="edit"
-                          availableSetTypes={availableSetTypes}
-                          allowEmptyNumbers={false}
-                          index={idx + 1}
-                          isDone={!!doneSetIds[s.id]}
-                          onPressSetType={() =>
-                            handleOpenSetOptions(we.id, s.id, s.setType as SetTypeId)
-                          }
-                          onChange={(next) => handleUpdateSet(we.id, s.id, next)}
-                          onDone={() => handleToggleDone(s.id)}
-                          doneButtonLabel="Toggle done"
-                          value={{
-                            setType: s.setType,
-                            weight: s.weight,
-                            reps: s.reps,
-                            time: s.time,
-                            distance: s.distance,
-                          }}
-                        />
-                      ))}
+                      {(() => {
+                        let workingIndex = 0
+
+                        return we.sets.map((s) => {
+                          const setType = (s.setType as SetTypeId | undefined) ?? "working"
+                          const isWorking = setType === "working"
+                          const displayIndex = isWorking ? ++workingIndex : undefined
+
+                          return (
+                            <SetRow
+                              key={s.id}
+                              category={exercise.category}
+                              mode="edit"
+                              availableSetTypes={availableSetTypes}
+                              allowEmptyNumbers={false}
+                              index={displayIndex}
+                              isDone={!!doneSetIds[s.id]}
+                              onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
+                              onChange={(next) => handleUpdateSet(we.id, s.id, next)}
+                              onDone={() => handleToggleDone(s.id)}
+                              doneButtonLabel="Toggle done"
+                              value={{
+                                setType: s.setType,
+                                weight: s.weight,
+                                reps: s.reps,
+                                time: s.time,
+                                distance: s.distance,
+                              }}
+                            />
+                          )
+                        })
+                      })()}
 
                       <Button
                         text="+ Set Ekle"
