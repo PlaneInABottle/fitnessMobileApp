@@ -179,7 +179,9 @@ export function SetRow({
 
       const hasEnteredValue = isKgOrReps
         ? shouldForceDoneZero ||
-          (isTouched ? inputValue !== "" : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0)
+          (isTouched
+            ? inputValue !== ""
+            : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0)
         : false
       const isSuggested = !isTouched && current !== undefined
 
@@ -235,10 +237,17 @@ export function SetRow({
             }}
             style={[
               themed($input),
-              isKgOrReps && !hasEnteredValue && { color: colors.textDim, fontFamily: typography.primary.medium },
-              isKgOrReps && hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
-              !isKgOrReps && isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
-              !isKgOrReps && isTouched && { color: colors.text, fontFamily: typography.primary.bold },
+              isKgOrReps &&
+                !hasEnteredValue && {
+                  color: colors.textDim,
+                  fontFamily: typography.primary.medium,
+                },
+              isKgOrReps &&
+                hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
+              !isKgOrReps &&
+                isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
+              !isKgOrReps &&
+                isTouched && { color: colors.text, fontFamily: typography.primary.bold },
               shouldForceDoneZero && { color: colors.text, fontFamily: typography.primary.bold },
             ]}
           />

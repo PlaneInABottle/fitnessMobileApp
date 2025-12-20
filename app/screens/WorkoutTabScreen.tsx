@@ -186,7 +186,6 @@ const $headerTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-
 const $settingsButton: ViewStyle = {
   padding: 8,
 }
@@ -264,22 +263,6 @@ const $newRoutineEmoji: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $newRoutineText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   flex: 1,
-})
-
-const $pillsRow: ViewStyle = {
-  flexDirection: "row",
-  gap: 8,
-}
-
-const $pill: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.xs,
-  borderRadius: 16,
-  backgroundColor: colors.cardSecondary,
-})
-
-const $pillText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
 })
 
 const $emptyRoutines: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({

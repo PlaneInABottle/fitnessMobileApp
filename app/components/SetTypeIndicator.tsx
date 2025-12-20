@@ -32,7 +32,8 @@ export function SetTypeIndicator(props: SetTypeIndicatorProps) {
   const { type, index, style: $styleOverride } = props
   const { themed, getSetTypeColor } = useAppTheme()
 
-  const displayText = type === "working" && typeof index === "number" ? String(index) : SET_TYPE_LETTERS[type]
+  const displayText =
+    type === "working" && typeof index === "number" ? String(index) : SET_TYPE_LETTERS[type]
 
   const color = getSetTypeColor(type)
 

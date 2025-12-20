@@ -95,7 +95,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         const exercise = session?.exercises.find((e) => e.id === workoutExerciseId)
         const set = exercise?.sets.find((s) => s.id === setId)
 
-        next[setId] = set?.weight !== undefined && set?.reps !== undefined ? set.weight * set.reps : 0
+        next[setId] =
+          set?.weight !== undefined && set?.reps !== undefined ? set.weight * set.reps : 0
         return next
       })
     }
@@ -134,7 +135,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
     function handleAddSet(workoutExerciseId: string, exerciseId: string) {
       workoutStore.clearError()
-      workoutStore.addSetToWorkoutExercise(workoutExerciseId, workoutStore.buildDefaultSetData(exerciseId))
+      workoutStore.addSetToWorkoutExercise(
+        workoutExerciseId,
+        workoutStore.buildDefaultSetData(exerciseId),
+      )
     }
 
     return (

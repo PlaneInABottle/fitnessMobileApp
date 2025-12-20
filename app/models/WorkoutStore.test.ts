@@ -18,7 +18,9 @@ describe("WorkoutStore", () => {
     const workoutExerciseId = root.workoutStore.addExerciseToSession("bench-press")
     expect(workoutExerciseId).toBeDefined()
 
-    const defaultSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === workoutExerciseId!)?.sets
+    const defaultSets = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.id === workoutExerciseId!,
+    )?.sets
     expect(defaultSets).toHaveLength(1)
     expect(defaultSets?.[0].setType).toBe("working")
     expect(defaultSets?.[0].weight).toBe(0)
@@ -67,13 +69,17 @@ describe("WorkoutStore", () => {
     root.workoutStore.startNewSession()
 
     const pullupId = root.workoutStore.addExerciseToSession("pull-up")!
-    const pullupSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === pullupId)?.sets
+    const pullupSets = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.id === pullupId,
+    )?.sets
     expect(pullupSets).toHaveLength(1)
     expect(pullupSets?.[0].setType).toBe("working")
     expect(pullupSets?.[0].reps).toBe(0)
 
     const plankId = root.workoutStore.addExerciseToSession("plank")!
-    const plankSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === plankId)?.sets
+    const plankSets = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.id === plankId,
+    )?.sets
     expect(plankSets).toHaveLength(1)
     expect(plankSets?.[0].setType).toBe("working")
     expect(plankSets?.[0].time).toBe(0)
@@ -113,7 +119,9 @@ describe("WorkoutStore", () => {
       "squat",
     ])
 
-    const bench = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    const bench = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.exerciseId === "bench-press",
+    )
     const squat = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "squat")
     expect(bench?.sets).toHaveLength(1)
     expect(bench?.sets?.[0].setType).toBe("working")
@@ -123,7 +131,6 @@ describe("WorkoutStore", () => {
     expect(squat?.sets?.[0].setType).toBe("working")
     expect(squat?.sets?.[0].weight).toBe(0)
     expect(squat?.sets?.[0].reps).toBe(0)
-
   })
 
   it("can update a template from the current session", () => {
@@ -137,7 +144,10 @@ describe("WorkoutStore", () => {
     const ok = root.workoutStore.updateTemplateFromCurrentSession(templateId)
     expect(ok).toBe(true)
 
-    expect(root.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
+    expect(root.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual([
+      "bench-press",
+      "squat",
+    ])
   })
 
   it("persists sets when creating and updating templates from session", () => {
@@ -146,7 +156,8 @@ describe("WorkoutStore", () => {
     root.workoutStore.startNewSession()
     const weId = root.workoutStore.addExerciseToSession("bench-press")!
 
-    const firstSetId = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0].id
+    const firstSetId = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)
+      ?.sets?.[0].id
     expect(firstSetId).toBeDefined()
 
     root.workoutStore.updateSetInWorkoutExercise(weId, firstSetId!, { weight: 100, reps: 5 })
@@ -155,25 +166,35 @@ describe("WorkoutStore", () => {
     const templateId = root.workoutStore.createTemplateFromSession("Bench")!
 
     const templateBefore = root.workoutStore.templates.get(templateId)
-    expect(templateBefore?.exercises.find((e) => e.exerciseId === "bench-press")?.sets).toHaveLength(2)
+    expect(
+      templateBefore?.exercises.find((e) => e.exerciseId === "bench-press")?.sets,
+    ).toHaveLength(2)
 
     root.workoutStore.completeSession()
     root.workoutStore.startSessionFromTemplate(templateId)
 
-    const bench1 = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    const bench1 = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.exerciseId === "bench-press",
+    )
     expect(bench1?.sets).toHaveLength(2)
     expect(bench1?.sets?.[0].weight).toBe(100)
     expect(bench1?.sets?.[0].reps).toBe(5)
     expect(bench1?.sets?.[1].weight).toBe(50)
     expect(bench1?.sets?.[1].reps).toBe(10)
 
-    root.workoutStore.addSetToWorkoutExercise(bench1!.id, { setType: "working", weight: 120, reps: 3 })
+    root.workoutStore.addSetToWorkoutExercise(bench1!.id, {
+      setType: "working",
+      weight: 120,
+      reps: 3,
+    })
     expect(root.workoutStore.updateTemplateFromCurrentSession(templateId)).toBe(true)
 
     root.workoutStore.completeSession()
     root.workoutStore.startSessionFromTemplate(templateId)
 
-    const bench2 = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    const bench2 = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.exerciseId === "bench-press",
+    )
     expect(bench2?.sets).toHaveLength(3)
     expect(bench2?.sets?.[0].weight).toBe(100)
     expect(bench2?.sets?.[0].reps).toBe(5)

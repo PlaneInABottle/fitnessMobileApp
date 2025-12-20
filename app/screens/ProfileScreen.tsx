@@ -64,7 +64,6 @@ export const ProfileScreen: FC<ProfileStackScreenProps<"ProfileTab">> = observer
             </Text>
           </View>
 
-
           {/* Settings List */}
           <View style={themed($settingsSection)}>
             <Text weight="semiBold" size="lg" style={themed($sectionTitle)}>
@@ -133,7 +132,6 @@ const $userName: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $userEmail: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
-
 
 const $settingsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.md,

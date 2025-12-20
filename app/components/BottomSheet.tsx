@@ -33,7 +33,14 @@ export interface BottomSheetProps {
  * NOTE: In tests we render a simplified version for deterministic assertions.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { visible, onClose, title, children, style: $styleOverride, snapPoints: snapPointsProp } = props
+  const {
+    visible,
+    onClose,
+    title,
+    children,
+    style: $styleOverride,
+    snapPoints: snapPointsProp,
+  } = props
   const { theme, themed } = useAppTheme()
   const insets = useSafeAreaInsets()
   const bottomInset = insets.bottom

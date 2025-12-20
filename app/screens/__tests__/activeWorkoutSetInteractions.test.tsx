@@ -35,8 +35,8 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     store.workoutStore.startNewSession()
     const weId = store.workoutStore.addExerciseToSession("bench-press")!
 
-    const defaultSetId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0]
-      ?.id
+    const defaultSetId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)
+      ?.sets?.[0]?.id
     expect(defaultSetId).toBeDefined()
     store.workoutStore.deleteSetFromWorkoutExercise(weId, defaultSetId!)
 

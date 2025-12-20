@@ -43,7 +43,6 @@ const palette = {
   error500: "#FF453A",
   errorDark: "#FF3B30",
 
-
   // Overlays
   overlay20: "rgba(0, 0, 0, 0.2)",
   overlay50: "rgba(0, 0, 0, 0.5)",
@@ -94,5 +93,4 @@ export const colors = {
 
   // Set type colors (exposed at top level for convenience)
   setTypeColors,
-
 } as const

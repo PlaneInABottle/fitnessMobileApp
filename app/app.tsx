@@ -19,12 +19,13 @@ if (__DEV__) {
 import "./utils/gestureHandler"
 
 import { useEffect, useState } from "react"
+import { StyleSheet } from "react-native"
 import { useFonts } from "expo-font"
 import * as Linking from "expo-linking"
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
-import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 
 import { initI18n } from "./i18n"
 import { RootStoreProvider, useInitialRootStore } from "./models"
@@ -99,7 +100,7 @@ export function App() {
   // otherwise, we're ready to render the app
   return (
     <RootStoreProvider value={rootStore}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={styles.gestureHandlerRoot}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <KeyboardProvider>
             <ThemeProvider>
@@ -117,3 +118,9 @@ export function App() {
     </RootStoreProvider>
   )
 }
+
+const styles = StyleSheet.create({
+  gestureHandlerRoot: {
+    flex: 1,
+  },
+})

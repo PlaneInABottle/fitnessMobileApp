@@ -99,9 +99,16 @@ describe("BottomSheet", () => {
         if (!node) return false
         const style = node.props?.style
         const styles = Array.isArray(style) ? style : style ? [style] : []
-        if (styles.some((s) => s && typeof s === "object" && (s as any).paddingBottom === paddingBottom)) return true
+        if (
+          styles.some(
+            (s) => s && typeof s === "object" && (s as any).paddingBottom === paddingBottom,
+          )
+        )
+          return true
         const children = node.children ?? []
-        return children.some((c: any) => (typeof c === "object" ? hasPaddingBottom(c, paddingBottom) : false))
+        return children.some((c: any) =>
+          typeof c === "object" ? hasPaddingBottom(c, paddingBottom) : false,
+        )
       }
 
       // spacing.lg (24) + bottom inset (20)

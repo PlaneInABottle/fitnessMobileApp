@@ -1,7 +1,7 @@
+import { Alert } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native"
-import { Alert } from "react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
@@ -170,7 +170,8 @@ describe("Workout MVP flow", () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
 
     try {
-      const { getByText, getByPlaceholderText, getAllByLabelText } = renderWorkoutFlowWithStore(store)
+      const { getByText, getByPlaceholderText, getAllByLabelText } =
+        renderWorkoutFlowWithStore(store)
 
       fireEvent.press(getByText("Start Routine"))
 
@@ -204,7 +205,10 @@ describe("Workout MVP flow", () => {
 
       await waitFor(() => expect(getByText("Rutinler")).toBeTruthy())
 
-      expect(store.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual(["bench-press", "squat"])
+      expect(store.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual([
+        "bench-press",
+        "squat",
+      ])
     } finally {
       alertSpy.mockRestore()
     }

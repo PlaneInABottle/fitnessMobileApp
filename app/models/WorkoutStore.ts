@@ -196,7 +196,10 @@ export const WorkoutStoreModel = types
       }
     }
 
-    function buildDefaultWorkingSetData(exerciseId: string, root: RootWithWorkoutDeps): Partial<SetData> {
+    function buildDefaultWorkingSetData(
+      exerciseId: string,
+      root: RootWithWorkoutDeps,
+    ): Partial<SetData> {
       const required = root.exerciseStore.getRequiredFieldsForExercise(exerciseId)
       const base: Partial<SetData> = { setType: "working" }
       required.forEach((k) => {
@@ -205,7 +208,10 @@ export const WorkoutStoreModel = types
       return base
     }
 
-    function buildDefaultWorkingSetSnapshot(exerciseId: string, root: RootWithWorkoutDeps): ExerciseSetSnapshotIn {
+    function buildDefaultWorkingSetSnapshot(
+      exerciseId: string,
+      root: RootWithWorkoutDeps,
+    ): ExerciseSetSnapshotIn {
       const setData = buildDefaultWorkingSetData(exerciseId, root)
       return {
         id: generateId(),
@@ -213,7 +219,9 @@ export const WorkoutStoreModel = types
       }
     }
 
-    function buildTemplateExercisesFromSession(session: WorkoutSession): TemplateExerciseSnapshotIn[] {
+    function buildTemplateExercisesFromSession(
+      session: WorkoutSession,
+    ): TemplateExerciseSnapshotIn[] {
       return session.exercises.map((we) => ({
         exerciseId: we.exerciseId,
         sets: (we.sets ?? []).map((s) => ({
@@ -569,9 +577,7 @@ export const WorkoutStoreModel = types
         }
       },
 
-      getTemplateUpdateSummary(
-        templateId: string,
-      ):
+      getTemplateUpdateSummary(templateId: string):
         | {
             addedExerciseIds: string[]
             removedExerciseIds: string[]
@@ -594,7 +600,10 @@ export const WorkoutStoreModel = types
 
         const sessionSetCounts = new Map<string, number>()
         for (const we of session.exercises) {
-          sessionSetCounts.set(we.exerciseId, (sessionSetCounts.get(we.exerciseId) ?? 0) + we.sets.length)
+          sessionSetCounts.set(
+            we.exerciseId,
+            (sessionSetCounts.get(we.exerciseId) ?? 0) + we.sets.length,
+          )
         }
 
         let addedSets = 0

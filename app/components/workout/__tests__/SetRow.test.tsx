@@ -9,13 +9,7 @@ import { ThemeProvider } from "@/theme/context"
 
 import { SetRow } from "../SetRow"
 
-function Harness({
-  initialValue,
-  isDone,
-}: {
-  initialValue: Partial<SetData>
-  isDone?: boolean
-}) {
+function Harness({ initialValue, isDone }: { initialValue: Partial<SetData>; isDone?: boolean }) {
   const [value, setValue] = useState<Partial<SetData>>(initialValue)
 
   return (
@@ -36,7 +30,9 @@ function Harness({
 
 describe("SetRow", () => {
   it("shows Kg/Reps placeholders when values are 0 and untouched", () => {
-    const { getByLabelText } = render(<Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />)
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />,
+    )
 
     expect(getByLabelText("Kg").props.value).toBe("")
     expect(getByLabelText("Reps").props.value).toBe("")
@@ -88,7 +84,9 @@ describe("SetRow", () => {
   })
 
   it("shows entered styling after user types (including 0)", () => {
-    const { getByLabelText } = render(<Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />)
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />,
+    )
 
     fireEvent.changeText(getByLabelText("Kg"), "0")
 
