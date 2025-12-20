@@ -51,6 +51,21 @@ jest.mock("react-native-keyboard-controller", () => {
   }
 })
 
+jest.mock("@gorhom/bottom-sheet", () => {
+  const React = require("react")
+  const { View } = require("react-native")
+
+  return {
+    BottomSheetModalProvider: ({ children }: any) => children,
+    BottomSheetBackdrop: () => null,
+    BottomSheetView: ({ children }: any) => React.createElement(View, null, children),
+    BottomSheetModal: React.forwardRef(({ children }: any, ref: any) => {
+      React.useImperativeHandle(ref, () => ({ present: jest.fn(), dismiss: jest.fn() }))
+      return React.createElement(View, null, children)
+    }),
+  }
+})
+
 jest.mock("../app/i18n/index.ts", () => ({
   i18n: {
     isInitialized: true,

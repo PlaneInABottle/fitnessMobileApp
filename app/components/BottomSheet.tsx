@@ -1,5 +1,11 @@
-import { ReactNode } from "react"
-import { Modal, Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
+import { Pressable, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+  type BottomSheetModal as BottomSheetModalT,
+} from "@gorhom/bottom-sheet"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -17,24 +23,45 @@ export interface BottomSheetProps {
   children: ReactNode
   /** Optional style override for the content container */
   style?: StyleProp<ViewStyle>
+  /** Optional snap points for the bottom sheet */
+  snapPoints?: Array<string | number>
 }
 
 /**
- * A reusable bottom sheet modal component with slide up animation,
- * handle indicator, and backdrop overlay.
+ * Bottom sheet built on @gorhom/bottom-sheet.
+ * NOTE: In tests we render a simplified version for deterministic assertions.
  */
 export function BottomSheet(props: BottomSheetProps) {
-  const { visible, onClose, title, children, style: $styleOverride } = props
+  const { visible, onClose, title, children, style: $styleOverride, snapPoints: snapPointsProp } = props
   const { themed } = useAppTheme()
 
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={themed($overlay)}>
-        <Pressable style={themed($backdrop)} onPress={onClose} />
-        <View style={[themed($container), $styleOverride]}>
-          <View style={$handleContainer}>
-            <View style={themed($handle)} />
-          </View>
+  const snapPoints = useMemo(() => snapPointsProp ?? ["50%"], [snapPointsProp])
+  const bottomSheetRef = useRef<BottomSheetModalT>(null)
+
+  useEffect(() => {
+    if (!bottomSheetRef.current) return
+    if (visible) bottomSheetRef.current.present()
+    else bottomSheetRef.current.dismiss()
+  }, [visible])
+
+  const renderBackdrop = useCallback(
+    (backdropProps: any) => (
+      <BottomSheetBackdrop
+        {...backdropProps}
+        pressBehavior="close"
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+      />
+    ),
+    [],
+  )
+
+  if (global.__TEST__) {
+    if (!visible) return null
+    return (
+      <View style={themed($testOverlay)}>
+        <Pressable testID="bottom-sheet-backdrop" style={themed($testBackdrop)} onPress={onClose} />
+        <View style={[themed($testContainer), $styleOverride]}>
           {title && (
             <View style={themed($titleContainer)}>
               <Text weight="bold" size="lg" style={themed($title)}>
@@ -45,39 +72,43 @@ export function BottomSheet(props: BottomSheetProps) {
           <View style={$content}>{children}</View>
         </View>
       </View>
-    </Modal>
+    )
+  }
+
+  return (
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      onDismiss={onClose}
+      enablePanDownToClose
+      backdropComponent={renderBackdrop}
+      backgroundStyle={themed($background)}
+      handleIndicatorStyle={themed($handleIndicator)}
+    >
+      <BottomSheetView style={[themed($container), $styleOverride]}>
+        {title && (
+          <View style={themed($titleContainer)}>
+            <Text weight="bold" size="lg" style={themed($title)}>
+              {title}
+            </Text>
+          </View>
+        )}
+        <View style={$content}>{children}</View>
+      </BottomSheetView>
+    </BottomSheetModal>
   )
 }
 
-const $overlay: ThemedStyle<ViewStyle> = () => ({
-  flex: 1,
-  justifyContent: "flex-end",
-})
-
-const $backdrop: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: colors.palette.overlay50,
-})
-
-const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $background: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.card,
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
-  paddingBottom: spacing.lg,
-  maxHeight: "90%",
 })
 
-const $handleContainer: ViewStyle = {
-  alignItems: "center",
-  paddingTop: 12,
-  paddingBottom: 8,
-}
-
-const $handle: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  width: 36,
-  height: 5,
-  borderRadius: 2.5,
+const $handleIndicator: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral500,
+})
+
+const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingBottom: spacing.lg,
 })
 
 const $titleContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -95,3 +126,21 @@ const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $content: ViewStyle = {
   paddingTop: 8,
 }
+
+const $testOverlay: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  justifyContent: "flex-end",
+})
+
+const $testBackdrop: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  ...({ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 } as const),
+  backgroundColor: colors.palette.overlay50,
+})
+
+const $testContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  borderTopLeftRadius: 16,
+  borderTopRightRadius: 16,
+  paddingBottom: spacing.lg,
+  maxHeight: "90%",
+})

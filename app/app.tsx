@@ -23,6 +23,7 @@ import { useFonts } from "expo-font"
 import * as Linking from "expo-linking"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 
 import { initI18n } from "./i18n"
 import { RootStoreProvider, useInitialRootStore } from "./models"
@@ -100,11 +101,13 @@ export function App() {
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <KeyboardProvider>
           <ThemeProvider>
-            <AppNavigator
-              linking={linking}
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
+            <BottomSheetModalProvider>
+              <AppNavigator
+                linking={linking}
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+              />
+            </BottomSheetModalProvider>
           </ThemeProvider>
         </KeyboardProvider>
       </SafeAreaProvider>
