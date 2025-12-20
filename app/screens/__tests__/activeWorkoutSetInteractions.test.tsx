@@ -1,7 +1,6 @@
-import { Modal } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { render, fireEvent, waitFor } from "@testing-library/react-native"
+import { fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
@@ -37,15 +36,15 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     const weId = store.workoutStore.addExerciseToSession("bench-press")!
     store.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 100, reps: 5 })
 
-    const { getByText, getByLabelText, UNSAFE_getByType } = renderActiveWorkout(store)
+    const { getByText, getByLabelText, queryByText } = renderActiveWorkout(store)
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    expect(UNSAFE_getByType(Modal).props.visible).toBe(false)
+    expect(queryByText("Set Türünü Seç")).toBeNull()
 
-    // Press on the set type indicator (now uses SetTypeIndicator component)
+    // Press on the set type indicator (opens SetOptionsBottomSheet)
     fireEvent.press(getByLabelText("Set type: working"))
-    await waitFor(() => expect(UNSAFE_getByType(Modal).props.visible).toBe(true))
+    await waitFor(() => expect(getByText("Set Türünü Seç")).toBeTruthy())
 
     fireEvent.press(getByLabelText("Toggle done"))
 

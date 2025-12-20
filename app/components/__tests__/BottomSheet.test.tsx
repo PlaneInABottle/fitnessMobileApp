@@ -1,5 +1,5 @@
 import { NavigationContainer } from "@react-navigation/native"
-import { render } from "@testing-library/react-native"
+import { fireEvent, render } from "@testing-library/react-native"
 
 import { ThemeProvider } from "../../theme/context"
 import { BottomSheet } from "../BottomSheet"
@@ -70,19 +70,14 @@ describe("BottomSheet", () => {
 
   describe("backdrop interaction", () => {
     it("calls onClose when backdrop is pressed", () => {
-      render(
-        <ThemeProvider>
-          <NavigationContainer>
-            <BottomSheet visible={true} onClose={mockOnClose}>
-              <Text>Content</Text>
-            </BottomSheet>
-          </NavigationContainer>
-        </ThemeProvider>,
-      )
+      const { getByTestId } = renderBottomSheet({
+        visible: true,
+        onClose: mockOnClose,
+      })
 
-      // The Modal component has a backdrop Pressable - we need to find it
-      // Since we don't have testID, we'll verify the callback is passed correctly
-      expect(mockOnClose).not.toHaveBeenCalled()
+      fireEvent.press(getByTestId("bottom-sheet-backdrop"))
+
+      expect(mockOnClose).toHaveBeenCalled()
     })
   })
 
