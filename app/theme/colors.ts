@@ -57,7 +57,6 @@ export const setTypeColors = {
   working: palette.neutral100,
   dropset: palette.info500,
   failure: palette.error500,
-  completed: palette.success500,
 } as const
 
 export const colors = {

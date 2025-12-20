@@ -21,7 +21,7 @@ export type Spacing = typeof spacingLight | typeof spacingDark
 export type SetTypeColors = typeof setTypeColorsLight | typeof setTypeColorsDark
 
 // Set type identifiers used in workout tracking
-export type SetType = "warmup" | "working" | "dropset" | "failure" | "completed"
+export type SetType = "warmup" | "working" | "dropset" | "failure"
 
 // These two are consistent across themes.
 export type Timing = typeof timing

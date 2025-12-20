@@ -60,7 +60,6 @@ export const setTypeColors = {
   working: palette.neutral900, // White text for regular sets
   dropset: palette.info500, // Cyan "D" indicator
   failure: palette.error500, // Red-orange "F" indicator
-  completed: palette.success500, // Green checkmark for completed
 } as const
 
 export const colors = {

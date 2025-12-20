@@ -19,10 +19,9 @@ export interface SetTypeIndicatorProps {
 /** Map set types to display letters */
 const SET_TYPE_LETTERS: Record<SetType, string> = {
   warmup: "W",
-  working: "",
+  working: "N",
   dropset: "D",
   failure: "F",
-  completed: "✓",
 }
 
 /**
@@ -33,8 +32,7 @@ export function SetTypeIndicator(props: SetTypeIndicatorProps) {
   const { type, index, style: $styleOverride } = props
   const { themed, getSetTypeColor } = useAppTheme()
 
-  const displayText =
-    type === "working" && index !== undefined ? index.toString() : SET_TYPE_LETTERS[type]
+  const displayText = SET_TYPE_LETTERS[type]
 
   const color = getSetTypeColor(type)
 

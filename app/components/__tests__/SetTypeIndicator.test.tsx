@@ -41,34 +41,22 @@ describe("SetTypeIndicator", () => {
     })
   })
 
-  describe("working sets with index", () => {
-    it("displays index number for working sets", () => {
+  describe("working sets", () => {
+    it("displays N for working sets even when index is provided", () => {
       const { getByText } = renderSetTypeIndicator({
         type: "working",
         index: 1,
       })
 
-      expect(getByText("1")).toBeTruthy()
+      expect(getByText("N")).toBeTruthy()
     })
 
-    it("displays correct index for higher numbers", () => {
+    it("displays N for working set without index", () => {
       const { getByText } = renderSetTypeIndicator({
         type: "working",
-        index: 5,
       })
 
-      expect(getByText("5")).toBeTruthy()
-    })
-
-    it("displays empty for working set without index", () => {
-      const { queryByText } = renderSetTypeIndicator({
-        type: "working",
-      })
-
-      // Working sets without index show empty string
-      expect(queryByText("W")).toBeNull()
-      expect(queryByText("D")).toBeNull()
-      expect(queryByText("F")).toBeNull()
+      expect(getByText("N")).toBeTruthy()
     })
   })
 
