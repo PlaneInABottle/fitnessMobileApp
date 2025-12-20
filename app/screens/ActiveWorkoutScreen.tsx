@@ -31,6 +31,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     } | null>(null)
 
     const [doneSetIds, setDoneSetIds] = useState<Record<string, boolean>>({})
+    const [doneSetVolumes, setDoneSetVolumes] = useState<Record<string, number>>({})
 
     // Timer state
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -58,6 +59,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     useEffect(() => {
       // Reset UI-only done state when session changes.
       setDoneSetIds({})
+      setDoneSetVolumes({})
       setSelectedSetInfo(null)
     }, [session?.id])
 
@@ -65,6 +67,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     const completedSetsCount = useMemo(() => {
       return Object.values(doneSetIds).filter(Boolean).length
     }, [doneSetIds])
+
+    const completedVolumeKg = useMemo(() => {
+      return Object.values(doneSetVolumes).reduce((sum, v) => sum + v, 0)
+    }, [doneSetVolumes])
 
     function handleOpenSetOptions(workoutExerciseId: string, setId: string, setType: SetTypeId) {
       setSelectedSetInfo({ workoutExerciseId, setId, setType })
@@ -74,8 +80,24 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       setSelectedSetInfo(null)
     }
 
-    function handleToggleDone(setId: string) {
+    function handleToggleDone(workoutExerciseId: string, setId: string) {
+      const isCurrentlyDone = !!doneSetIds[setId]
+
       setDoneSetIds((prev) => ({ ...prev, [setId]: !prev[setId] }))
+      setDoneSetVolumes((prev) => {
+        const next = { ...prev }
+
+        if (isCurrentlyDone) {
+          delete next[setId]
+          return next
+        }
+
+        const exercise = session?.exercises.find((e) => e.id === workoutExerciseId)
+        const set = exercise?.sets.find((s) => s.id === setId)
+
+        next[setId] = set?.weight !== undefined && set?.reps !== undefined ? set.weight * set.reps : 0
+        return next
+      })
     }
 
     function handleUpdateSet(workoutExerciseId: string, setId: string, patch: Partial<SetData>) {
@@ -89,6 +111,11 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         selectedSetInfo.setId,
       )
       setDoneSetIds((prev) => {
+        const next = { ...prev }
+        delete next[selectedSetInfo.setId]
+        return next
+      })
+      setDoneSetVolumes((prev) => {
         const next = { ...prev }
         delete next[selectedSetInfo.setId]
         return next
@@ -120,7 +147,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           onRightActionPress={() => navigation.navigate("WorkoutComplete")}
           showStats
           timeSeconds={elapsedSeconds}
-          volumeKg={workoutStore.totalVolume}
+          volumeKg={completedVolumeKg}
           setsCount={completedSetsCount}
         />
 
@@ -184,7 +211,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               isDone={!!doneSetIds[s.id]}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
-                              onDone={() => handleToggleDone(s.id)}
+                              onDone={() => handleToggleDone(we.id, s.id)}
                               doneButtonLabel="Toggle done"
                               value={{
                                 setType: s.setType,

@@ -157,7 +157,7 @@ export function SetRow({
         !!isDone &&
         isKgOrReps &&
         !isTouched &&
-        normalizedKgRepsCurrent === 0
+        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
 
       const shouldShowPlaceholder =
         isKgOrReps &&
@@ -212,24 +212,35 @@ export function SetRow({
   }
 
   const rowStyle: ThemedStyle<ViewStyle> = ({ colors }) => {
-    if (typeof rowIndex === "number") {
-      return {
-        backgroundColor: rowIndex % 2 === 0 ? colors.palette.neutral100 : colors.palette.neutral200,
-        borderRadius: 6,
-        paddingVertical: 10,
-      }
-    }
-    if (mode === "completed" && typeof index === "number") {
-      return {
-        backgroundColor: index % 2 === 0 ? colors.palette.neutral100 : colors.palette.neutral200,
-        borderRadius: 6,
-        paddingVertical: 10,
-      }
-    }
-    return {
-      backgroundColor: "transparent",
+    const base = {
       borderRadius: 6,
       paddingVertical: 10,
+    }
+
+    if (isDone) {
+      return {
+        ...base,
+        backgroundColor: colors.success,
+      }
+    }
+
+    if (typeof rowIndex === "number") {
+      return {
+        ...base,
+        backgroundColor: rowIndex % 2 === 0 ? colors.card : colors.cardSecondary,
+      }
+    }
+
+    if (mode === "completed" && typeof index === "number") {
+      return {
+        ...base,
+        backgroundColor: index % 2 === 0 ? colors.card : colors.cardSecondary,
+      }
+    }
+
+    return {
+      ...base,
+      backgroundColor: "transparent",
     }
   }
 

@@ -117,11 +117,6 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
                   Yeni Rutin
                 </Text>
               </Pressable>
-              <Pressable style={themed($pill)}>
-                <Text weight="medium" size="sm" style={themed($pillText)}>
-                  Keşfet
-                </Text>
-              </Pressable>
             </View>
 
             {/* Routine Cards */}

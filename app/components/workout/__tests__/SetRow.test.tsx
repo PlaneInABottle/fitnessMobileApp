@@ -57,6 +57,20 @@ describe("SetRow", () => {
     expect(kgStyle.color).toBe("#FFFFFF")
   })
 
+  it("shows Kg/Reps as 0 when set is done, untouched, and values are undefined", () => {
+    const { getByLabelText } = render(<Harness initialValue={{ setType: "working" }} isDone />)
+
+    const kgInput = getByLabelText("Kg")
+    const repsInput = getByLabelText("Reps")
+
+    expect(kgInput.props.value).toBe("0")
+    expect(repsInput.props.value).toBe("0")
+
+    const kgStyle = StyleSheet.flatten(kgInput.props.style)
+    expect(kgStyle.fontFamily).toBe("spaceGroteskBold")
+    expect(kgStyle.color).toBe("#FFFFFF")
+  })
+
   it("shows entered styling after user types (including 0)", () => {
     const { getByLabelText } = render(<Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />)
 

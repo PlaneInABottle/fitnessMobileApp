@@ -209,6 +209,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
 
 const $searchContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
+  paddingTop: spacing.sm,
   paddingHorizontal: spacing.md,
   paddingBottom: spacing.sm,
   borderBottomWidth: 1,
