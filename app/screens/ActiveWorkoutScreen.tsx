@@ -176,7 +176,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                       {(() => {
                         let workingIndex = 0
 
-                        return we.sets.map((s) => {
+                        return we.sets.map((s, i) => {
                           const setType = (s.setType as SetTypeId | undefined) ?? "working"
                           const isWorking = setType === "working"
                           const displayIndex = isWorking ? ++workingIndex : undefined
@@ -189,6 +189,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               availableSetTypes={availableSetTypes}
                               allowEmptyNumbers={false}
                               index={displayIndex}
+                              rowIndex={i}
                               isDone={!!doneSetIds[s.id]}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}

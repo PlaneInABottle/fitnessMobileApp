@@ -33,8 +33,8 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
           accessibilityLabel="Continue current workout session"
           accessibilityRole="button"
         >
-          <Text text="Devam" weight="medium" size="xs" style={themed($resumeText)} />
           <Icon icon="caretRight" size={14} color={theme.colors.tint} />
+          <Text text="Devam" weight="medium" size="sm" style={themed($resumeText)} />
         </Pressable>
 
         <Pressable
@@ -44,7 +44,7 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
           accessibilityRole="button"
         >
           <Icon icon="x" size={14} color={theme.colors.error} />
-          <Text text="Sil" weight="medium" size="xs" style={themed($deleteText)} />
+          <Text text="Sil" weight="medium" size="sm" style={themed($deleteText)} />
         </Pressable>
       </View>
     </View>

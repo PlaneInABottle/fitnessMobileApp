@@ -8,7 +8,13 @@ import { ThemeProvider } from "@/theme/context"
 
 import { SetRow } from "../SetRow"
 
-function Harness({ initialValue }: { initialValue: Partial<SetData> }) {
+function Harness({
+  initialValue,
+  isDone,
+}: {
+  initialValue: Partial<SetData>
+  isDone?: boolean
+}) {
   const [value, setValue] = useState<Partial<SetData>>(initialValue)
 
   return (
@@ -19,6 +25,7 @@ function Harness({ initialValue }: { initialValue: Partial<SetData> }) {
           mode="edit"
           value={value}
           allowEmptyNumbers={false}
+          isDone={isDone}
           onChange={(next) => setValue(next)}
         />
       </NavigationContainer>
@@ -32,6 +39,22 @@ describe("SetRow", () => {
 
     expect(getByLabelText("Kg").props.value).toBe("")
     expect(getByLabelText("Reps").props.value).toBe("")
+  })
+
+  it("shows Kg/Reps as 0 when set is done and untouched", () => {
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} isDone />,
+    )
+
+    const kgInput = getByLabelText("Kg")
+    const repsInput = getByLabelText("Reps")
+
+    expect(kgInput.props.value).toBe("0")
+    expect(repsInput.props.value).toBe("0")
+
+    const kgStyle = StyleSheet.flatten(kgInput.props.style)
+    expect(kgStyle.fontFamily).toBe("spaceGroteskBold")
+    expect(kgStyle.color).toBe("#FFFFFF")
   })
 
   it("shows entered styling after user types (including 0)", () => {

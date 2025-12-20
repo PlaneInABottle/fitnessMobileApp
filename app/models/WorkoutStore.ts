@@ -172,6 +172,23 @@ export const WorkoutStoreModel = types
       }
     }
 
+    function buildDefaultWorkingSetData(exerciseId: string, root: RootWithWorkoutDeps): Partial<SetData> {
+      const required = root.exerciseStore.getRequiredFieldsForExercise(exerciseId)
+      const base: Partial<SetData> = { setType: "working" }
+      required.forEach((k) => {
+        ;(base as any)[k] = 0
+      })
+      return base
+    }
+
+    function buildDefaultWorkingSetSnapshot(exerciseId: string, root: RootWithWorkoutDeps): ExerciseSetSnapshotIn {
+      const setData = buildDefaultWorkingSetData(exerciseId, root)
+      return {
+        id: generateId(),
+        ...buildSetSnapshot(setData),
+      }
+    }
+
     function setError(error: unknown) {
       self.lastError = error instanceof Error ? error.message : String(error)
     }
@@ -197,7 +214,7 @@ export const WorkoutStoreModel = types
         cast({
           id: workoutExerciseId,
           exerciseId,
-          sets: [],
+          sets: [buildDefaultWorkingSetSnapshot(exerciseId, root)],
         }),
       )
       return workoutExerciseId

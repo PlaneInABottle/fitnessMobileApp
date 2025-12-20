@@ -125,9 +125,7 @@ describe("Workout MVP flow", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    // Add first set - button text changed to Turkish
-    fireEvent.press(getByText("+ Set Ekle"))
-
+    // First set is created by default when exercise is added
     const reps1 = getByLabelText("Reps")
     const kg1 = getByLabelText("Kg")
 

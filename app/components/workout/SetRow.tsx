@@ -41,8 +41,10 @@ export interface SetRowProps {
    * Keep true for draft/new-set entry.
    */
   allowEmptyNumbers?: boolean
-  /** 1-based set index for display */
+  /** 1-based set index for display (working sets only) */
   index?: number
+  /** 0-based row index for styling (all set types) */
+  rowIndex?: number
   isDone?: boolean
   onLongPress?: () => void
 }
@@ -99,6 +101,7 @@ export function SetRow({
   onPressSetType,
   allowEmptyNumbers = true,
   index,
+  rowIndex,
   isDone,
   onLongPress,
 }: SetRowProps) {
@@ -150,17 +153,24 @@ export function SetRow({
       const normalizedKgRepsCurrent =
         isKgOrReps && typeof current === "number" && Number.isFinite(current) ? current : undefined
 
+      const shouldForceDoneZero = !!isDone && isKgOrReps && !isTouched && normalizedKgRepsCurrent === 0
+
       const shouldShowPlaceholder =
-        isKgOrReps && !isTouched && (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
-      const inputValue = shouldShowPlaceholder
-        ? ""
-        : isKgOrReps
-          ? toText(normalizedKgRepsCurrent)
-          : toText(current)
+        isKgOrReps &&
+        !shouldForceDoneZero &&
+        !isTouched &&
+        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
+
+      const inputValue = shouldForceDoneZero
+        ? "0"
+        : shouldShowPlaceholder
+          ? ""
+          : isKgOrReps
+            ? toText(normalizedKgRepsCurrent)
+            : toText(current)
       const hasEnteredValue = isKgOrReps
-        ? isTouched
-          ? inputValue !== ""
-          : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0
+        ? shouldForceDoneZero ||
+          (isTouched ? inputValue !== "" : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0)
         : false
       const isSuggested = !isTouched && current !== undefined
 
@@ -172,6 +182,7 @@ export function SetRow({
             placeholder={placeholders?.[key] ?? "0"}
             placeholderTextColor={colors.textDim}
             keyboardType="numeric"
+            underlineColorAndroid="transparent"
             onChangeText={(t) => {
               setLocalTouched((prev) => ({ ...prev, [key]: true }))
               onChange({ ...value, [key]: toNumberOrUndefined(t, allowEmptyNumbers) }, key)
@@ -182,6 +193,7 @@ export function SetRow({
               isKgOrReps && hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
               !isKgOrReps && isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
               !isKgOrReps && isTouched && { color: colors.text, fontFamily: typography.primary.bold },
+              shouldForceDoneZero && { color: "#FFFFFF", fontFamily: typography.primary.bold },
             ]}
           />
         </View>
@@ -203,9 +215,9 @@ export function SetRow({
         paddingVertical: 6,
       }
     }
-    if (mode === "completed" && typeof index === "number") {
+    if (typeof rowIndex === "number") {
       return {
-        backgroundColor: index % 2 === 0 ? colors.palette.neutral300 : colors.palette.neutral200,
+        backgroundColor: rowIndex % 2 === 0 ? colors.palette.neutral100 : colors.palette.neutral200,
         borderRadius: 6,
         paddingVertical: 6,
       }
@@ -343,12 +355,12 @@ const $previousText: ThemedStyle<TextStyle> = ({ colors }) => ({
   textAlign: "center",
 })
 
-const $input: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
+const $input: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   borderWidth: 0,
   borderRadius: 6,
-  paddingVertical: spacing.xs,
-  paddingHorizontal: spacing.sm,
-  backgroundColor: colors.cardSecondary,
+  paddingVertical: 0,
+  paddingHorizontal: 0,
+  backgroundColor: "transparent",
   color: colors.text,
   fontFamily: typography.primary.medium,
   fontSize: 14,

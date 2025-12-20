@@ -36,20 +36,20 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     const weId = store.workoutStore.addExerciseToSession("bench-press")!
     store.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 100, reps: 5 })
 
-    const { getByText, getByLabelText, queryByText } = renderActiveWorkout(store)
+    const { getByText, getAllByLabelText, queryByText } = renderActiveWorkout(store)
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     expect(queryByText("Set Türünü Seç")).toBeNull()
 
     // Press on the set type indicator (opens SetOptionsBottomSheet)
-    fireEvent.press(getByLabelText("Set type: working"))
+    fireEvent.press(getAllByLabelText("Set type: working")[0])
     await waitFor(() => expect(getByText("Set Türünü Seç")).toBeTruthy())
 
-    fireEvent.press(getByLabelText("Toggle done"))
+    fireEvent.press(getAllByLabelText("Toggle done")[0])
 
     // Still editable (inputs remain) - labels updated to match new SetRow design
-    expect(getByLabelText("Kg")).toBeTruthy()
-    expect(getByLabelText("Reps")).toBeTruthy()
+    expect(getAllByLabelText("Kg").length).toBeGreaterThan(0)
+    expect(getAllByLabelText("Reps").length).toBeGreaterThan(0)
   })
 })

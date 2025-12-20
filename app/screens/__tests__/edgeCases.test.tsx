@@ -65,7 +65,7 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     store.workoutStore.addExerciseToSession("bench-press")
     store.workoutStore.addExerciseToSession("squat")
 
-    const { getByText, getAllByText, getByLabelText } = renderActiveWorkout(store)
+    const { getByText, getAllByText, getAllByLabelText } = renderActiveWorkout(store)
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
     expect(getByText("Squat")).toBeTruthy()
@@ -74,16 +74,18 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     const addSetButtons = getAllByText("+ Set Ekle")
     fireEvent.press(addSetButtons[0])
 
-    // Fill in set values (sets are always editable; no "Add set" action)
-    fireEvent.changeText(getByLabelText("Reps"), "5")
-    fireEvent.changeText(getByLabelText("Kg"), "60")
+    // Fill in set values
+    const repsInputs = getAllByLabelText("Reps")
+    const kgInputs = getAllByLabelText("Kg")
+    fireEvent.changeText(repsInputs[0], "5")
+    fireEvent.changeText(kgInputs[0], "60")
 
     // Verify set was added to correct exercise
     const benchExercise = store.workoutStore.currentSession?.exercises[0]
     const squatExercise = store.workoutStore.currentSession?.exercises[1]
 
-    expect(benchExercise?.sets.length).toBe(1)
-    expect(squatExercise?.sets.length).toBe(0)
+    expect(benchExercise?.sets.length).toBe(2)
+    expect(squatExercise?.sets.length).toBe(1)
   })
 
   it("shows sets count per exercise via store", async () => {
@@ -103,8 +105,8 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     const { getByText } = renderActiveWorkout(store)
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
-    // Should show 2 completed sets
-    expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(2)
+    // Should show 3 sets (1 default + 2 added)
+    expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(3)
   })
 })
 
@@ -117,8 +119,7 @@ describe("Edge Cases - Validation", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    // Add set (it is immediately added with defaults) and then edit values - Turkish button text
-    fireEvent.press(getByText("+ Set Ekle"))
+    // Default set exists; edit values
     fireEvent.changeText(getByLabelText("Reps"), "10")
     fireEvent.changeText(getByLabelText("Kg"), "100")
 
@@ -185,14 +186,14 @@ describe("Edge Cases - Workout Store Operations", () => {
     root.workoutStore.addSetToWorkoutExercise(weId, { setType: "working", weight: 100, reps: 5 })
 
     const sets = root.workoutStore.currentSession?.exercises[0]?.sets
-    expect(sets?.length).toBe(2)
+    expect(sets?.length).toBe(3)
 
-    const setToDelete = sets![0].id
+    const setToDelete = sets!.find((s) => s.setType === "warmup")!.id
     root.workoutStore.deleteSetFromWorkoutExercise(weId, setToDelete)
 
     const remainingSets = root.workoutStore.currentSession?.exercises[0]?.sets
-    expect(remainingSets?.length).toBe(1)
-    expect(remainingSets![0].setType).toBe("working")
+    expect(remainingSets?.length).toBe(2)
+    expect(remainingSets?.some((s) => s.setType === "working")).toBe(true)
   })
 
   it("discardSession clears current session without saving to history", () => {

@@ -36,7 +36,7 @@ describe("WorkoutStore", () => {
       exerciseId: "bench-press",
       category: "STRENGTH",
       setType: "working",
-      order: 1,
+      order: 2,
     })
     expect(placeholders.weight).toBe("100")
     expect(placeholders.reps).toBe("5")
@@ -48,7 +48,8 @@ describe("WorkoutStore", () => {
     expect(we2).toBeDefined()
 
     const sets = root.workoutStore.currentSession?.exercises.find((e) => e.id === we2!)?.sets
-    expect(sets).toHaveLength(0)
+    expect(sets).toHaveLength(1)
+    expect(sets?.[0].setType).toBe("working")
   })
 
   it("creates a template from a session and can start a session from it", () => {
@@ -161,8 +162,8 @@ describe("WorkoutStore", () => {
       })
 
       const sets = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets
-      expect(sets).toHaveLength(2)
-      const setToDelete = sets![0].id
+      expect(sets).toHaveLength(3)
+      const setToDelete = sets!.find((s) => s.setType === "warmup")!.id
 
       const result = root.workoutStore.deleteSetFromWorkoutExercise(weId, setToDelete)
       expect(result).toBe(true)
@@ -170,8 +171,8 @@ describe("WorkoutStore", () => {
       const updatedSets = root.workoutStore.currentSession?.exercises.find(
         (e) => e.id === weId,
       )?.sets
-      expect(updatedSets).toHaveLength(1)
-      expect(updatedSets![0].setType).toBe("working")
+      expect(updatedSets).toHaveLength(2)
+      expect(updatedSets?.some((s) => s.setType === "working")).toBe(true)
     })
 
     it("returns false when set not found", () => {
