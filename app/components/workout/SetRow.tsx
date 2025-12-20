@@ -157,7 +157,7 @@ export function SetRow({
         !!isDone &&
         isKgOrReps &&
         !isTouched &&
-        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
+        normalizedKgRepsCurrent === 0
 
       const shouldShowPlaceholder =
         isKgOrReps &&

@@ -17,6 +17,13 @@ describe("WorkoutStore", () => {
 
     const workoutExerciseId = root.workoutStore.addExerciseToSession("bench-press")
     expect(workoutExerciseId).toBeDefined()
+
+    const defaultSets = root.workoutStore.currentSession?.exercises.find((e) => e.id === workoutExerciseId!)?.sets
+    expect(defaultSets).toHaveLength(1)
+    expect(defaultSets?.[0].setType).toBe("working")
+    expect(defaultSets?.[0].weight).toBe(0)
+    expect(defaultSets?.[0].reps).toBe(0)
+
     root.workoutStore.addSetToWorkoutExercise(workoutExerciseId!, {
       setType: "working",
       weight: 100,
@@ -50,6 +57,8 @@ describe("WorkoutStore", () => {
     const sets = root.workoutStore.currentSession?.exercises.find((e) => e.id === we2!)?.sets
     expect(sets).toHaveLength(1)
     expect(sets?.[0].setType).toBe("working")
+    expect(sets?.[0].weight).toBe(0)
+    expect(sets?.[0].reps).toBe(0)
   })
 
   it("creates a template from a session and can start a session from it", () => {
@@ -72,6 +81,17 @@ describe("WorkoutStore", () => {
       "bench-press",
       "squat",
     ])
+
+    const bench = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "bench-press")
+    const squat = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "squat")
+    expect(bench?.sets).toHaveLength(1)
+    expect(bench?.sets?.[0].setType).toBe("working")
+    expect(bench?.sets?.[0].weight).toBe(0)
+    expect(bench?.sets?.[0].reps).toBe(0)
+    expect(squat?.sets).toHaveLength(1)
+    expect(squat?.sets?.[0].setType).toBe("working")
+    expect(squat?.sets?.[0].weight).toBe(0)
+    expect(squat?.sets?.[0].reps).toBe(0)
   })
 
   it("tracks template lastUsedAt", () => {
