@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native"
 import { fireEvent, render } from "@testing-library/react-native"
 
 import type { SetData } from "@/models/SetStore"
+import { colors } from "@/theme/colors"
 import { ThemeProvider } from "@/theme/context"
 
 import { SetRow } from "../SetRow"
@@ -54,7 +55,7 @@ describe("SetRow", () => {
 
     const kgStyle = StyleSheet.flatten(kgInput.props.style)
     expect(kgStyle.fontFamily).toBe("spaceGroteskBold")
-    expect(kgStyle.color).toBe("#FFFFFF")
+    expect(kgStyle.color).toBe(colors.text)
   })
 
   it("shows Kg/Reps as 0 when set is done, untouched, and values are undefined", () => {
@@ -68,7 +69,7 @@ describe("SetRow", () => {
 
     const kgStyle = StyleSheet.flatten(kgInput.props.style)
     expect(kgStyle.fontFamily).toBe("spaceGroteskBold")
-    expect(kgStyle.color).toBe("#FFFFFF")
+    expect(kgStyle.color).toBe(colors.text)
   })
 
   it("shows entered styling after user types (including 0)", () => {

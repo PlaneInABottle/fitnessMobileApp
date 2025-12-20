@@ -54,7 +54,7 @@ const palette = {
  */
 export const setTypeColors = {
   warmup: palette.warning500,
-  working: palette.neutral100,
+  working: palette.neutral900,
   dropset: palette.info500,
   failure: palette.error500,
 } as const

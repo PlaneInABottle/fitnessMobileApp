@@ -197,7 +197,7 @@ export function SetRow({
               isKgOrReps && hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
               !isKgOrReps && isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
               !isKgOrReps && isTouched && { color: colors.text, fontFamily: typography.primary.bold },
-              shouldForceDoneZero && { color: "#FFFFFF", fontFamily: typography.primary.bold },
+              shouldForceDoneZero && { color: colors.text, fontFamily: typography.primary.bold },
             ]}
           />
         </View>

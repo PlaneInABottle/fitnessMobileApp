@@ -181,12 +181,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard
-                      exercise={exercise}
-                      note="Aynı devam"
-                      onPress={() => {}}
-                      onMenuPress={() => {}}
-                    />
+                    <ExerciseCard exercise={exercise} note="Aynı devam" />
 
                     <View style={themed($setsContainer)}>
                       <SetRow category={exercise.category} mode="header" />
