@@ -37,5 +37,5 @@ const $inputWrapper: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 })
 
 const $inputIndent: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginHorizontal: spacing.md,
+  marginHorizontal: spacing.lg,
 })

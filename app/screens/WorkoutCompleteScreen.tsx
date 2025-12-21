@@ -1,4 +1,4 @@
-import { FC, useCallback, useLayoutEffect, useMemo, useState } from "react"
+import { FC, useCallback, useLayoutEffect, useState } from "react"
 import { Alert, BackHandler, TextStyle, View, ViewStyle } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
@@ -36,7 +36,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       }, []),
     )
 
-    const { durationMinutes, exerciseCount, totalSets, totalVolume } = useMemo(() => {
+    const { durationMinutes, exerciseCount, totalSets, totalVolume } = (() => {
       if (!session) return { durationMinutes: 0, exerciseCount: 0, totalSets: 0, totalVolume: 0 }
 
       const ms = Date.now() - session.startedAt.getTime()
@@ -58,7 +58,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
         totalSets: session.exercises.reduce((sum, we) => sum + we.sets.length, 0),
         totalVolume: volume,
       }
-    }, [session])
+    })()
 
     function handleStartSaveTemplate() {
       workoutStore.clearError()
@@ -190,6 +190,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                   <View style={$statItem}>
                     <Text text="Egzersiz" size="xs" style={themed($statLabel)} />
                     <Text
+                      testID="workoutComplete.exerciseCount"
                       text={exerciseCount.toString()}
                       weight="bold"
                       size="lg"
@@ -200,6 +201,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                   <View style={$statItem}>
                     <Text text="Set" size="xs" style={themed($statLabel)} />
                     <Text
+                      testID="workoutComplete.totalSets"
                       text={totalSets.toString()}
                       weight="bold"
                       size="lg"

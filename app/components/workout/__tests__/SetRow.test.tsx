@@ -3,20 +3,29 @@ import { StyleSheet } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { fireEvent, render } from "@testing-library/react-native"
 
+import type { ExerciseCategory } from "@/models/ExerciseStore"
 import type { SetData } from "@/models/SetStore"
 import { colors } from "@/theme/colors"
 import { ThemeProvider } from "@/theme/context"
 
 import { SetRow } from "../SetRow"
 
-function Harness({ initialValue, isDone }: { initialValue: Partial<SetData>; isDone?: boolean }) {
+function Harness({
+  initialValue,
+  isDone,
+  category = "STRENGTH",
+}: {
+  initialValue: Partial<SetData>
+  isDone?: boolean
+  category?: ExerciseCategory
+}) {
   const [value, setValue] = useState<Partial<SetData>>(initialValue)
 
   return (
     <ThemeProvider>
       <NavigationContainer>
         <SetRow
-          category="STRENGTH"
+          category={category}
           mode="edit"
           value={value}
           allowEmptyNumbers={false}
@@ -36,6 +45,14 @@ describe("SetRow", () => {
 
     expect(getByLabelText("Kg").props.value).toBe("")
     expect(getByLabelText("Reps").props.value).toBe("")
+  })
+
+  it("shows time placeholder when value is 0 and untouched", () => {
+    const { getByLabelText } = render(
+      <Harness category="TIMED" initialValue={{ setType: "working", time: 0 }} />,
+    )
+
+    expect(getByLabelText("Sec").props.value).toBe("")
   })
 
   it("allows clearing numeric input while focused and coerces on blur", () => {

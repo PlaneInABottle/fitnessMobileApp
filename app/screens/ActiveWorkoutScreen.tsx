@@ -23,6 +23,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     const { themed } = useAppTheme()
 
     const session = workoutStore.currentSession
+    const template = session?.templateId ? workoutStore.templates.get(session.templateId) : undefined
     const availableSetTypes = useMemo(() => setStore.getAvailableSetTypes(), [setStore])
 
     const [selectedSetInfo, setSelectedSetInfo] = useState<{
@@ -184,6 +185,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                 const exercise = exerciseStore.exercises.get(we.exerciseId)
                 if (!exercise) return null
 
+                const templateExercise = template?.exercises.find((x) => x.exerciseId === we.exerciseId)
+
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
                     <ExerciseCard exercise={exercise} showBottomSeparator={false} />
@@ -198,11 +201,20 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                       {(() => {
                         let workingIndex = 0
+                        const templateTypeCounters: Partial<Record<SetTypeId, number>> = {}
 
                         return we.sets.map((s, i) => {
                           const setType = (s.setType as SetTypeId | undefined) ?? "working"
                           const isWorking = setType === "working"
                           const displayIndex = isWorking ? ++workingIndex : undefined
+
+                          const orderWithinType =
+                            (templateTypeCounters[setType] = (templateTypeCounters[setType] ?? 0) + 1)
+                          const templateSet = templateExercise
+                            ? templateExercise.sets.filter((ts) => (ts.setType as SetTypeId) === setType)[
+                                orderWithinType - 1
+                              ]
+                            : undefined
 
                           return (
                             <SetRow
@@ -214,6 +226,22 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               index={displayIndex}
                               rowIndex={i}
                               isDone={!!doneSetIds[s.id]}
+                              placeholders={
+                                templateSet
+                                  ? {
+                                      weight:
+                                        templateSet.weight !== undefined
+                                          ? String(templateSet.weight)
+                                          : undefined,
+                                      reps: templateSet.reps !== undefined ? String(templateSet.reps) : undefined,
+                                      time: templateSet.time !== undefined ? String(templateSet.time) : undefined,
+                                      distance:
+                                        templateSet.distance !== undefined
+                                          ? String(templateSet.distance)
+                                          : undefined,
+                                    }
+                                  : undefined
+                              }
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                               onDone={() => handleToggleDone(we.id, s.id)}
@@ -271,19 +299,19 @@ const $scrollView: ThemedStyle<ViewStyle> = ({ colors }) => ({
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingTop: spacing.md,
   paddingHorizontal: 0,
-  gap: spacing.lg,
+  gap: 0,
   paddingBottom: spacing.xl,
 })
 
-const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
   borderRadius: 0,
   padding: 0,
-  gap: spacing.sm,
+  gap: 0,
 })
 
-const $setsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.xs,
+const $setsContainer: ThemedStyle<ViewStyle> = () => ({
+  gap: 0,
 })
 
 const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({

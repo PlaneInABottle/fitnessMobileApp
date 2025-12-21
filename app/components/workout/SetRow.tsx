@@ -152,28 +152,23 @@ export function SetRow({
 
       const isTouched = !!touched?.[key] || !!localTouched[key]
       const isKgOrReps = key === "weight" || key === "reps"
-      const normalizedKgRepsCurrent =
-        isKgOrReps && typeof current === "number" && Number.isFinite(current) ? current : undefined
+      const normalizedCurrent =
+        typeof current === "number" && Number.isFinite(current) ? current : undefined
+      const isZeroOrUndefined = normalizedCurrent === 0 || normalizedCurrent === undefined
 
-      const shouldForceDoneZero =
-        !!isDone &&
-        isKgOrReps &&
-        !isTouched &&
-        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
+      const shouldForceDoneZero = !!isDone && isKgOrReps && !isTouched && isZeroOrUndefined
+
+      const shouldTreatAsPlaceholderSuggestion =
+        !!placeholders?.[key] && !isTouched && normalizedCurrent !== undefined && normalizedCurrent !== 0
 
       const shouldShowPlaceholder =
-        isKgOrReps &&
-        !shouldForceDoneZero &&
-        !isTouched &&
-        (normalizedKgRepsCurrent === 0 || normalizedKgRepsCurrent === undefined)
+        !shouldForceDoneZero && !isTouched && (isZeroOrUndefined || shouldTreatAsPlaceholderSuggestion)
 
       const inputValue = shouldShowPlaceholder
         ? ""
         : shouldForceDoneZero
           ? "0"
-          : isKgOrReps
-            ? toText(normalizedKgRepsCurrent)
-            : toText(current)
+          : toText(normalizedCurrent)
 
       const displayValue = focusedField === key ? (draftText[key] ?? "") : inputValue
 
@@ -181,7 +176,7 @@ export function SetRow({
         ? shouldForceDoneZero ||
           (isTouched
             ? inputValue !== ""
-            : normalizedKgRepsCurrent !== undefined && normalizedKgRepsCurrent !== 0)
+            : !shouldShowPlaceholder && normalizedCurrent !== undefined && normalizedCurrent !== 0)
         : false
       const isSuggested = !isTouched && current !== undefined
 
@@ -196,7 +191,10 @@ export function SetRow({
             underlineColorAndroid="transparent"
             onFocus={() => {
               setFocusedField(key)
-              setDraftText((prev) => ({ ...prev, [key]: inputValue }))
+              setDraftText((prev) => ({
+                ...prev,
+                [key]: shouldTreatAsPlaceholderSuggestion ? toText(normalizedCurrent) : inputValue,
+              }))
             }}
             onChangeText={(t) => {
               setLocalTouched((prev) => ({ ...prev, [key]: true }))
@@ -238,16 +236,16 @@ export function SetRow({
             style={[
               themed($input),
               isKgOrReps &&
-                !hasEnteredValue && {
-                  color: colors.textDim,
-                  fontFamily: typography.primary.medium,
-                },
+              !hasEnteredValue && {
+                color: colors.textDim,
+                fontFamily: typography.primary.medium,
+              },
               isKgOrReps &&
-                hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
+              hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
               !isKgOrReps &&
-                isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
+              isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
               !isKgOrReps &&
-                isTouched && { color: colors.text, fontFamily: typography.primary.bold },
+              isTouched && { color: colors.text, fontFamily: typography.primary.bold },
               shouldForceDoneZero && { color: colors.text, fontFamily: typography.primary.bold },
             ]}
           />
@@ -384,7 +382,7 @@ const $row: ViewStyle = {
 
 const $headerRow: ViewStyle = {
   paddingVertical: 4,
-  marginBottom: 4,
+  marginBottom: 0,
 }
 
 const $setTypeCell: ViewStyle = {
@@ -395,12 +393,12 @@ const $setTypeCell: ViewStyle = {
 
 const $previousCell: ViewStyle = {
   flex: 0.8,
-  paddingHorizontal: 8,
+  paddingHorizontal: 12,
 }
 
 const $cell: ViewStyle = {
   flex: 1,
-  paddingHorizontal: 8,
+  paddingHorizontal: 12,
 }
 
 const $doneCell: ViewStyle = {

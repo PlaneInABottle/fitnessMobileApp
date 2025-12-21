@@ -108,7 +108,7 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const { store, getByText, getByLabelText, getAllByLabelText, getByPlaceholderText } =
+    const { store, getByText, getByTestId, getByLabelText, getAllByLabelText, getByPlaceholderText } =
       renderWorkoutFlow()
 
     fireEvent.press(getByText("+ Boş Antrenmana Başla"))
@@ -150,6 +150,9 @@ describe("Workout MVP flow", () => {
     fireEvent.press(getByText("Bitir"))
 
     await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
+
+    expect(getByTestId("workoutComplete.exerciseCount").props.children).toBe("1")
+    expect(getByTestId("workoutComplete.totalSets").props.children).toBe("2")
 
     fireEvent.press(getByText("Şablon Olarak Kaydet"))
     fireEvent.changeText(getByPlaceholderText("Şablon adı"), "Upper A")
