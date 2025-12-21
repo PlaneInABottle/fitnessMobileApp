@@ -21,10 +21,11 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary">> = observer(
-  function ExerciseLibraryScreen({ navigation }) {
+  function ExerciseLibraryScreen({ navigation, route }) {
     const { workoutStore, exerciseStore } = useStores()
     const { themed } = useAppTheme()
 
+    const fromCreateRoutine = !!route.params?.fromCreateRoutine
     const session = workoutStore.currentSession
 
     const [query, setQuery] = useState("")
@@ -51,6 +52,12 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     }
 
     function handleAddExercise(exerciseId: string) {
+      if (fromCreateRoutine) {
+        workoutStore.setPendingRoutineExerciseId(exerciseId)
+        navigation.goBack()
+        return
+      }
+
       workoutStore.clearError()
       const workoutExerciseId = workoutStore.addExerciseToSession(exerciseId)
       if (workoutExerciseId) navigation.goBack()
@@ -108,7 +115,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
         </View>
 
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
-          {!session ? (
+          {!session && !fromCreateRoutine ? (
             <ErrorMessage
               message="No active workout session."
               actionLabel="Start New"
@@ -116,7 +123,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
             />
           ) : (
             <>
-              {!!workoutStore.lastError && (
+              {!fromCreateRoutine && !!workoutStore.lastError && (
                 <ErrorMessage
                   message={workoutStore.lastError}
                   actionLabel="Clear"

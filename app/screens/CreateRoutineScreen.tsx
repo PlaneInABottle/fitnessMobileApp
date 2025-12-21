@@ -1,5 +1,6 @@
 import { FC, useCallback, useState } from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
+import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -26,6 +27,17 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       existingTemplate ? [...existingTemplate.exerciseIds] : [],
     )
     const [isSaving, setIsSaving] = useState(false)
+
+    useFocusEffect(
+      useCallback(() => {
+        const selectedExerciseId = workoutStore.consumePendingRoutineExerciseId()
+        if (!selectedExerciseId) return
+
+        setSelectedExerciseIds((prev) =>
+          prev.includes(selectedExerciseId) ? prev : [...prev, selectedExerciseId],
+        )
+      }, [workoutStore]),
+    )
 
     const canSave = title.trim().length > 0 && selectedExerciseIds.length > 0
 

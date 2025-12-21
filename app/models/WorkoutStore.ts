@@ -122,6 +122,7 @@ export const WorkoutStoreModel = types
     templates: types.optional(types.map(WorkoutTemplateModel), {}),
     sessionHistory: types.optional(types.array(WorkoutSessionModel), []),
     lastError: types.maybe(types.string),
+    pendingRoutineExerciseId: types.maybe(types.string),
   })
   .views((self) => ({
     /**
@@ -541,6 +542,16 @@ export const WorkoutStoreModel = types
     return {
       clearError() {
         self.lastError = undefined
+      },
+
+      setPendingRoutineExerciseId(exerciseId: string) {
+        self.pendingRoutineExerciseId = exerciseId
+      },
+
+      consumePendingRoutineExerciseId(): string | undefined {
+        const exerciseId = self.pendingRoutineExerciseId
+        self.pendingRoutineExerciseId = undefined
+        return exerciseId
       },
 
       startNewSession(): boolean {
