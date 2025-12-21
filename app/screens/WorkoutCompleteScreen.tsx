@@ -112,7 +112,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               text: "Atla",
               style: "default",
               onPress: () => {
-                const ok = workoutStore.completeSession()
+                const ok = workoutStore.completeSession(true)
                 if (ok) navigation.popToTop()
               },
             },
@@ -120,8 +120,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               text: "Güncelle",
               style: "default",
               onPress: () => {
-                workoutStore.updateTemplateFromCurrentSession(templateId)
-                const ok = workoutStore.completeSession()
+                const ok = workoutStore.completeSession(false)
                 if (ok) navigation.popToTop()
               },
             },

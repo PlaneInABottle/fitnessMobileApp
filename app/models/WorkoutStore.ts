@@ -414,7 +414,7 @@ export const WorkoutStoreModel = types
       set.isDone = merged.isDone as any
     }
 
-    function completeSessionUnsafe() {
+    function completeSessionUnsafe(skipTemplateUpdate: boolean = false) {
       const root = getAttachedRoot()
       const session = requireCurrentSession()
 
@@ -455,7 +455,7 @@ export const WorkoutStoreModel = types
       })
 
       // Auto-update template with completed workout values
-      if (session.templateId) {
+      if (!skipTemplateUpdate && session.templateId) {
         const template = self.templates.get(session.templateId)
         if (template) {
           template.exercises = cast(buildTemplateExercisesFromSession(session))
@@ -605,9 +605,9 @@ export const WorkoutStoreModel = types
         }
       },
 
-      completeSession(): boolean {
+      completeSession(skipTemplateUpdate: boolean = false): boolean {
         try {
-          completeSessionUnsafe()
+          completeSessionUnsafe(skipTemplateUpdate)
           self.lastError = undefined
           return true
         } catch (e) {
