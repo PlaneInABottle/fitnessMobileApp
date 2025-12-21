@@ -534,6 +534,23 @@ export const WorkoutStoreModel = types
       return id
     }
 
+    function updateTemplateUnsafe(templateId: string, name: string, exerciseIds: string[]): void {
+      const root = getAttachedRoot()
+      const template = self.templates.get(templateId)
+      if (!template) throw new Error("Template not found")
+
+      const sanitizedName = sanitizeText(name)
+      if (!sanitizedName) throw new Error("Template name is required")
+
+      const sanitizedExerciseIds = exerciseIds.map((id) => sanitizeText(id)).filter(Boolean)
+      sanitizedExerciseIds.forEach((id) => {
+        if (!root.exerciseStore.hasExercise(id)) throw new Error("Invalid exerciseId")
+      })
+
+      template.name = sanitizedName
+      template.exerciseIds.replace(sanitizedExerciseIds)
+    }
+
     function deleteSetFromWorkoutExerciseUnsafe(workoutExerciseId: string, setId: string) {
       const workoutExercise = requireWorkoutExercise(workoutExerciseId)
       const setIndex = workoutExercise.sets.findIndex((s) => s.id === setId)
@@ -665,6 +682,17 @@ export const WorkoutStoreModel = types
         } catch (e) {
           setError(e)
           return undefined
+        }
+      },
+
+      updateTemplate(templateId: string, name: string, exerciseIds: string[]): boolean {
+        try {
+          updateTemplateUnsafe(templateId, name, exerciseIds)
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
         }
       },
 

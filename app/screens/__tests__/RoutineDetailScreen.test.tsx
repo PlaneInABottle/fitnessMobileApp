@@ -229,6 +229,65 @@ describe("RoutineDetailScreen navigation", () => {
 
     expect(store.workoutStore.currentSession).toBeUndefined()
   })
+
+  it("save persists edits and returns to routine detail", async () => {
+    const store = RootStoreModel.create({})
+    const templateId = store.workoutStore.createTemplate("Upper Body A", ["bench-press", "overhead-press"])!
+
+    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } = renderFromWorkoutTab(store)
+
+    // Navigate to routine detail
+    await waitFor(() => {
+      expect(getByText("Upper Body A")).toBeTruthy()
+    })
+    fireEvent.press(getByLabelText("More options"))
+
+    await waitFor(() => {
+      expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+    })
+    fireEvent.press(getByLabelText("Rutini Düzenle"))
+
+    await waitFor(() => {
+      expect(getByText("Rutin Oluştur")).toBeTruthy()
+    })
+
+    const titleInput = getByPlaceholderText("Rutin başlığı")
+    expect(titleInput.props.value).toBe("Upper Body A")
+
+    // Add an exercise via ExerciseLibrary (routine mode)
+    fireEvent.press(getByText("+ Egzersiz ekle"))
+    await waitFor(() => {
+      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+    })
+
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
+    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
+    fireEvent.press(getAllByLabelText("Add exercise")[0])
+
+    await waitFor(() => {
+      expect(getByText("Egzersizler (3)")).toBeTruthy()
+      expect(getByText("Deadlift")).toBeTruthy()
+    })
+
+    fireEvent.changeText(titleInput, "Upper Body A Updated")
+    fireEvent.press(getByLabelText("Kaydet"))
+
+    await waitFor(() => {
+      expect(getByText("Rutini Başlat")).toBeTruthy()
+      expect(getByText("Upper Body A Updated")).toBeTruthy()
+      expect(getByText("Egzersizler (3)")).toBeTruthy()
+    })
+
+    expect(store.workoutStore.templates.get(templateId)?.name).toBe("Upper Body A Updated")
+    expect(store.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual([
+      "bench-press",
+      "overhead-press",
+      "deadlift",
+    ])
+
+    expect(store.workoutStore.currentSession).toBeUndefined()
+    expect(store.workoutStore.sessionHistory).toHaveLength(0)
+  })
 })
 
 describe("RoutineDetailScreen analytics tabs", () => {

@@ -52,9 +52,8 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       try {
         if (editTemplateId && existingTemplate) {
           // Update existing template
-          existingTemplate.name = title.trim()
-          existingTemplate.exerciseIds.replace(selectedExerciseIds)
-          navigation.goBack()
+          const ok = workoutStore.updateTemplate(editTemplateId, title.trim(), selectedExerciseIds)
+          if (ok) navigation.goBack()
         } else {
           // Create new template
           const templateId = workoutStore.createTemplate(title.trim(), selectedExerciseIds)
