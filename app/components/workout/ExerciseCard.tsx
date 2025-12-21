@@ -12,6 +12,8 @@ export interface ExerciseCardProps {
   exercise: Exercise
   /** Note text like "Aynı devam" (Same as before) */
   note?: string
+  /** Whether to show the bottom separator line */
+  showBottomSeparator?: boolean
   /** Whether rest timer is enabled */
   restTimerEnabled?: boolean
   /** Callback when rest timer toggle changes */
@@ -25,6 +27,7 @@ export interface ExerciseCardProps {
 export function ExerciseCard({
   exercise,
   note,
+  showBottomSeparator = true,
   restTimerEnabled = false,
   onRestTimerChange,
   onPress,
@@ -35,7 +38,7 @@ export function ExerciseCard({
   const _muscles = exercise.muscleGroups.length ? exercise.muscleGroups.join(", ") : "—"
 
   return (
-    <View style={themed($container)}>
+    <View style={themed([$container, !showBottomSeparator && $containerNoSeparator])}>
       {/* Header Row */}
       <View style={$styles.row}>
         {/* Thumbnail */}
@@ -104,6 +107,10 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderBottomWidth: 1,
   borderBottomColor: colors.separator,
 })
+
+const $containerNoSeparator: ViewStyle = {
+  borderBottomWidth: 0,
+}
 
 const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 44,

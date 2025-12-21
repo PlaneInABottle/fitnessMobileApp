@@ -18,6 +18,7 @@ export function NoteInput({ value, onChangeText }: NoteInputProps) {
       onChangeText={onChangeText}
       placeholder="Buraya not ekleyin..."
       multiline
+      borderless
       accessibilityLabel="Exercise note"
       containerStyle={themed($container)}
       inputWrapperStyle={themed($inputWrapper)}
@@ -29,7 +30,9 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginHorizontal: spacing.md,
 })
 
-const $inputWrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $inputWrapper: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  borderRadius: 0,
   minHeight: 56,
   paddingVertical: spacing.xs,
 })

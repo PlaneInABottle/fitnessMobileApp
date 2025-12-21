@@ -186,7 +186,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard exercise={exercise} />
+                    <ExerciseCard exercise={exercise} showBottomSeparator={false} />
 
                     <NoteInput
                       value={we.notes}

@@ -91,6 +91,10 @@ export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
    */
   inputWrapperStyle?: StyleProp<ViewStyle>
   /**
+   * Removes the idle border from the input wrapper (focus ring still appears on focus).
+   */
+  borderless?: boolean
+  /**
    * An optional component to render on the right side of the input.
    * Example: `RightAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} color={props.editable ? colors.textDim : colors.text} />}`
    * Note: It is a good idea to memoize this.
@@ -129,6 +133,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     style: $inputStyleOverride,
     containerStyle: $containerStyleOverride,
     inputWrapperStyle: $inputWrapperStyleOverride,
+    borderless,
     ...TextInputProps
   } = props
   const input = useRef<TextInput>(null)
@@ -152,6 +157,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
   const $inputWrapperStyles = [
     $styles.row,
     $inputWrapperStyle,
+    borderless && { borderWidth: 0 },
     status === "error" && { borderColor: colors.error },
     isFocused && { borderColor: colors.tint, borderWidth: 2 }, // Blue border on focus
     TextInputProps.multiline && { minHeight: 112 },

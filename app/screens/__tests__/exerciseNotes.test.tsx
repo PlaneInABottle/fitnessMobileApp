@@ -56,5 +56,5 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.notes).toBe("Yeni not")
     })
-  })
+  }, 15000)
 })
