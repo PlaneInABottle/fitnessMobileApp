@@ -159,7 +159,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     $inputWrapperStyle,
     borderless && { borderWidth: 0 },
     status === "error" && { borderColor: colors.error },
-    isFocused && { borderColor: colors.tint, borderWidth: 2 }, // Blue border on focus
+    isFocused && !borderless && { borderColor: colors.tint, borderWidth: 2 }, // Blue border on focus
     TextInputProps.multiline && { minHeight: 112 },
     LeftAccessory && { paddingStart: 0 },
     RightAccessory && { paddingEnd: 0 },

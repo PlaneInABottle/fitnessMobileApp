@@ -395,12 +395,12 @@ const $setTypeCell: ViewStyle = {
 
 const $previousCell: ViewStyle = {
   flex: 0.8,
-  paddingHorizontal: 4,
+  paddingHorizontal: 8,
 }
 
 const $cell: ViewStyle = {
   flex: 1,
-  paddingHorizontal: 4,
+  paddingHorizontal: 8,
 }
 
 const $doneCell: ViewStyle = {
@@ -444,10 +444,10 @@ const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: 32,
   borderRadius: 6,
   borderWidth: 1,
-  borderColor: colors.border,
+  borderColor: colors.cardSecondary,
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "transparent",
+  backgroundColor: colors.cardSecondary,
 })
 
 const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
@@ -455,12 +455,12 @@ const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.success,
 })
 
-const $doneText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
+const $doneText: ThemedStyle<TextStyle> = () => ({
+  color: "#FFFFFF",
   fontSize: 16,
   fontWeight: "600",
 })
 
-const $doneTextDone: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral100,
+const $doneTextDone: ThemedStyle<TextStyle> = () => ({
+  color: "#FFFFFF",
 })

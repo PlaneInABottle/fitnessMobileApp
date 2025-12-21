@@ -287,9 +287,8 @@ const $setsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: "transparent",
-  borderWidth: 1,
-  borderColor: colors.border,
+  backgroundColor: colors.cardSecondary,
+  borderWidth: 0,
   borderRadius: 8,
   minHeight: 44,
   marginTop: spacing.sm,
