@@ -42,10 +42,14 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       const ms = Date.now() - session.startedAt.getTime()
       const minutes = Math.max(0, Math.round(ms / 60000))
 
-      // Calculate total volume
+      let completedSets = 0
       let volume = 0
+      
       for (const exercise of session.exercises) {
         for (const set of exercise.sets) {
+          if (!set.isDone) continue // ONLY count done sets
+          
+          completedSets++
           const weight = set.weight ?? 0
           const reps = set.reps ?? 0
           volume += weight * reps
@@ -55,8 +59,8 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       return {
         durationMinutes: minutes,
         exerciseCount: session.exercises.length,
-        totalSets: session.exercises.reduce((sum, we) => sum + we.sets.length, 0),
-        totalVolume: volume,
+        totalSets: completedSets, // Only completed sets
+        totalVolume: volume, // Only completed sets volume
       }
     })()
 
