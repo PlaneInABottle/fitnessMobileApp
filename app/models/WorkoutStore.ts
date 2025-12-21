@@ -454,6 +454,16 @@ export const WorkoutStoreModel = types
           .filter((x): x is NonNullable<typeof x> => !!x),
       })
 
+      // Auto-update template with completed workout values
+      if (session.templateId) {
+        const template = self.templates.get(session.templateId)
+        if (template) {
+          template.exercises = cast(buildTemplateExercisesFromSession(session))
+          template.exerciseIds = cast(session.exercises.map((we) => we.exerciseId))
+          template.lastUsedAt = now
+        }
+      }
+
       // Notes are for the active session UX only; don't persist them into history.
       const snapshotForHistory = {
         ...snapshot,

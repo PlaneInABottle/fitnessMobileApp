@@ -295,6 +295,83 @@ describe("WorkoutStore", () => {
     )
   })
 
+  it("automatically updates template on workout completion", () => {
+    const root = RootStoreModel.create({})
+
+    jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+
+    // Create template from workout with specific values
+    root.workoutStore.startNewSession()
+    const benchId = root.workoutStore.addExerciseToSession("bench-press")!
+
+    const firstSetId = root.workoutStore.currentSession?.exercises
+      .find((e) => e.id === benchId)
+      ?.sets?.[0].id
+    root.workoutStore.updateSetInWorkoutExercise(benchId, firstSetId!, {
+      weight: 100,
+      reps: 5,
+      isDone: true,
+    })
+    root.workoutStore.addSetToWorkoutExercise(benchId, {
+      setType: "working",
+      weight: 110,
+      reps: 3,
+      isDone: true,
+    })
+
+    const templateId = root.workoutStore.createTemplateFromSession("Bench Template")!
+
+    // Verify initial template values
+    let template = root.workoutStore.templates.get(templateId)
+    expect(template?.exercises).toHaveLength(1)
+    expect(template?.exercises[0].sets).toHaveLength(2)
+    expect(template?.exercises[0].sets[0].weight).toBe(100)
+    expect(template?.exercises[0].sets[0].reps).toBe(5)
+    expect(template?.exercises[0].sets[1].weight).toBe(110)
+    expect(template?.exercises[0].sets[1].reps).toBe(3)
+
+    root.workoutStore.completeSession()
+
+    // Start new workout from template
+    jest.setSystemTime(new Date("2025-01-02T00:00:00Z"))
+    root.workoutStore.startSessionFromTemplate(templateId)
+
+    // Update with new values
+    const bench2Id = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.exerciseId === "bench-press",
+    )?.id
+    const set1Id = root.workoutStore.currentSession?.exercises
+      .find((e) => e.id === bench2Id)
+      ?.sets?.[0].id
+    const set2Id = root.workoutStore.currentSession?.exercises
+      .find((e) => e.id === bench2Id)
+      ?.sets?.[1].id
+
+    root.workoutStore.updateSetInWorkoutExercise(bench2Id!, set1Id!, {
+      weight: 105,
+      reps: 5,
+      isDone: true,
+    })
+    root.workoutStore.updateSetInWorkoutExercise(bench2Id!, set2Id!, {
+      weight: 115,
+      reps: 3,
+      isDone: true,
+    })
+
+    // Complete workout - template should auto-update
+    root.workoutStore.completeSession()
+
+    // Verify template was automatically updated with new values
+    template = root.workoutStore.templates.get(templateId)
+    expect(template?.exercises).toHaveLength(1)
+    expect(template?.exercises[0].sets).toHaveLength(2)
+    expect(template?.exercises[0].sets[0].weight).toBe(105)
+    expect(template?.exercises[0].sets[0].reps).toBe(5)
+    expect(template?.exercises[0].sets[1].weight).toBe(115)
+    expect(template?.exercises[0].sets[1].reps).toBe(3)
+    expect(template?.lastUsedAt?.toISOString()).toBe("2025-01-02T00:00:00.000Z")
+  })
+
   it("sets lastError and returns false/undefined on failures", () => {
     const root = RootStoreModel.create({})
 
