@@ -226,6 +226,13 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                             }
                           })()
 
+                          const previousValue = performanceMemoryStore.getPreviousSetData({
+                            exerciseId: we.exerciseId,
+                            category: exercise.category,
+                            setType,
+                            order: orderWithinType,
+                          })
+
                           return (
                             <SetRow
                               key={s.id}
@@ -237,6 +244,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               rowIndex={i}
                               isDone={s.isDone}
                               placeholders={placeholders}
+                              previousValue={previousValue}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                               onDone={() => handleToggleDone(we.id, s.id)}
@@ -298,11 +306,12 @@ const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xl,
 })
 
-const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
   borderRadius: 0,
   padding: 0,
   gap: 0,
+  marginBottom: spacing.lg,
 })
 
 const $setsContainer: ThemedStyle<ViewStyle> = () => ({
@@ -315,10 +324,12 @@ const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderRadius: 8,
   minHeight: 44,
   marginTop: spacing.sm,
+  marginBottom: spacing.md,
   marginHorizontal: spacing.md,
 })
 
-const $addExerciseButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $addExerciseButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.tint,
   borderRadius: 8,
+  marginTop: spacing.lg,
 })

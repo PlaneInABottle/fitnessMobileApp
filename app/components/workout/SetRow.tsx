@@ -405,6 +405,7 @@ export function SetRow({
 
 const $row: ViewStyle = {
   alignItems: "center",
+  paddingHorizontal: 16,
 }
 
 const $headerRow: ViewStyle = {
