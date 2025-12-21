@@ -6,6 +6,7 @@ import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
 import { CreateRoutineScreen } from "@/screens/CreateRoutineScreen"
+import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { RoutineDetailScreen } from "@/screens/RoutineDetailScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { ThemeProvider } from "@/theme/context"
@@ -117,6 +118,7 @@ function renderFromWorkoutTab(store = createStoreWithTemplate()) {
             <Stack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
             <Stack.Screen name="RoutineDetail" component={RoutineDetailScreen} />
             <Stack.Screen name="CreateRoutine" component={CreateRoutineScreen} />
+            <Stack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
             <Stack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} />
           </Stack.Navigator>
         </NavigationContainer>
@@ -189,6 +191,43 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Rutin Oluştur")).toBeTruthy()
     })
+  })
+
+  it("can add exercises while editing a routine without starting a session", async () => {
+    const store = createStoreWithTemplate()
+    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } = renderFromWorkoutTab(store)
+
+    // Navigate to routine detail
+    await waitFor(() => {
+      expect(getByText("Upper Body A")).toBeTruthy()
+    })
+    fireEvent.press(getByLabelText("More options"))
+
+    await waitFor(() => {
+      expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+    })
+    fireEvent.press(getByLabelText("Rutini Düzenle"))
+
+    await waitFor(() => {
+      expect(getByText("Egzersizler (2)")).toBeTruthy()
+    })
+
+    fireEvent.press(getByText("+ Egzersiz ekle"))
+
+    await waitFor(() => {
+      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+    })
+
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
+    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
+    fireEvent.press(getAllByLabelText("Add exercise")[0])
+
+    await waitFor(() => {
+      expect(getByText("Egzersizler (3)")).toBeTruthy()
+      expect(getByText("Deadlift")).toBeTruthy()
+    })
+
+    expect(store.workoutStore.currentSession).toBeUndefined()
   })
 })
 

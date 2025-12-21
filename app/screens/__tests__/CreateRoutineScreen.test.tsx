@@ -89,6 +89,25 @@ describe("CreateRoutineScreen", () => {
     })
   })
 
+  it("selecting an exercise returns to routine and adds it", async () => {
+    const { getByText, getAllByLabelText } = renderCreateRoutineScreen()
+
+    fireEvent.press(getByText("+ Egzersiz ekle"))
+
+    await waitFor(() => {
+      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+    })
+
+    // Select first exercise from the library
+    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
+    fireEvent.press(getAllByLabelText("Add exercise")[0])
+
+    await waitFor(() => {
+      expect(getByText("Egzersizler (1)")).toBeTruthy()
+      expect(getByText("Bench Press")).toBeTruthy()
+    })
+  })
+
   it("save button is disabled when title is empty", () => {
     const { getByLabelText } = renderCreateRoutineScreen()
 
