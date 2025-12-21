@@ -132,7 +132,7 @@ export function SetRow({
       return `${previousValue.time ?? 0}s`
     }
     if (category === "CARDIO") {
-      return `${previousValue.time ?? 0}s / ${previousValue.distance ?? 0}m`
+      return `${previousValue.time ?? 0}s × ${previousValue.distance ?? 0}m`
     }
     return "-"
   }
