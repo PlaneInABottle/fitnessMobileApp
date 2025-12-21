@@ -61,6 +61,44 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     expect(within(workingButtons[1]).getByText("2")).toBeTruthy()
   })
 
+  it("converts template placeholders to real values when marking done (and persists to history)", async () => {
+    const store = RootStoreModel.create({})
+
+    // Create a template with stored set values
+    store.workoutStore.startNewSession()
+    const weId = store.workoutStore.addExerciseToSession("bench-press")!
+    const setId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0]?.id
+    expect(setId).toBeDefined()
+    store.workoutStore.updateSetInWorkoutExercise(weId, setId!, { weight: 100, reps: 5 })
+
+    const templateId = store.workoutStore.createTemplateFromSession("Bench Template")!
+    store.workoutStore.completeSession()
+
+    // Start from template (session values start at 0; template values are placeholders)
+    store.workoutStore.startSessionFromTemplate(templateId)
+
+    expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.weight).toBe(0)
+    expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.reps).toBe(0)
+
+    const { getByText, getAllByLabelText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+    // Mark set done: placeholder values should be copied into the set data.
+    fireEvent.press(getAllByLabelText("Toggle done")[0])
+
+    await waitFor(() => {
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.weight).toBe(100)
+      expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.reps).toBe(5)
+    })
+
+    store.workoutStore.completeSession()
+
+    const last = store.workoutStore.sessionHistory[store.workoutStore.sessionHistory.length - 1]
+    expect(last.exercises[0]?.sets[0]?.weight).toBe(100)
+    expect(last.exercises[0]?.sets[0]?.reps).toBe(5)
+  })
+
   it("opens set options on set type tap and keeps set row editable when toggling done", async () => {
     const store = RootStoreModel.create({})
     store.workoutStore.startNewSession()

@@ -246,12 +246,8 @@ export const WorkoutStoreModel = types
         const sets = te.sets.length
           ? te.sets.map((s) => {
               const setData: Partial<SetData> = {
+                ...buildDefaultWorkingSetData(te.exerciseId, root),
                 setType: s.setType as SetTypeId,
-                weight: toFiniteNumber(s.weight),
-                reps: toFiniteNumber(s.reps),
-                time: toFiniteNumber(s.time),
-                distance: toFiniteNumber(s.distance),
-                restTime: toFiniteNumber(s.restTime),
               }
 
               const validation = root.setStore.validateSetData(te.exerciseId, setData)

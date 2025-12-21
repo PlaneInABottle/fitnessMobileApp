@@ -141,6 +141,40 @@ export function SetRow({
     if (onPressSetType) return onPressSetType()
   }
 
+  function handlePressDone() {
+    if (mode !== "edit" || !onDone) return
+
+    // Only convert placeholder -> actual values when marking a set as done.
+    if (!isDone && onChange && placeholders) {
+      const [f1, f2] = getFields(category)
+      const keys = [f1.key, f2.key].filter(Boolean) as EditableFieldKey[]
+
+      let didPatch = false
+      const next: Partial<SetData> = { ...(value ?? {}) }
+
+      keys.forEach((k) => {
+        const placeholder = placeholders[k]
+        if (placeholder === undefined) return
+
+        const n = Number(String(placeholder).trim())
+        if (!Number.isFinite(n)) return
+
+        const current = (value as any)?.[k] as number | undefined
+        const isTouched = !!touched?.[k] || !!localTouched[k]
+        const isZeroOrUndefined = current === 0 || current === undefined
+
+        if (!isTouched && isZeroOrUndefined) {
+          ;(next as any)[k] = n
+          didPatch = true
+        }
+      })
+
+      if (didPatch) onChange(next)
+    }
+
+    onDone()
+  }
+
   function renderFieldCell(field: FieldConfig) {
     if (!field.label) return <View style={$cell} />
 
@@ -158,11 +192,7 @@ export function SetRow({
 
       const shouldForceDoneZero = !!isDone && isKgOrReps && !isTouched && isZeroOrUndefined
 
-      const shouldTreatAsPlaceholderSuggestion =
-        !!placeholders?.[key] && !isTouched && normalizedCurrent !== undefined && normalizedCurrent !== 0
-
-      const shouldShowPlaceholder =
-        !shouldForceDoneZero && !isTouched && (isZeroOrUndefined || shouldTreatAsPlaceholderSuggestion)
+      const shouldShowPlaceholder = !shouldForceDoneZero && !isTouched && isZeroOrUndefined
 
       const inputValue = shouldShowPlaceholder
         ? ""
@@ -191,10 +221,7 @@ export function SetRow({
             underlineColorAndroid="transparent"
             onFocus={() => {
               setFocusedField(key)
-              setDraftText((prev) => ({
-                ...prev,
-                [key]: shouldTreatAsPlaceholderSuggestion ? toText(normalizedCurrent) : inputValue,
-              }))
+              setDraftText((prev) => ({ ...prev, [key]: inputValue }))
             }}
             onChangeText={(t) => {
               setLocalTouched((prev) => ({ ...prev, [key]: true }))
@@ -353,7 +380,7 @@ export function SetRow({
       {/* Done Checkmark */}
       <View style={$doneCell}>
         <Pressable
-          onPress={onDone}
+          onPress={handlePressDone}
           style={[themed($doneButton), isDone && themed($doneButtonDone)]}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: !!isDone }}

@@ -197,10 +197,11 @@ describe("WorkoutStore", () => {
       (e) => e.exerciseId === "bench-press",
     )
     expect(bench1?.sets).toHaveLength(2)
-    expect(bench1?.sets?.[0].weight).toBe(100)
-    expect(bench1?.sets?.[0].reps).toBe(5)
-    expect(bench1?.sets?.[1].weight).toBe(50)
-    expect(bench1?.sets?.[1].reps).toBe(10)
+    // When starting from a template, sets start as 0 so template numbers can be shown as placeholders.
+    expect(bench1?.sets?.[0].weight).toBe(0)
+    expect(bench1?.sets?.[0].reps).toBe(0)
+    expect(bench1?.sets?.[1].weight).toBe(0)
+    expect(bench1?.sets?.[1].reps).toBe(0)
 
     root.workoutStore.addSetToWorkoutExercise(bench1!.id, {
       setType: "working",
@@ -216,12 +217,12 @@ describe("WorkoutStore", () => {
       (e) => e.exerciseId === "bench-press",
     )
     expect(bench2?.sets).toHaveLength(3)
-    expect(bench2?.sets?.[0].weight).toBe(100)
-    expect(bench2?.sets?.[0].reps).toBe(5)
-    expect(bench2?.sets?.[1].weight).toBe(50)
-    expect(bench2?.sets?.[1].reps).toBe(10)
-    expect(bench2?.sets?.[2].weight).toBe(120)
-    expect(bench2?.sets?.[2].reps).toBe(3)
+    expect(bench2?.sets?.[0].weight).toBe(0)
+    expect(bench2?.sets?.[0].reps).toBe(0)
+    expect(bench2?.sets?.[1].weight).toBe(0)
+    expect(bench2?.sets?.[1].reps).toBe(0)
+    expect(bench2?.sets?.[2].weight).toBe(0)
+    expect(bench2?.sets?.[2].reps).toBe(0)
   })
 
   it("uses template set counts as baseline for update summary", () => {

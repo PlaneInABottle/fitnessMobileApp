@@ -38,6 +38,33 @@ function Harness({
 }
 
 describe("SetRow", () => {
+  it("converts placeholders to actual values when marking done", () => {
+    const onChange = jest.fn()
+    const onDone = jest.fn()
+
+    const { getByLabelText } = render(
+      <ThemeProvider>
+        <NavigationContainer>
+          <SetRow
+            category="STRENGTH"
+            mode="edit"
+            value={{ setType: "working", weight: 0, reps: 0 }}
+            placeholders={{ weight: "100", reps: "5" }}
+            allowEmptyNumbers={false}
+            isDone={false}
+            onChange={onChange}
+            onDone={onDone}
+          />
+        </NavigationContainer>
+      </ThemeProvider>,
+    )
+
+    fireEvent.press(getByLabelText("Done"))
+
+    expect(onChange).toHaveBeenCalledWith({ setType: "working", weight: 100, reps: 5 })
+    expect(onDone).toHaveBeenCalled()
+  })
+
   it("shows Kg/Reps placeholders when values are 0 and untouched", () => {
     const { getByLabelText } = render(
       <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />,
