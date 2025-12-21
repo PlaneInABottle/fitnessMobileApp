@@ -401,17 +401,25 @@ export const WorkoutStoreModel = types
             const category = root.exerciseStore.getExerciseCategory(we.exerciseId)
             if (!category) return undefined
 
-            return {
-              exerciseId: we.exerciseId,
-              category,
-              sets: (we.sets ?? []).map((s) => ({
+            // Filter to only completed sets
+            const completedSets = (we.sets ?? [])
+              .filter((s) => s.isDone)
+              .map((s) => ({
                 setType: s.setType,
                 weight: s.weight,
                 reps: s.reps,
                 time: s.time,
                 distance: s.distance,
                 restTime: s.restTime,
-              })),
+              }))
+
+            // Skip exercises with no completed sets
+            if (completedSets.length === 0) return undefined
+
+            return {
+              exerciseId: we.exerciseId,
+              category,
+              sets: completedSets,
             }
           })
           .filter((x): x is NonNullable<typeof x> => !!x),
