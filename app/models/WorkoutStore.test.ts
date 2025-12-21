@@ -32,6 +32,23 @@ describe("WorkoutStore", () => {
       reps: 5,
     })
 
+    // Mark both sets as done before completing the workout
+    const exercise = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.id === workoutExerciseId!,
+    )
+    
+    // Mark first set (default set with weight 0) as done
+    const firstSetId = exercise?.sets[0]?.id
+    if (firstSetId) {
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId!, firstSetId, { isDone: true })
+    }
+    
+    // Mark second set (the one we just added with weight 100) as done
+    const secondSetId = exercise?.sets[1]?.id
+    if (secondSetId) {
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId!, secondSetId, { isDone: true })
+    }
+
     jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
     root.workoutStore.completeSession()
 

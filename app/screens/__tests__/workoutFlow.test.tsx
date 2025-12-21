@@ -139,12 +139,25 @@ describe("Workout MVP flow", () => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets[0]?.weight).toBe(60)
     })
 
+    // Mark first set as done
+    const workoutExerciseId = store.workoutStore.currentSession?.exercises[0]?.id
+    const firstSetId = store.workoutStore.currentSession?.exercises[0]?.sets[0]?.id
+    if (workoutExerciseId && firstSetId) {
+      store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, firstSetId, { isDone: true })
+    }
+
     // Add second set
     fireEvent.press(getByText("+ Set Ekle"))
 
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(2)
     })
+
+    // Mark second set as done
+    const secondSetId = store.workoutStore.currentSession?.exercises[0]?.sets[1]?.id
+    if (workoutExerciseId && secondSetId) {
+      store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, secondSetId, { isDone: true })
+    }
 
     // End button is now "Bitir" in Turkish
     fireEvent.press(getByText("Bitir"))
