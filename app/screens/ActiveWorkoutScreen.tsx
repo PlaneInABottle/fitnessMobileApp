@@ -7,6 +7,7 @@ import { ErrorMessage } from "@/components/common/ErrorMessage"
 import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
+import { NoteInput } from "@/components/workout/NoteInput"
 import { SetOptionsBottomSheet } from "@/components/workout/SetOptionsBottomSheet"
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
@@ -185,7 +186,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard exercise={exercise} note="Aynı devam" />
+                    <ExerciseCard exercise={exercise} />
+
+                    <NoteInput
+                      value={we.notes}
+                      onChangeText={(value) => workoutStore.updateWorkoutExerciseNotes(we.id, value)}
+                    />
 
                     <View style={themed($setsContainer)}>
                       <SetRow category={exercise.category} mode="header" />

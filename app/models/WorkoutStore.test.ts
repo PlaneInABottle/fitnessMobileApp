@@ -63,6 +63,26 @@ describe("WorkoutStore", () => {
     expect(sets?.[0].reps).toBe(0)
   })
 
+  it("updates workout exercise notes and keeps them on the session model", () => {
+    const root = RootStoreModel.create({})
+
+    root.workoutStore.startNewSession()
+    const workoutExerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+
+    const workoutExercise = root.workoutStore.currentSession?.exercises.find(
+      (e) => e.id === workoutExerciseId,
+    )
+    expect(workoutExercise?.notes).toBe("")
+
+    root.workoutStore.updateWorkoutExerciseNotes(workoutExerciseId, "Some note")
+    expect(workoutExercise?.notes).toBe("Some note")
+
+    root.workoutStore.completeSession()
+
+    // Notes are not persisted into history.
+    expect(root.workoutStore.sessionHistory[0].exercises[0].notes).toBe("")
+  })
+
   it("creates default sets for non-strength exercises", () => {
     const root = RootStoreModel.create({})
 

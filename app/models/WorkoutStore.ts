@@ -78,6 +78,7 @@ export interface ExerciseSetSnapshotOut extends SnapshotOut<typeof ExerciseSetMo
 export const WorkoutExerciseModel = types.model("WorkoutExercise", {
   id: types.identifier,
   exerciseId: types.string,
+  notes: types.optional(types.string, ""),
   sets: types.optional(types.array(ExerciseSetModel), []),
 })
 
@@ -349,6 +350,11 @@ export const WorkoutStoreModel = types
       })
     }
 
+    function updateWorkoutExerciseNotesUnsafe(workoutExerciseId: string, notes: string) {
+      const workoutExercise = requireWorkoutExercise(workoutExerciseId)
+      workoutExercise.notes = notes
+    }
+
     function updateSetInWorkoutExerciseUnsafe(
       workoutExerciseId: string,
       setId: string,
@@ -411,8 +417,17 @@ export const WorkoutStoreModel = types
           .filter((x): x is NonNullable<typeof x> => !!x),
       })
 
+      // Notes are for the active session UX only; don't persist them into history.
+      const snapshotForHistory = {
+        ...snapshot,
+        exercises: (snapshot.exercises ?? []).map((we: any) => {
+          const { notes: _notes, ...rest } = we
+          return rest
+        }),
+      }
+
       self.currentSession = undefined
-      self.sessionHistory.push(cast(snapshot))
+      self.sessionHistory.push(cast(snapshotForHistory))
     }
 
     function createTemplateUnsafe(name: string, exerciseIds: string[]): string {
@@ -524,6 +539,17 @@ export const WorkoutStoreModel = types
       ): boolean {
         try {
           updateSetInWorkoutExerciseUnsafe(workoutExerciseId, setId, patch)
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      updateWorkoutExerciseNotes(workoutExerciseId: string, notes: string): boolean {
+        try {
+          updateWorkoutExerciseNotesUnsafe(workoutExerciseId, notes)
           self.lastError = undefined
           return true
         } catch (e) {
