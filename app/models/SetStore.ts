@@ -1,6 +1,7 @@
 import { getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
 import { ExerciseSetFieldKey } from "./ExerciseStore"
+import { SET_TYPE_IDS } from "./utils/constants"
 
 export const SET_TYPES = {
   WARMUP: { name: "Warmup", label: "Isınma Seti", letter: "W" },
@@ -10,8 +11,6 @@ export const SET_TYPES = {
 } as const
 
 export type SetTypeId = "warmup" | "working" | "dropset" | "failure"
-
-const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset", "failure"] as const
 
 export type SetData = {
   setType: SetTypeId | string

@@ -1,29 +1,10 @@
-import {
-  cast,
-  getRoot,
-  getSnapshot,
-  Instance,
-  SnapshotIn,
-  SnapshotOut,
-  types,
-} from "mobx-state-tree"
+import { cast, getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
 import { ExerciseSetFieldKey } from "./ExerciseStore"
 import { SetData, SetTypeId } from "./SetStore"
-
-function sanitizeText(value: string): string {
-  return value.trim().replace(/\s+/g, " ")
-}
-
-function generateId(): string {
-  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
-}
-
-function toFiniteNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined
-}
-
-const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset", "failure"] as const
+import { generateId, sanitizeText, toFiniteNumber } from "./utils/common"
+import { calculateTotalVolume } from "./utils/calculations"
+import { SET_TYPE_IDS } from "./utils/constants"
 
 type RootWithWorkoutDeps = {
   exerciseStore: {
@@ -147,15 +128,10 @@ export const WorkoutStoreModel = types
      */
     get totalVolume(): number {
       if (!self.currentSession) return 0
-      let total = 0
-      for (const exercise of self.currentSession.exercises) {
-        for (const set of exercise.sets) {
-          if (set.weight !== undefined && set.reps !== undefined) {
-            total += set.weight * set.reps
-          }
-        }
-      }
-      return total
+      return self.currentSession.exercises.reduce(
+        (total, exercise) => total + calculateTotalVolume(exercise.sets),
+        0,
+      )
     },
 
     /**
@@ -182,17 +158,29 @@ export const WorkoutStoreModel = types
      */
     get completedVolumeKg(): number {
       if (!self.currentSession) return 0
-      return self.currentSession.exercises.reduce((volume, exercise) => {
-        return (
-          volume +
-          exercise.sets.reduce((setVolume, set) => {
-            if (!set.isDone) return setVolume
-            const weight = set.weight ?? 0
-            const reps = set.reps ?? 0
-            return setVolume + weight * reps
-          }, 0)
-        )
-      }, 0)
+      return self.currentSession.exercises.reduce(
+        (total, exercise) => total + calculateTotalVolume(exercise.sets, true),
+        0,
+      )
+    },
+
+    /**
+     * Get the template associated with the current session, if any
+     */
+    get currentTemplate(): WorkoutTemplate | undefined {
+      if (!self.currentSession?.templateId) return undefined
+      return self.templates.get(self.currentSession.templateId)
+    },
+
+    /**
+     * Get templates sorted by most recently used
+     */
+    get recentTemplates(): WorkoutTemplate[] {
+      return Array.from(self.templates.values()).sort((a, b) => {
+        const aTime = a.lastUsedAt?.getTime() ?? 0
+        const bTime = b.lastUsedAt?.getTime() ?? 0
+        return bTime - aTime
+      })
     },
   }))
   .actions((self) => {
@@ -421,17 +409,16 @@ export const WorkoutStoreModel = types
       const now = new Date()
       session.completedAt = now
 
-      const snapshot = getSnapshot(session)
-
+      // Build workout data without getSnapshot for performance
       root.performanceMemoryStore.recordCompletedWorkout({
         completedAt: now,
-        exercises: (snapshot.exercises ?? [])
+        exercises: session.exercises
           .map((we) => {
             const category = root.exerciseStore.getExerciseCategory(we.exerciseId)
             if (!category) return undefined
 
             // Filter to only completed sets
-            const completedSets = (we.sets ?? [])
+            const completedSets = we.sets
               .filter((s) => s.isDone)
               .map((s) => ({
                 setType: s.setType,
@@ -464,17 +451,31 @@ export const WorkoutStoreModel = types
         }
       }
 
-      // Notes are for the active session UX only; don't persist them into history.
-      const snapshotForHistory = {
-        ...snapshot,
-        exercises: (snapshot.exercises ?? []).map((we: any) => {
-          const { notes: _notes, ...rest } = we
-          return rest
-        }),
+      // Build history entry without notes (for UX only)
+      const historyEntry = {
+        id: session.id,
+        templateId: session.templateId,
+        startedAt: session.startedAt,
+        completedAt: session.completedAt,
+        exercises: session.exercises.map((we) => ({
+          id: we.id,
+          exerciseId: we.exerciseId,
+          notes: "", // Notes are for active session UX only
+          sets: we.sets.map((s) => ({
+            id: s.id,
+            setType: s.setType,
+            weight: s.weight,
+            reps: s.reps,
+            time: s.time,
+            distance: s.distance,
+            restTime: s.restTime,
+            isDone: s.isDone,
+          })),
+        })),
       }
 
       self.currentSession = undefined
-      self.sessionHistory.push(cast(snapshotForHistory))
+      self.sessionHistory.push(cast(historyEntry))
     }
 
     function createTemplateUnsafe(name: string, exerciseIds: string[]): string {
@@ -482,7 +483,7 @@ export const WorkoutStoreModel = types
       const sanitizedName = sanitizeText(name)
       if (!sanitizedName) throw new Error("Template name is required")
 
-      const sanitizedExerciseIds = exerciseIds.map(sanitizeText).filter(Boolean)
+      const sanitizedExerciseIds = exerciseIds.map((id) => sanitizeText(id)).filter(Boolean)
       sanitizedExerciseIds.forEach((id) => {
         if (!root.exerciseStore.hasExercise(id)) throw new Error("Invalid exerciseId")
       })

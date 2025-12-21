@@ -1,5 +1,7 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
+import { generateId, sanitizeText } from "./utils/common"
+
 export const EXERCISE_CATEGORY_VALUES = ["STRENGTH", "BODYWEIGHT", "TIMED", "CARDIO"] as const
 export type ExerciseCategory = (typeof EXERCISE_CATEGORY_VALUES)[number]
 
@@ -35,20 +37,11 @@ const MAX_EXERCISE_NAME_LENGTH = 80
 const MAX_EXERCISE_INSTRUCTIONS_LENGTH = 2000
 const MAX_EXERCISE_IMAGE_URL_LENGTH = 2048
 
-function sanitizeText(value: string, maxLength?: number): string {
-  const sanitized = value.trim().replace(/\s+/g, " ")
-  return maxLength ? sanitized.slice(0, maxLength) : sanitized
-}
-
 function sanitizeImageUrl(value: string): string {
   const sanitized = sanitizeText(value, MAX_EXERCISE_IMAGE_URL_LENGTH)
   if (!sanitized) throw new Error("Invalid imageUrl")
   if (!/^https?:\/\//i.test(sanitized) || /\s/.test(sanitized)) throw new Error("Invalid imageUrl")
   return sanitized
-}
-
-function generateId(): string {
-  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
 }
 
 export const ExerciseModel = types.model("Exercise", {
