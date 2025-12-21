@@ -39,6 +39,7 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
       schemaVersion: 2,
       patternMemories: {},
       personalRecords: {},
+      exerciseNotes: {},
     }
   }
 
@@ -54,6 +55,7 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
             schemaVersion: 2,
             patternMemories: {},
             personalRecords: {},
+            exerciseNotes: {},
           },
         } as any)
       } catch (finalError) {
@@ -83,6 +85,7 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
         schemaVersion: 2,
         patternMemories: {},
         personalRecords: {},
+        exerciseNotes: {},
       },
       workoutStore: {
         currentSession: undefined,

@@ -36,6 +36,7 @@ export type CompletedExercise = {
   exerciseId: string
   category: ExerciseCategory
   sets: CompletedSet[]
+  notes?: string
 }
 
 export type CompletedWorkout = {
@@ -99,15 +100,35 @@ export interface PersonalRecord extends Instance<typeof PersonalRecordModel> {}
 export interface PersonalRecordSnapshotIn extends SnapshotIn<typeof PersonalRecordModel> {}
 export interface PersonalRecordSnapshotOut extends SnapshotOut<typeof PersonalRecordModel> {}
 
+export const ExerciseNoteMemoryEntryModel = types.model("ExerciseNoteMemoryEntry", {
+  exerciseId: types.string,
+  note: types.string,
+  updatedAt: types.Date,
+})
+
+export interface ExerciseNoteMemoryEntry extends Instance<typeof ExerciseNoteMemoryEntryModel> {}
+export interface ExerciseNoteMemoryEntrySnapshotIn extends SnapshotIn<
+  typeof ExerciseNoteMemoryEntryModel
+> {}
+export interface ExerciseNoteMemoryEntrySnapshotOut extends SnapshotOut<
+  typeof ExerciseNoteMemoryEntryModel
+> {}
+
 export const PerformanceMemoryStoreModel = types
   .model("PerformanceMemoryStore", {
     schemaVersion: types.optional(types.number, 2),
     patternMemories: types.optional(types.map(PatternMemoryEntryModel), {}),
     personalRecords: types.optional(types.map(PersonalRecordModel), {}),
+    exerciseNotes: types.optional(types.map(ExerciseNoteMemoryEntryModel), {}),
   })
   .views((self) => ({
     getPersonalRecord(exerciseId: string): PersonalRecord | undefined {
       return self.personalRecords.get(exerciseId)
+    },
+
+    getPreviousNotes(exerciseId: string): string | undefined {
+      const note = self.exerciseNotes.get(exerciseId)?.note
+      return typeof note === "string" && note.trim().length > 0 ? note : undefined
     },
 
     getPlaceholderForField(query: PlaceholderQuery, field: SetFieldKey): PlaceholderValue {
@@ -225,6 +246,15 @@ export const PerformanceMemoryStoreModel = types
         workout?.exercises?.forEach((exercise) => {
           const counters: Partial<Record<SetTypeId, number>> = {}
 
+          const note = typeof exercise?.notes === "string" ? exercise.notes.trim() : ""
+          if (note.length > 0 && typeof exercise.exerciseId === "string" && exercise.exerciseId) {
+            self.exerciseNotes.set(exercise.exerciseId, {
+              exerciseId: exercise.exerciseId,
+              note,
+              updatedAt: now,
+            })
+          }
+
           exercise?.sets?.forEach((set) => {
             const setType = set?.setType
             if (typeof setType !== "string" || !SET_TYPE_IDS.includes(setType as SetTypeId)) return
@@ -268,6 +298,7 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
     schemaVersion: 2,
     patternMemories: {},
     personalRecords: {},
+    exerciseNotes: {},
   }
 
   const maybe = input as any
@@ -287,6 +318,28 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
         maxReps: isFiniteNumber((pr as any)?.maxReps) ? (pr as any).maxReps : undefined,
         maxTime: isFiniteNumber((pr as any)?.maxTime) ? (pr as any).maxTime : undefined,
         maxDistance: isFiniteNumber((pr as any)?.maxDistance) ? (pr as any).maxDistance : undefined,
+        updatedAt,
+      }
+    })
+  }
+
+  const exerciseNotes: Record<string, any> = {}
+  const notes = maybe?.exerciseNotes
+  if (notes && typeof notes === "object") {
+    Object.entries(notes).forEach(([exerciseId, entry]) => {
+      const e = entry as any
+      if (!exerciseId || typeof exerciseId !== "string") return
+      if (!e || typeof e !== "object") return
+
+      const note = typeof e.note === "string" ? e.note.trim() : ""
+      if (!note) return
+
+      const updatedAt = toDate(e.updatedAt)
+      if (!updatedAt) return
+
+      exerciseNotes[exerciseId] = {
+        exerciseId,
+        note,
         updatedAt,
       }
     })
@@ -328,6 +381,7 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
       schemaVersion: 2,
       patternMemories: v2PatternMemories,
       personalRecords,
+      exerciseNotes,
     }
   }
 
@@ -384,6 +438,7 @@ export function migratePerformanceMemoryStoreSnapshotToV2(
     ...base,
     patternMemories,
     personalRecords,
+    exerciseNotes,
   }
 }
 

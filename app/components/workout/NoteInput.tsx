@@ -7,16 +7,17 @@ import type { ThemedStyle } from "@/theme/types"
 export interface NoteInputProps {
   value: string
   onChangeText: (value: string) => void
+  placeholder?: string
 }
 
-export function NoteInput({ value, onChangeText }: NoteInputProps) {
+export function NoteInput({ value, onChangeText, placeholder }: NoteInputProps) {
   const { themed } = useAppTheme()
 
   return (
     <TextField
       value={value}
       onChangeText={onChangeText}
-      placeholder="Buraya not ekleyin..."
+      placeholder={placeholder ?? "Buraya not ekleyin..."}
       multiline
       borderless
       accessibilityLabel="Exercise note"

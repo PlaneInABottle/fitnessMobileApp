@@ -48,20 +48,15 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         }
         updateTimer()
         timerRef.current = setInterval(updateTimer, 1000)
-
-        return () => {
-          if (timerRef.current) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
-          }
-        }
       } else {
-        // Clear timer if session is removed
+        setElapsedSeconds(0)
+      }
+
+      return () => {
         if (timerRef.current) {
           clearInterval(timerRef.current)
           timerRef.current = null
         }
-        setElapsedSeconds(0)
       }
     }, [session?.id, session?.startedAt])
 
@@ -133,14 +128,14 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               text: "Çık",
               style: "destructive",
               onPress: () => {
-                workoutStore.cancelSession()
+                workoutStore.discardSession()
                 navigation.goBack()
               },
             },
           ],
         )
       } else {
-        workoutStore.cancelSession()
+        workoutStore.discardSession()
         navigation.goBack()
       }
     }
@@ -191,6 +186,16 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                   (x) => x.exerciseId === we.exerciseId,
                 )
 
+                const notePlaceholder = (() => {
+                  const templateNote = templateExercise?.notes?.trim()
+                  if (templateNote) return templateNote
+
+                  const previousNote = performanceMemoryStore.getPreviousNotes(we.exerciseId)?.trim()
+                  if (previousNote) return previousNote
+
+                  return undefined
+                })()
+
                 // Pre-group template sets by type to avoid O(n²) filtering in render
                 const templateSetsByType: Partial<Record<SetTypeId, Array<any>>> | null = templateExercise
                   ? (() => {
@@ -210,6 +215,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                     <NoteInput
                       value={we.notes}
+                      placeholder={notePlaceholder}
                       onChangeText={(value) =>
                         workoutStore.updateWorkoutExerciseNotes(we.id, value)
                       }

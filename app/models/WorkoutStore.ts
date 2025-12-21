@@ -37,6 +37,7 @@ type RootWithWorkoutDeps = {
           distance?: number
           restTime?: number
         }>
+        notes?: string
       }>
     }): void
   }
@@ -95,6 +96,7 @@ export interface TemplateSetSnapshotOut extends SnapshotOut<typeof TemplateSetMo
 
 export const TemplateExerciseModel = types.model("TemplateExercise", {
   exerciseId: types.string,
+  notes: types.optional(types.string, ""),
   sets: types.optional(types.array(TemplateSetModel), []),
 })
 
@@ -244,6 +246,7 @@ export const WorkoutStoreModel = types
     ): TemplateExerciseSnapshotIn[] {
       return session.exercises.map((we) => ({
         exerciseId: we.exerciseId,
+        notes: we.notes,
         sets: (we.sets ?? []).map((s) => ({
           setType: s.setType as SetTypeId,
           weight: toFiniteNumber(s.weight),
@@ -429,13 +432,17 @@ export const WorkoutStoreModel = types
                 restTime: s.restTime,
               }))
 
-            // Skip exercises with no completed sets
-            if (completedSets.length === 0) return undefined
+            const notes = we.notes
+            const hasNotes = typeof notes === "string" && notes.trim().length > 0
+
+            // Skip exercises only if there is no completed work and no notes.
+            if (completedSets.length === 0 && !hasNotes) return undefined
 
             return {
               exerciseId: we.exerciseId,
               category,
               sets: completedSets,
+              notes,
             }
           })
           .filter((x): x is NonNullable<typeof x> => !!x),

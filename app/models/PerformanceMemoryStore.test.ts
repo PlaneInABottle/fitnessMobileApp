@@ -120,4 +120,37 @@ describe("PerformanceMemoryStore (v2)", () => {
     expect(pr?.maxDistance).toBe(1.5)
     expect(pr?.updatedAt.toISOString()).toBe("2025-01-01T00:00:30.000Z")
   })
+
+  it("stores last non-empty note per exercise", () => {
+    const store = PerformanceMemoryStoreModel.create({})
+
+    store.recordCompletedWorkout({
+      completedAt: new Date("2025-01-01T00:00:00Z"),
+      exercises: [
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [],
+          notes: "Keep elbows tucked",
+        },
+      ],
+    })
+
+    expect(store.getPreviousNotes("bench-press")).toBe("Keep elbows tucked")
+
+    // Whitespace updates must not overwrite.
+    store.recordCompletedWorkout({
+      completedAt: new Date("2025-01-01T00:00:10Z"),
+      exercises: [
+        {
+          exerciseId: "bench-press",
+          category: "STRENGTH",
+          sets: [],
+          notes: "   ",
+        },
+      ],
+    })
+
+    expect(store.getPreviousNotes("bench-press")).toBe("Keep elbows tucked")
+  })
 })

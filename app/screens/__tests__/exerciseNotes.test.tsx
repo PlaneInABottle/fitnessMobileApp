@@ -57,4 +57,49 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
       expect(store.workoutStore.currentSession?.exercises[0]?.notes).toBe("Yeni not")
     })
   }, 15000)
+
+  it("shows previous note as placeholder in a new session", async () => {
+    const store = RootStoreModel.create({})
+
+    store.workoutStore.startNewSession()
+    const weId = store.workoutStore.addExerciseToSession("bench-press")!
+    store.workoutStore.updateWorkoutExerciseNotes(weId, "Memory note")
+
+    // No completed sets; note should still be recorded on completion.
+    store.workoutStore.completeSession(true)
+
+    store.workoutStore.startNewSession()
+    store.workoutStore.addExerciseToSession("bench-press")
+
+    const { getByText, getByPlaceholderText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+    expect(getByPlaceholderText("Memory note")).toBeTruthy()
+  })
+
+  it("prefers template note over previous note", async () => {
+    const store = RootStoreModel.create({})
+
+    // Seed memory note.
+    store.workoutStore.startNewSession()
+    const weId = store.workoutStore.addExerciseToSession("bench-press")!
+    store.workoutStore.updateWorkoutExerciseNotes(weId, "Memory note")
+    store.workoutStore.completeSession(true)
+
+    // Create a template with a different note.
+    store.workoutStore.startNewSession()
+    const weId2 = store.workoutStore.addExerciseToSession("bench-press")!
+    store.workoutStore.updateWorkoutExerciseNotes(weId2, "Template note")
+    const templateId = store.workoutStore.createTemplateFromSession("My Template")!
+    store.workoutStore.discardSession()
+
+    store.workoutStore.startSessionFromTemplate(templateId)
+
+    const { getByText, getByPlaceholderText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+    expect(getByPlaceholderText("Template note")).toBeTruthy()
+  })
 })
