@@ -20,6 +20,7 @@ export type SetData = {
   time?: number
   distance?: number
   restTime?: number
+  isDone?: boolean
 }
 
 export type SetValidationResult = { ok: true } | { ok: false; error: string }

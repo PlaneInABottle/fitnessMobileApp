@@ -69,6 +69,7 @@ export const ExerciseSetModel = types.model("ExerciseSet", {
   time: types.maybe(types.number),
   distance: types.maybe(types.number),
   restTime: types.maybe(types.number),
+  isDone: types.optional(types.boolean, false),
 })
 
 export interface ExerciseSet extends Instance<typeof ExerciseSetModel> {}
@@ -194,6 +195,7 @@ export const WorkoutStoreModel = types
         time: toFiniteNumber(setData.time),
         distance: toFiniteNumber(setData.distance),
         restTime: toFiniteNumber(setData.restTime),
+        isDone: setData.isDone ?? false,
       }
     }
 
@@ -368,6 +370,7 @@ export const WorkoutStoreModel = types
         time: patch.time ?? set.time,
         distance: patch.distance ?? set.distance,
         restTime: patch.restTime ?? set.restTime,
+        isDone: patch.isDone ?? set.isDone,
       }
 
       const validation = root.setStore.validateSetData(workoutExercise.exerciseId, merged)
@@ -379,6 +382,7 @@ export const WorkoutStoreModel = types
       set.time = merged.time as any
       set.distance = merged.distance as any
       set.restTime = merged.restTime as any
+      set.isDone = merged.isDone as any
     }
 
     function completeSessionUnsafe() {
