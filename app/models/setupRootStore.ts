@@ -29,6 +29,11 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
     },
   } as RootStoreSnapshotIn
 
+  // Non-persistent UI state; drop it from older persisted snapshots to avoid restore failures.
+  if ((merged as any).workoutStore?.pendingRoutineExerciseId != null) {
+    delete (merged as any).workoutStore.pendingRoutineExerciseId
+  }
+
   try {
     ;(merged as any).performanceMemoryStore = migratePerformanceMemoryStoreSnapshotToV2(
       (merged as any).performanceMemoryStore,

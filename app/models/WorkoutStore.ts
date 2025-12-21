@@ -122,8 +122,10 @@ export const WorkoutStoreModel = types
     templates: types.optional(types.map(WorkoutTemplateModel), {}),
     sessionHistory: types.optional(types.array(WorkoutSessionModel), []),
     lastError: types.maybe(types.string),
-    pendingRoutineExerciseId: types.maybe(types.string),
   })
+  .volatile(() => ({
+    pendingRoutineExerciseId: undefined as string | undefined,
+  }))
   .views((self) => ({
     /**
      * Calculate total volume (kg) for the current session
