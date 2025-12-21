@@ -243,11 +243,19 @@ export const WorkoutStoreModel = types
 
     function buildTemplateExercisesFromSession(
       session: WorkoutSession,
+      existingTemplate?: WorkoutTemplate,
     ): TemplateExerciseSnapshotIn[] {
-      return session.exercises.map((we) => ({
-        exerciseId: we.exerciseId,
-        notes: we.notes,
-        sets: (we.sets ?? []).map((s) => ({
+      return session.exercises.map((we) => {
+        const existingNotes = existingTemplate?.exercises.find(
+          (e) => e.exerciseId === we.exerciseId,
+        )?.notes
+
+        const notes = we.notes.trim().length > 0 ? we.notes : existingNotes ?? ""
+
+        return {
+          exerciseId: we.exerciseId,
+          notes,
+          sets: (we.sets ?? []).map((s) => ({
           setType: s.setType as SetTypeId,
           weight: toFiniteNumber(s.weight),
           reps: toFiniteNumber(s.reps),
@@ -255,7 +263,8 @@ export const WorkoutStoreModel = types
           distance: toFiniteNumber(s.distance),
           restTime: toFiniteNumber(s.restTime),
         })),
-      }))
+        }
+      })
     }
 
     function buildWorkoutExercisesFromTemplate(
@@ -452,7 +461,7 @@ export const WorkoutStoreModel = types
       if (!skipTemplateUpdate && session.templateId) {
         const template = self.templates.get(session.templateId)
         if (template) {
-          template.exercises = cast(buildTemplateExercisesFromSession(session))
+          template.exercises = cast(buildTemplateExercisesFromSession(session, template))
           template.exerciseIds = cast(session.exercises.map((we) => we.exerciseId))
           template.lastUsedAt = now
         }
@@ -726,7 +735,7 @@ export const WorkoutStoreModel = types
           if (!template) throw new Error("Invalid templateId")
 
           template.exerciseIds = cast(session.exercises.map((we) => we.exerciseId))
-          template.exercises = cast(buildTemplateExercisesFromSession(session))
+          template.exercises = cast(buildTemplateExercisesFromSession(session, template))
           template.lastUsedAt = new Date()
 
           self.lastError = undefined

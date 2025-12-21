@@ -102,4 +102,31 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
 
     expect(getByPlaceholderText("Template note")).toBeTruthy()
   })
+
+  it("does not wipe template note on completion when user leaves note empty", async () => {
+    const store = RootStoreModel.create({})
+
+    // Create a template with a note.
+    store.workoutStore.startNewSession()
+    const weId = store.workoutStore.addExerciseToSession("bench-press")!
+    store.workoutStore.updateWorkoutExerciseNotes(weId, "Template note")
+    const templateId = store.workoutStore.createTemplateFromSession("My Template")!
+    store.workoutStore.discardSession()
+
+    // Start from template, do not type anything, complete.
+    store.workoutStore.startSessionFromTemplate(templateId)
+    const workoutExerciseId = store.workoutStore.currentSession?.exercises[0]?.id!
+    const setId = store.workoutStore.currentSession?.exercises[0]?.sets[0]?.id!
+    store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, setId, { isDone: true })
+    store.workoutStore.completeSession()
+
+    // Start again from template; template note should still be there.
+    store.workoutStore.startSessionFromTemplate(templateId)
+
+    const { getByText, getByPlaceholderText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+    expect(getByPlaceholderText("Template note")).toBeTruthy()
+  })
 })
