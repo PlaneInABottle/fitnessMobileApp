@@ -32,9 +32,6 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       setType: SetTypeId
     } | null>(null)
 
-    const [doneSetIds, setDoneSetIds] = useState<Record<string, boolean>>({})
-    const [doneSetVolumes, setDoneSetVolumes] = useState<Record<string, number>>({})
-
     // Timer state
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -59,20 +56,29 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     }, [session?.id])
 
     useEffect(() => {
-      // Reset UI-only done state when session changes.
-      setDoneSetIds({})
-      setDoneSetVolumes({})
+      // Reset state when session changes.
       setSelectedSetInfo(null)
     }, [session?.id])
 
-    // Calculate completed sets count (only sets marked as done in UI)
+    // Calculate completed sets count
     const completedSetsCount = useMemo(() => {
-      return Object.values(doneSetIds).filter(Boolean).length
-    }, [doneSetIds])
+      if (!session) return 0
+      return session.exercises.reduce((count, exercise) => {
+        return count + exercise.sets.filter(set => set.isDone).length
+      }, 0)
+    }, [session?.exercises])
 
     const completedVolumeKg = useMemo(() => {
-      return Object.values(doneSetVolumes).reduce((sum, v) => sum + v, 0)
-    }, [doneSetVolumes])
+      if (!session) return 0
+      return session.exercises.reduce((volume, exercise) => {
+        return volume + exercise.sets.reduce((setVolume, set) => {
+          if (!set.isDone) return setVolume
+          const weight = set.weight ?? 0
+          const reps = set.reps ?? 0
+          return setVolume + (weight * reps)
+        }, 0)
+      }, 0)
+    }, [session?.exercises])
 
     function handleOpenSetOptions(workoutExerciseId: string, setId: string, setType: SetTypeId) {
       setSelectedSetInfo({ workoutExerciseId, setId, setType })
@@ -83,23 +89,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     }
 
     function handleToggleDone(workoutExerciseId: string, setId: string) {
-      const isCurrentlyDone = !!doneSetIds[setId]
+      const exercise = session?.exercises.find((e) => e.id === workoutExerciseId)
+      const set = exercise?.sets.find((s) => s.id === setId)
+      if (!set) return
 
-      setDoneSetIds((prev) => ({ ...prev, [setId]: !prev[setId] }))
-      setDoneSetVolumes((prev) => {
-        const next = { ...prev }
-
-        if (isCurrentlyDone) {
-          delete next[setId]
-          return next
-        }
-
-        const exercise = session?.exercises.find((e) => e.id === workoutExerciseId)
-        const set = exercise?.sets.find((s) => s.id === setId)
-
-        next[setId] =
-          set?.weight !== undefined && set?.reps !== undefined ? set.weight * set.reps : 0
-        return next
+      workoutStore.updateSetInWorkoutExercise(workoutExerciseId, setId, {
+        isDone: !set.isDone
       })
     }
 
@@ -113,16 +108,6 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         selectedSetInfo.workoutExerciseId,
         selectedSetInfo.setId,
       )
-      setDoneSetIds((prev) => {
-        const next = { ...prev }
-        delete next[selectedSetInfo.setId]
-        return next
-      })
-      setDoneSetVolumes((prev) => {
-        const next = { ...prev }
-        delete next[selectedSetInfo.setId]
-        return next
-      })
       setSelectedSetInfo(null)
     }
 
@@ -225,7 +210,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               allowEmptyNumbers={false}
                               index={displayIndex}
                               rowIndex={i}
-                              isDone={!!doneSetIds[s.id]}
+                              isDone={s.isDone}
                               placeholders={
                                 templateSet
                                   ? {
