@@ -37,12 +37,12 @@ export function saveString(key: string, value: string): boolean {
  * @param key The key to fetch.
  */
 export function load<T>(key: string): T | null {
-  let almostThere: string | null = null
   try {
-    almostThere = loadString(key)
-    return JSON.parse(almostThere ?? "") as T
+    const almostThere = loadString(key)
+    if (!almostThere) return null
+    return JSON.parse(almostThere) as T
   } catch {
-    return (almostThere as T) ?? null
+    return null
   }
 }
 

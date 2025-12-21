@@ -191,7 +191,6 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
                   key={exerciseId}
                   title={exercise.name}
                   subtitle={`${3} set planlandı`}
-                  onPress={() => {}}
                 />
               )
             })}

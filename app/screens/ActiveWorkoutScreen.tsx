@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react"
-import { ScrollView, View, ViewStyle } from "react-native"
+import { Alert, ScrollView, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -48,14 +48,22 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
         }
         updateTimer()
         timerRef.current = setInterval(updateTimer, 1000)
-      }
-      return () => {
+
+        return () => {
+          if (timerRef.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+          }
+        }
+      } else {
+        // Clear timer if session is removed
         if (timerRef.current) {
           clearInterval(timerRef.current)
+          timerRef.current = null
         }
+        setElapsedSeconds(0)
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session?.id])
+    }, [session?.id, session?.startedAt])
 
     useEffect(() => {
       // Reset state when session changes.
@@ -113,12 +121,36 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       )
     }
 
+    function handleGoBack() {
+      const hasData = session && session.exercises.length > 0
+      if (hasData) {
+        Alert.alert(
+          "Antrenmanı kaydetmediniz",
+          "Çıkmak istediğinizden emin misiniz? Tüm veriler kaybolacak.",
+          [
+            { text: "İptal", style: "cancel" },
+            {
+              text: "Çık",
+              style: "destructive",
+              onPress: () => {
+                workoutStore.cancelSession()
+                navigation.goBack()
+              },
+            },
+          ],
+        )
+      } else {
+        workoutStore.cancelSession()
+        navigation.goBack()
+      }
+    }
+
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
           title="Antrenman Kaydet"
           leftActionLabel="Back"
-          onLeftActionPress={() => navigation.goBack()}
+          onLeftActionPress={handleGoBack}
           rightActionLabel="Bitir"
           onRightActionPress={() => navigation.navigate("WorkoutComplete")}
           showStats
@@ -159,6 +191,19 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                   (x) => x.exerciseId === we.exerciseId,
                 )
 
+                // Pre-group template sets by type to avoid O(n²) filtering in render
+                const templateSetsByType: Partial<Record<SetTypeId, Array<any>>> | null = templateExercise
+                  ? (() => {
+                      const grouped: Partial<Record<SetTypeId, Array<any>>> = {}
+                      templateExercise.sets.forEach((ts) => {
+                        const type = (ts.setType as SetTypeId) ?? "working"
+                        if (!grouped[type]) grouped[type] = []
+                        grouped[type]!.push(ts)
+                      })
+                      return grouped
+                    })()
+                  : null
+
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
                     <ExerciseCard exercise={exercise} showBottomSeparator={false} />
@@ -184,11 +229,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                           const orderWithinType = (templateTypeCounters[setType] =
                             (templateTypeCounters[setType] ?? 0) + 1)
-                          const templateSet = templateExercise
-                            ? templateExercise.sets.filter(
-                                (ts) => (ts.setType as SetTypeId) === setType,
-                              )[orderWithinType - 1]
-                            : undefined
+                          const templateSet = templateSetsByType?.[setType]?.[orderWithinType - 1]
 
                           const placeholders = (() => {
                             if (templateSet) {

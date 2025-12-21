@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Pressable,
   // eslint-disable-next-line no-restricted-imports
@@ -114,6 +114,19 @@ export function SetRow({
   const [localTouched, setLocalTouched] = useState<Partial<Record<EditableFieldKey, boolean>>>({})
   const [draftText, setDraftText] = useState<Partial<Record<EditableFieldKey, string>>>({})
   const [focusedField, setFocusedField] = useState<EditableFieldKey | null>(null)
+
+  // Track set type to detect when set type changes (need to reset state)
+  const prevSetTypeRef = useRef(value?.setType)
+
+  useEffect(() => {
+    // Only reset state when set type changes, not on every value change
+    if (prevSetTypeRef.current !== value?.setType) {
+      prevSetTypeRef.current = value?.setType
+      setLocalTouched({})
+      setDraftText({})
+      setFocusedField(null)
+    }
+  }, [value?.setType])
 
   const setTypeId = (value?.setType as SetTypeId | undefined) ?? "working"
 

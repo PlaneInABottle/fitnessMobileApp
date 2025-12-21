@@ -45,7 +45,8 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
   if (persistedState || persistedSecureState) {
     try {
       applySnapshot(rootStore, merged)
-    } catch {
+    } catch (error) {
+      console.warn("Failed to restore root store, attempting with clean performance memory", error)
       try {
         applySnapshot(rootStore, {
           ...merged,
@@ -55,7 +56,8 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
             personalRecords: {},
           },
         } as any)
-      } catch {
+      } catch (finalError) {
+        console.error("Failed to restore root store, clearing storage", finalError)
         storage.remove(ROOT_STORE_PERSISTENCE_KEY)
         secureStorage.remove(ROOT_STORE_SECURE_PERSISTENCE_KEY)
       }

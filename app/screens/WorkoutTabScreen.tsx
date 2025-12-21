@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import { Alert, Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -65,7 +65,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
             </Text>
           </View>
           <Pressable
-            onPress={() => {}}
+            onPress={() => Alert.alert("Ayarlar", "Bu özellik yakında eklenecek")}
             style={$settingsButton}
             accessibilityRole="button"
             accessibilityLabel="Settings"

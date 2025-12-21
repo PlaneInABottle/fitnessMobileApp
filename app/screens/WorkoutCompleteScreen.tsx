@@ -1,4 +1,4 @@
-import { FC, useCallback, useLayoutEffect, useState } from "react"
+import { FC, useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { Alert, BackHandler, TextStyle, View, ViewStyle } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
@@ -36,7 +36,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       }, []),
     )
 
-    const { durationMinutes, exerciseCount, totalSets, totalVolume } = (() => {
+    const { durationMinutes, exerciseCount, totalSets, totalVolume } = useMemo(() => {
       if (!session) return { durationMinutes: 0, exerciseCount: 0, totalSets: 0, totalVolume: 0 }
 
       const ms = Date.now() - session.startedAt.getTime()
@@ -47,7 +47,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       
       for (const exercise of session.exercises) {
         for (const set of exercise.sets) {
-          if (!set.isDone) continue // ONLY count done sets
+          if (!set.isDone) continue
           
           completedSets++
           const weight = set.weight ?? 0
@@ -59,10 +59,10 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       return {
         durationMinutes: minutes,
         exerciseCount: session.exercises.length,
-        totalSets: completedSets, // Only completed sets
-        totalVolume: volume, // Only completed sets volume
+        totalSets: completedSets,
+        totalVolume: volume,
       }
-    })()
+    }, [session])
 
     function handleStartSaveTemplate() {
       workoutStore.clearError()

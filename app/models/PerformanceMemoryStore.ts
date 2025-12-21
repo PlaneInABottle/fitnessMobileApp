@@ -3,7 +3,7 @@ import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { EXERCISE_CATEGORY_VALUES, type ExerciseCategory } from "./ExerciseStore"
 import type { SetTypeId } from "./SetStore"
 
-const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset"] as const
+const SET_TYPE_IDS: readonly SetTypeId[] = ["warmup", "working", "dropset", "failure"] as const
 
 export type SetFieldKey = "weight" | "reps" | "time" | "distance" | "restTime"
 

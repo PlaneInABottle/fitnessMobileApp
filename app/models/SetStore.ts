@@ -107,7 +107,7 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
       if (typeof value !== "number" || !Number.isFinite(value)) {
         return {
           ok: false,
-          error: isRequired ? `${field} is required` : `${field} must be a finite number`,
+          error: `${field} must be a valid number`,
         }
       }
 

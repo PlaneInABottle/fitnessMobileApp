@@ -143,7 +143,7 @@ export const WorkoutStoreModel = types
   .views((self) => ({
     /**
      * Calculate total volume (kg) for the current session
-     * Volume = sum of (weight * reps) for all completed sets
+     * Volume = sum of (weight * reps) for all sets (both completed and incomplete)
      */
     get totalVolume(): number {
       if (!self.currentSession) return 0
@@ -393,13 +393,13 @@ export const WorkoutStoreModel = types
       if (!set) throw new Error("Set not found")
 
       const merged: Partial<SetData> = {
-        setType: patch.setType ?? set.setType,
-        weight: patch.weight ?? set.weight,
-        reps: patch.reps ?? set.reps,
-        time: patch.time ?? set.time,
-        distance: patch.distance ?? set.distance,
-        restTime: patch.restTime ?? set.restTime,
-        isDone: patch.isDone ?? set.isDone,
+        setType: patch.setType !== undefined ? patch.setType : set.setType,
+        weight: patch.weight !== undefined ? patch.weight : set.weight,
+        reps: patch.reps !== undefined ? patch.reps : set.reps,
+        time: patch.time !== undefined ? patch.time : set.time,
+        distance: patch.distance !== undefined ? patch.distance : set.distance,
+        restTime: patch.restTime !== undefined ? patch.restTime : set.restTime,
+        isDone: patch.isDone !== undefined ? patch.isDone : set.isDone,
       }
 
       const validation = root.setStore.validateSetData(workoutExercise.exerciseId, merged)

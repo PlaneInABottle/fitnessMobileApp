@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { Pressable, TextStyle, View, ViewStyle } from "react-native"
+import { Alert, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Icon } from "@/components/Icon"
@@ -71,10 +71,10 @@ export const ProfileScreen: FC<ProfileStackScreenProps<"ProfileTab">> = observer
             </Text>
 
             <View style={themed($settingsCard)}>
-              <SettingsItem icon="settings" label="Genel Ayarlar" onPress={() => {}} />
-              <SettingsItem icon="bell" label="Bildirimler" onPress={() => {}} />
-              <SettingsItem icon="lock" label="Gizlilik" onPress={() => {}} />
-              <SettingsItem icon="view" label="Görünüm" onPress={() => {}} />
+              <SettingsItem icon="settings" label="Genel Ayarlar" onPress={() => Alert.alert("Genel Ayarlar", "Bu özellik yakında eklenecek")} />
+              <SettingsItem icon="bell" label="Bildirimler" onPress={() => Alert.alert("Bildirimler", "Bu özellik yakında eklenecek")} />
+              <SettingsItem icon="lock" label="Gizlilik" onPress={() => Alert.alert("Gizlilik", "Bu özellik yakında eklenecek")} />
+              <SettingsItem icon="view" label="Görünüm" onPress={() => Alert.alert("Görünüm", "Bu özellik yakında eklenecek")} />
             </View>
           </View>
 

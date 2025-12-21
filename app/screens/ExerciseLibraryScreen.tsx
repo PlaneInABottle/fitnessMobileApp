@@ -67,8 +67,6 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
           title="Egzersiz Ekle"
           leftActionLabel="İptal"
           onLeftActionPress={navigation.goBack}
-          rightActionLabel="Oluştur"
-          onRightActionPress={() => {}}
         />
 
         <View style={themed($searchContainer)}>
@@ -140,7 +138,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
                       key={exercise.id}
                       title={exercise.name}
                       subtitle={exercise.muscleGroups.join(", ") || exercise.category}
-                      onPress={() => {}}
+                      onPress={() => handleAddExercise(exercise.id)}
                       onAdd={() => handleAddExercise(exercise.id)}
                     />
                   ))}

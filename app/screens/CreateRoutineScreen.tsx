@@ -38,14 +38,22 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       setIsSaving(true)
 
       try {
-        const templateId = workoutStore.createTemplate(title.trim(), selectedExerciseIds)
-        if (templateId) {
+        if (editTemplateId && existingTemplate) {
+          // Update existing template
+          existingTemplate.name = title.trim()
+          existingTemplate.exerciseIds.replace(selectedExerciseIds)
           navigation.goBack()
+        } else {
+          // Create new template
+          const templateId = workoutStore.createTemplate(title.trim(), selectedExerciseIds)
+          if (templateId) {
+            navigation.goBack()
+          }
         }
       } finally {
         setIsSaving(false)
       }
-    }, [canSave, isSaving, workoutStore, title, selectedExerciseIds, navigation])
+    }, [canSave, isSaving, editTemplateId, existingTemplate, workoutStore, title, selectedExerciseIds, navigation])
 
     const handleAddExercise = useCallback(() => {
       navigation.navigate("ExerciseLibrary", { fromCreateRoutine: true })
@@ -128,7 +136,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
                     key={exerciseId}
                     title={exercise.name}
                     subtitle={exercise.muscleGroups.join(", ") || exercise.category}
-                    onPress={() => {}}
+                    onPress={() => handleRemoveExercise(exerciseId)}
                     onAdd={() => handleRemoveExercise(exerciseId)}
                     addLabel="−"
                   />

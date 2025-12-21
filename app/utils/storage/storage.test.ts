@@ -22,7 +22,8 @@ describe("MMKV Storage", () => {
     expect(load<object>("object")).toEqual(VALUE_OBJECT)
     expect(loadString("object")).toEqual(VALUE_STRING)
 
-    expect(load<string>("string")).toEqual("string")
+    // Raw string cannot be JSON-parsed, returns null
+    expect(load<string>("string")).toEqual(null)
     expect(loadString("string")).toEqual("string")
   })
 
