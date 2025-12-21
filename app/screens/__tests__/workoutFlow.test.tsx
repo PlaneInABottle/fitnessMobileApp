@@ -108,8 +108,14 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const { store, getByText, getByTestId, getByLabelText, getAllByLabelText, getByPlaceholderText } =
-      renderWorkoutFlow()
+    const {
+      store,
+      getByText,
+      getByTestId,
+      getByLabelText,
+      getAllByLabelText,
+      getByPlaceholderText,
+    } = renderWorkoutFlow()
 
     fireEvent.press(getByText("+ Boş Antrenmana Başla"))
 
@@ -143,7 +149,11 @@ describe("Workout MVP flow", () => {
     const workoutExerciseId = store.workoutStore.currentSession?.exercises[0]?.id
     const firstSetId = store.workoutStore.currentSession?.exercises[0]?.sets[0]?.id
     if (workoutExerciseId && firstSetId) {
-      store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, firstSetId, { isDone: true })
+      act(() => {
+        store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, firstSetId, {
+          isDone: true,
+        })
+      })
     }
 
     // Add second set
@@ -156,7 +166,11 @@ describe("Workout MVP flow", () => {
     // Mark second set as done
     const secondSetId = store.workoutStore.currentSession?.exercises[0]?.sets[1]?.id
     if (workoutExerciseId && secondSetId) {
-      store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, secondSetId, { isDone: true })
+      act(() => {
+        store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, secondSetId, {
+          isDone: true,
+        })
+      })
     }
 
     // End button is now "Bitir" in Turkish

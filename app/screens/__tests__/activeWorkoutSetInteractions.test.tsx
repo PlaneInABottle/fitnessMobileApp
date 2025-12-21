@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { fireEvent, render, waitFor, within } from "@testing-library/react-native"
+import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
@@ -67,12 +67,15 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     // Create a template with stored set values
     store.workoutStore.startNewSession()
     const weId = store.workoutStore.addExerciseToSession("bench-press")!
-    const setId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0]?.id
+    const setId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0]
+      ?.id
     expect(setId).toBeDefined()
     store.workoutStore.updateSetInWorkoutExercise(weId, setId!, { weight: 100, reps: 5 })
 
     const templateId = store.workoutStore.createTemplateFromSession("Bench Template")!
-    store.workoutStore.completeSession()
+    act(() => {
+      store.workoutStore.completeSession()
+    })
 
     // Start from template (session values start at 0; template values are placeholders)
     store.workoutStore.startSessionFromTemplate(templateId)
@@ -92,11 +95,50 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.reps).toBe(5)
     })
 
-    store.workoutStore.completeSession()
+    act(() => {
+      store.workoutStore.completeSession()
+    })
 
     const last = store.workoutStore.sessionHistory[store.workoutStore.sessionHistory.length - 1]
     expect(last.exercises[0]?.sets[0]?.weight).toBe(100)
     expect(last.exercises[0]?.sets[0]?.reps).toBe(5)
+  })
+
+  it("updates header stats immediately when toggling a set done/undone", async () => {
+    const store = RootStoreModel.create({})
+    store.workoutStore.startNewSession()
+    const weId = store.workoutStore.addExerciseToSession("bench-press")!
+
+    const setId = store.workoutStore.currentSession?.exercises.find((e) => e.id === weId)?.sets?.[0]
+      ?.id
+    expect(setId).toBeDefined()
+    store.workoutStore.updateSetInWorkoutExercise(weId, setId!, { weight: 100, reps: 5 })
+
+    const { getByText, getAllByLabelText, getByLabelText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+    const readText = (node: any) => {
+      const c = node.props.children
+      return Array.isArray(c) ? c.join("") : String(c)
+    }
+
+    expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("0 kg")
+    expect(readText(getByLabelText("workout-stats-sets-value"))).toBe("0")
+
+    fireEvent.press(getAllByLabelText("Toggle done")[0])
+
+    await waitFor(() => {
+      expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("500 kg")
+      expect(readText(getByLabelText("workout-stats-sets-value"))).toBe("1")
+    })
+
+    fireEvent.press(getAllByLabelText("Toggle done")[0])
+
+    await waitFor(() => {
+      expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("0 kg")
+      expect(readText(getByLabelText("workout-stats-sets-value"))).toBe("0")
+    })
   })
 
   it("opens set options on set type tap and keeps set row editable when toggling done", async () => {

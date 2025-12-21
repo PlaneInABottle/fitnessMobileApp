@@ -165,6 +165,35 @@ export const WorkoutStoreModel = types
       if (!self.currentSession) return 0
       return self.currentSession.exercises.reduce((sum, ex) => sum + ex.sets.length, 0)
     },
+
+    /**
+     * Count of completed sets (isDone) in the current session.
+     */
+    get completedSetsCount(): number {
+      if (!self.currentSession) return 0
+      return self.currentSession.exercises.reduce((count, exercise) => {
+        return count + exercise.sets.filter((set) => set.isDone).length
+      }, 0)
+    },
+
+    /**
+     * Total volume (kg) for completed sets in the current session.
+     * Volume = sum of (weight * reps) for all sets where isDone === true.
+     */
+    get completedVolumeKg(): number {
+      if (!self.currentSession) return 0
+      return self.currentSession.exercises.reduce((volume, exercise) => {
+        return (
+          volume +
+          exercise.sets.reduce((setVolume, set) => {
+            if (!set.isDone) return setVolume
+            const weight = set.weight ?? 0
+            const reps = set.reps ?? 0
+            return setVolume + weight * reps
+          }, 0)
+        )
+      }, 0)
+    },
   }))
   .actions((self) => {
     function requireCurrentSession(): WorkoutSession {

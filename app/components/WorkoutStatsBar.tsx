@@ -44,7 +44,12 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
         <Text size="xxs" style={themed($label)}>
           Süre
         </Text>
-        <Text weight="bold" size="sm" style={themed($valueBlue)}>
+        <Text
+          weight="bold"
+          size="sm"
+          style={themed($valueBlue)}
+          accessibilityLabel="workout-stats-time-value"
+        >
           {formatTime(timeSeconds)}
         </Text>
       </View>
@@ -53,7 +58,12 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
         <Text size="xxs" style={themed($label)}>
           Hacim
         </Text>
-        <Text weight="bold" size="sm" style={themed($value)}>
+        <Text
+          weight="bold"
+          size="sm"
+          style={themed($value)}
+          accessibilityLabel="workout-stats-volume-value"
+        >
           {volumeKg.toLocaleString()} kg
         </Text>
       </View>
@@ -62,7 +72,12 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
         <Text size="xxs" style={themed($label)}>
           Sets
         </Text>
-        <Text weight="bold" size="sm" style={themed($value)}>
+        <Text
+          weight="bold"
+          size="sm"
+          style={themed($value)}
+          accessibilityLabel="workout-stats-sets-value"
+        >
           {setsCount}
         </Text>
       </View>

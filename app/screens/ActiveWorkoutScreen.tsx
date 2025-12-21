@@ -19,11 +19,13 @@ import type { ThemedStyle } from "@/theme/types"
 
 export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> = observer(
   function ActiveWorkoutScreen({ navigation }) {
-    const { workoutStore, exerciseStore, setStore } = useStores()
+    const { workoutStore, exerciseStore, setStore, performanceMemoryStore } = useStores()
     const { themed } = useAppTheme()
 
     const session = workoutStore.currentSession
-    const template = session?.templateId ? workoutStore.templates.get(session.templateId) : undefined
+    const template = session?.templateId
+      ? workoutStore.templates.get(session.templateId)
+      : undefined
     const availableSetTypes = useMemo(() => setStore.getAvailableSetTypes(), [setStore])
 
     const [selectedSetInfo, setSelectedSetInfo] = useState<{
@@ -60,25 +62,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       setSelectedSetInfo(null)
     }, [session?.id])
 
-    // Calculate completed sets count
-    const completedSetsCount = useMemo(() => {
-      if (!session) return 0
-      return session.exercises.reduce((count, exercise) => {
-        return count + exercise.sets.filter(set => set.isDone).length
-      }, 0)
-    }, [session?.exercises])
-
-    const completedVolumeKg = useMemo(() => {
-      if (!session) return 0
-      return session.exercises.reduce((volume, exercise) => {
-        return volume + exercise.sets.reduce((setVolume, set) => {
-          if (!set.isDone) return setVolume
-          const weight = set.weight ?? 0
-          const reps = set.reps ?? 0
-          return setVolume + (weight * reps)
-        }, 0)
-      }, 0)
-    }, [session?.exercises])
+    const completedSetsCount = workoutStore.completedSetsCount
+    const completedVolumeKg = workoutStore.completedVolumeKg
 
     function handleOpenSetOptions(workoutExerciseId: string, setId: string, setType: SetTypeId) {
       setSelectedSetInfo({ workoutExerciseId, setId, setType })
@@ -94,7 +79,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       if (!set) return
 
       workoutStore.updateSetInWorkoutExercise(workoutExerciseId, setId, {
-        isDone: !set.isDone
+        isDone: !set.isDone,
       })
     }
 
@@ -170,7 +155,9 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                 const exercise = exerciseStore.exercises.get(we.exerciseId)
                 if (!exercise) return null
 
-                const templateExercise = template?.exercises.find((x) => x.exerciseId === we.exerciseId)
+                const templateExercise = template?.exercises.find(
+                  (x) => x.exerciseId === we.exerciseId,
+                )
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
@@ -178,7 +165,9 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                     <NoteInput
                       value={we.notes}
-                      onChangeText={(value) => workoutStore.updateWorkoutExerciseNotes(we.id, value)}
+                      onChangeText={(value) =>
+                        workoutStore.updateWorkoutExerciseNotes(we.id, value)
+                      }
                     />
 
                     <View style={themed($setsContainer)}>
@@ -193,13 +182,49 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                           const isWorking = setType === "working"
                           const displayIndex = isWorking ? ++workingIndex : undefined
 
-                          const orderWithinType =
-                            (templateTypeCounters[setType] = (templateTypeCounters[setType] ?? 0) + 1)
+                          const orderWithinType = (templateTypeCounters[setType] =
+                            (templateTypeCounters[setType] ?? 0) + 1)
                           const templateSet = templateExercise
-                            ? templateExercise.sets.filter((ts) => (ts.setType as SetTypeId) === setType)[
-                                orderWithinType - 1
-                              ]
+                            ? templateExercise.sets.filter(
+                                (ts) => (ts.setType as SetTypeId) === setType,
+                              )[orderWithinType - 1]
                             : undefined
+
+                          const placeholders = (() => {
+                            if (templateSet) {
+                              return {
+                                weight:
+                                  templateSet.weight !== undefined
+                                    ? String(templateSet.weight)
+                                    : undefined,
+                                reps:
+                                  templateSet.reps !== undefined ? String(templateSet.reps) : undefined,
+                                time:
+                                  templateSet.time !== undefined ? String(templateSet.time) : undefined,
+                                distance:
+                                  templateSet.distance !== undefined
+                                    ? String(templateSet.distance)
+                                    : undefined,
+                              }
+                            }
+
+                            const memoryPlaceholders = performanceMemoryStore.getPlaceholdersForSet({
+                              exerciseId: we.exerciseId,
+                              category: exercise.category,
+                              setType,
+                              order: orderWithinType,
+                            })
+
+                            return {
+                              weight: memoryPlaceholders.weight !== "-" ? memoryPlaceholders.weight : undefined,
+                              reps: memoryPlaceholders.reps !== "-" ? memoryPlaceholders.reps : undefined,
+                              time: memoryPlaceholders.time !== "-" ? memoryPlaceholders.time : undefined,
+                              distance:
+                                memoryPlaceholders.distance !== "-"
+                                  ? memoryPlaceholders.distance
+                                  : undefined,
+                            }
+                          })()
 
                           return (
                             <SetRow
@@ -211,22 +236,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               index={displayIndex}
                               rowIndex={i}
                               isDone={s.isDone}
-                              placeholders={
-                                templateSet
-                                  ? {
-                                      weight:
-                                        templateSet.weight !== undefined
-                                          ? String(templateSet.weight)
-                                          : undefined,
-                                      reps: templateSet.reps !== undefined ? String(templateSet.reps) : undefined,
-                                      time: templateSet.time !== undefined ? String(templateSet.time) : undefined,
-                                      distance:
-                                        templateSet.distance !== undefined
-                                          ? String(templateSet.distance)
-                                          : undefined,
-                                    }
-                                  : undefined
-                              }
+                              placeholders={placeholders}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                               onDone={() => handleToggleDone(we.id, s.id)}
