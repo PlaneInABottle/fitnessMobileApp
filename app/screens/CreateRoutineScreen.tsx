@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react"
+import { FC, useCallback, useEffect, useRef, useState } from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
@@ -27,6 +27,13 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       existingTemplate ? [...existingTemplate.exerciseIds] : [],
     )
     const [isSaving, setIsSaving] = useState(false)
+
+    const isMountedRef = useRef(true)
+    useEffect(() => {
+      return () => {
+        isMountedRef.current = false
+      }
+    }, [])
 
     useFocusEffect(
       useCallback(() => {
@@ -62,7 +69,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           }
         }
       } finally {
-        setIsSaving(false)
+        if (isMountedRef.current) setIsSaving(false)
       }
     }, [canSave, isSaving, editTemplateId, existingTemplate, workoutStore, title, selectedExerciseIds, navigation])
 

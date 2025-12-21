@@ -549,6 +549,33 @@ export const WorkoutStoreModel = types
 
       template.name = sanitizedName
       template.exerciseIds.replace(sanitizedExerciseIds)
+
+      // If the template already has per-exercise data (from completing a workout),
+      // keep it consistent with the edited exerciseIds.
+      if (template.exercises.length > 0) {
+        const existingById = new Map(template.exercises.map((e) => [e.exerciseId, e]))
+
+        template.exercises = cast(
+          sanitizedExerciseIds.map((exerciseId) => {
+            const existing = existingById.get(exerciseId)
+            if (existing) {
+              return {
+                exerciseId,
+                notes: existing.notes,
+                sets: existing.sets.map((s) => ({
+                  setType: s.setType,
+                  weight: s.weight,
+                  reps: s.reps,
+                  time: s.time,
+                  distance: s.distance,
+                  restTime: s.restTime,
+                })),
+              }
+            }
+            return { exerciseId, notes: "", sets: [] }
+          }),
+        )
+      }
     }
 
     function deleteSetFromWorkoutExerciseUnsafe(workoutExerciseId: string, setId: string) {

@@ -158,6 +158,43 @@ describe("Integration: Template Management Flow", () => {
     })
   })
 
+  describe("Template edit after completion", () => {
+    it("edits template after completion → next session reflects updated exerciseIds", () => {
+      const templateId = root.workoutStore.createTemplate("Editable", ["bench-press", "squat"])
+      expect(templateId).toBeDefined()
+
+      // Start + complete workout so template.exercises gets populated.
+      expect(root.workoutStore.startSessionFromTemplate(templateId!)).toBe(true)
+      root.workoutStore.currentSession?.exercises.forEach((we) => {
+        markAllSetsComplete(root, we.id)
+      })
+      simulateTime(600000)
+      expect(root.workoutStore.completeSession()).toBe(true)
+
+      const populatedTemplate = root.workoutStore.templates.get(templateId!)
+      expect(populatedTemplate?.exercises.length).toBeGreaterThan(0)
+
+      // Edit: remove bench, reorder, and add deadlift.
+      expect(root.workoutStore.updateTemplate(templateId!, "Editable", ["squat", "deadlift"]))
+        .toBe(true)
+
+      const updatedTemplate = root.workoutStore.templates.get(templateId!)
+      expect(updatedTemplate?.exerciseIds).toEqual(["squat", "deadlift"])
+      expect(updatedTemplate?.exercises.map((e) => e.exerciseId)).toEqual(["squat", "deadlift"])
+
+      // Next session should reflect edited routine, even when template.exercises is present.
+      expect(root.workoutStore.startSessionFromTemplate(templateId!)).toBe(true)
+      expect(root.workoutStore.currentSession?.exercises.map((e) => e.exerciseId)).toEqual([
+        "squat",
+        "deadlift",
+      ])
+
+      const deadlift = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "deadlift")
+      expect(deadlift?.sets).toHaveLength(1)
+      expect(deadlift?.sets[0].setType).toBe("working")
+    })
+  })
+
   describe("Template with invalid exercises", () => {
     it("prevents template creation with non-existent exercise IDs", () => {
       // Attempt to create template with invalid exerciseId
