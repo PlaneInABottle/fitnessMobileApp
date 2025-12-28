@@ -36,6 +36,13 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
+    owner: "smokymumbo",
     plugins: [...existingPlugins],
+    extra: {
+      ...config.extra,
+      eas: {
+        projectId: "your-project-id-here",
+      },
+    },
   }
 }

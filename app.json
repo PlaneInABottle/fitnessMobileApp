@@ -59,6 +59,7 @@
   "experiments": {
     "tsconfigPaths": true
   },
+  "owner": "smokymumbo",
   "extra": {
     "ignite": {
       "version": "11.3.2"
