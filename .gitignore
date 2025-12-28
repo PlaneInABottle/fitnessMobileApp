@@ -111,3 +111,6 @@ CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 *.cxx/
+
+# Environment variables
+.env*
