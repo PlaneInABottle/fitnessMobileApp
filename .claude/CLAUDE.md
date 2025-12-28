@@ -1,4 +1,4 @@
-# Project Context
+# Project Context - Claude
 
 <!-- Generated: 2025-12-28T12:00:00Z | Template Version: 2.0.0 -->
 
@@ -88,8 +88,19 @@ Strict 5-Store Architecture:
 4. **PerformanceMemoryStore**: Last 5 performances and reactive suggestions.
 5. **ProgressStore**: Analytics and progress tracking.
 
-Folder structure: feature-based (screens, navigators, components, models, services, utils, theme, i18n).
-Persistence: dual-layer (MMKV for performance data, Secure Storage for auth).
+### State Management (MST)
+- **RootStore**: Single source of truth.
+- **Volatile State**: Use for UI-only state (e.g., `isSaving`, `pendingId`).
+- **Flows**: Use `flow` for all asynchronous actions.
+
+### UI & Theming
+- **Themed Styles**: Use the `themed` higher-order function from `@/theme/context` for support of dynamic theme switching.
+- **Atomic Components**: Prefer small, reusable components in `app/components/`.
+
+### Storage & Persistence
+- **MMKV**: High-frequency performance data and store snapshots.
+- **Secure Storage**: Sensitive user data or tokens.
+- **Migrations**: Always provide migration logic when changing store models.
 </architecture>
 
 ---
@@ -105,6 +116,7 @@ Persistence: dual-layer (MMKV for performance data, Secure Storage for auth).
 - Folder-scoped barrel exports (index.ts).
 - Consistent naming: PascalCase for components, camelCase for functions/models.
 - Use `themed` style pattern for components.
+- Semantic commit prefixes: `[implementer] Feature:`, `[implementer] Fix:`, `[implementer] Chore:`, `[implementer] Style:`.
 </code_style>
 
 ---
@@ -134,6 +146,7 @@ app/
 - Integration tests for store workflows (workout creation, template management).
 - Component testing with React Testing Library.
 - Maestro for cross-platform E2E flows.
+- Tests should target actual behavior, not implementation details.
 </testing>
 
 ---
@@ -157,4 +170,5 @@ app/
 - Development builds required for MMKV and Keyboard Controller.
 - Offline-first: all workout data persists locally before any sync.
 - Reactive suggestions: suggestions appear based on previous performances stored in PerformanceMemoryStore.
+- **Reactotron**: Use for MST action logs and performance tracking.
 </project_notes>
