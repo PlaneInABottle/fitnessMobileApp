@@ -1,77 +1,90 @@
-# Welcome to your new ignited app!
+# Fitness Tracker
 
-> The latest and greatest boilerplate for Infinite Red opinions
+A modern, high-performance fitness tracking application built with React Native and Expo. Designed with an offline-first philosophy and a focused user experience for tracking workouts, sets, and progress.
 
-This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way to test bleeding-edge changes to our React Native stack.
+## 📋 Features
 
-- [Quick start documentation](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/Boilerplate.md)
-- [Full documentation](https://github.com/infinitered/ignite/blob/master/docs/README.md)
+- **Offline-First Architecture**: Track your workouts anywhere, even without an internet connection.
+- **Custom Workout Creation**: Build your own routines or start an empty workout on the fly.
+- **Advanced Set Tracking**: Supports multiple set types including Warmup, Working, and Dropsets.
+- **Performance Memory**: Automatically remembers your last 5 performances per exercise and set type, providing reactive suggestions.
+- **Routine Templates**: Save your favorite workouts as templates for quick access in the future.
+- **Personal Records**: Tracks and displays your all-time bests for every exercise.
+- **Modern UI/UX**: Clean, intuitive interface with dark mode support and touch-optimized interactions.
 
-## Getting Started
+## 🚀 Tech Stack
 
+- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
+- **State Management**: [MobX State Tree (MST)](https://mobx-state-tree.js.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Ignite UI](https://github.com/infinitered/ignite) based theme system
+- **Storage**: dual-layer persistence (MMKV for fast data + Secure Storage for sensitive auth tokens)
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [Bun](https://bun.sh/) (preferred) or [npm](https://www.npmjs.com/)
+- [Expo Go](https://expo.dev/client) app on your mobile device (for development)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PlaneInABottle/fitnessMobileApp.git
+   cd fitnessMobileApp
+   ```
+
+2. Install dependencies:
+   ```bash
+   bun install
+   ```
+
+3. Start the development server:
+   ```bash
+   bun run start
+   ```
+
+### Building for Native
+
+To build the native Android and iOS directories:
 ```bash
-bun install
-bun run start
+npx expo prebuild
 ```
 
-To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
-
+For EAS builds:
 ```bash
 bun run build:ios:sim # build for ios simulator
-bun run build:ios:device # build for ios device
-bun run build:ios:prod # build for ios device
+bun run build:android:preview # build for android preview
 ```
 
-### `./assets` directory
+## 🏗️ Architecture
 
-This directory is designed to organize and store various assets, making it easy for you to manage and use them in your application. The assets are further categorized into subdirectories, including `icons` and `images`:
+The app follows a strict **5-Store Architecture** using MobX State Tree:
 
-```tree
-assets
-├── icons
-└── images
+1.  **ExerciseStore**: Manages the library of available exercises and categories.
+2.  **WorkoutStore**: Handles active sessions, workout history, and templates.
+3.  **SetStore**: Logic for individual set validation and data management.
+4.  **PerformanceMemoryStore**: Remembers performance patterns and calculates suggestions.
+5.  **ProgressStore**: (In development) For advanced analytics and progress tracking.
+
+## 🧪 Testing
+
+The project uses Jest for unit and integration testing.
+
+Run all tests:
+```bash
+bun run test
 ```
 
-**icons**
-This is where your icon assets will live. These icons can be used for buttons, navigation elements, or any other UI components. The recommended format for icons is PNG, but other formats can be used as well.
+## 📄 License
 
-Ignite comes with a built-in `Icon` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/app/components/Icon.md).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-**images**
-This is where your images will live, such as background images, logos, or any other graphics. You can use various formats such as PNG, JPEG, or GIF for your images.
+## 🤝 Contributing
 
-Another valuable built-in component within Ignite is the `AutoImage` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/Components-AutoImage.md).
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-How to use your `icon` or `image` assets:
-
-```typescript
-import { Image } from 'react-native';
-
-const MyComponent = () => {
-  return (
-    <Image source={require('assets/images/my_image.png')} />
-  );
-};
-```
-
-## Running Maestro end-to-end tests
-
-Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup) recipe.
-
-## Next Steps
-
-### Ignite Cookbook
-
-[Ignite Cookbook](https://ignitecookbook.com/) is an easy way for developers to browse and share code snippets (or “recipes”) that actually work.
-
-### Upgrade Ignite boilerplate
-
-Read our [Upgrade Guide](https://ignitecookbook.com/docs/recipes/UpdatingIgnite) to learn how to upgrade your Ignite project.
-
-## Community
-
-⭐️ Help us out by [starring on GitHub](https://github.com/infinitered/ignite), filing bug reports in [issues](https://github.com/infinitered/ignite/issues) or [ask questions](https://github.com/infinitered/ignite/discussions).
-
-💬 Join us on [Slack](https://join.slack.com/t/infiniteredcommunity/shared_invite/zt-1f137np4h-zPTq_CbaRFUOR_glUFs2UA) to discuss.
-
-📰 Make our Editor-in-chief happy by [reading the React Native Newsletter](https://reactnativenewsletter.com/).
+---
+Built with ❤️ by Mirza
