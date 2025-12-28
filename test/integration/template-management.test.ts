@@ -1,10 +1,5 @@
+import { createTestRootStore, markAllSetsComplete, simulateTime, expectNoErrors } from "./helpers"
 import { RootStore } from "../../app/models/RootStore"
-import {
-  createTestRootStore,
-  markAllSetsComplete,
-  simulateTime,
-  expectNoErrors,
-} from "./helpers"
 
 describe("Integration: Template Management Flow", () => {
   let root: RootStore
@@ -175,8 +170,9 @@ describe("Integration: Template Management Flow", () => {
       expect(populatedTemplate?.exercises.length).toBeGreaterThan(0)
 
       // Edit: remove bench, reorder, and add deadlift.
-      expect(root.workoutStore.updateTemplate(templateId!, "Editable", ["squat", "deadlift"]))
-        .toBe(true)
+      expect(root.workoutStore.updateTemplate(templateId!, "Editable", ["squat", "deadlift"])).toBe(
+        true,
+      )
 
       const updatedTemplate = root.workoutStore.templates.get(templateId!)
       expect(updatedTemplate?.exerciseIds).toEqual(["squat", "deadlift"])
@@ -189,7 +185,9 @@ describe("Integration: Template Management Flow", () => {
         "deadlift",
       ])
 
-      const deadlift = root.workoutStore.currentSession?.exercises.find((e) => e.exerciseId === "deadlift")
+      const deadlift = root.workoutStore.currentSession?.exercises.find(
+        (e) => e.exerciseId === "deadlift",
+      )
       expect(deadlift?.sets).toHaveLength(1)
       expect(deadlift?.sets[0].setType).toBe("working")
     })

@@ -2,8 +2,8 @@ import { cast, getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-st
 
 import { ExerciseSetFieldKey } from "./ExerciseStore"
 import { SetData, SetTypeId } from "./SetStore"
-import { generateId, sanitizeText, toFiniteNumber } from "./utils/common"
 import { calculateTotalVolume } from "./utils/calculations"
+import { generateId, sanitizeText, toFiniteNumber } from "./utils/common"
 import { SET_TYPE_IDS } from "./utils/constants"
 
 type RootWithWorkoutDeps = {
@@ -253,19 +253,19 @@ export const WorkoutStoreModel = types
           (e) => e.exerciseId === we.exerciseId,
         )?.notes
 
-        const notes = we.notes.trim().length > 0 ? we.notes : existingNotes ?? ""
+        const notes = we.notes.trim().length > 0 ? we.notes : (existingNotes ?? "")
 
         return {
           exerciseId: we.exerciseId,
           notes,
           sets: (we.sets ?? []).map((s) => ({
-          setType: s.setType as SetTypeId,
-          weight: toFiniteNumber(s.weight),
-          reps: toFiniteNumber(s.reps),
-          time: toFiniteNumber(s.time),
-          distance: toFiniteNumber(s.distance),
-          restTime: toFiniteNumber(s.restTime),
-        })),
+            setType: s.setType as SetTypeId,
+            weight: toFiniteNumber(s.weight),
+            reps: toFiniteNumber(s.reps),
+            time: toFiniteNumber(s.time),
+            distance: toFiniteNumber(s.distance),
+            restTime: toFiniteNumber(s.restTime),
+          })),
         }
       })
     }

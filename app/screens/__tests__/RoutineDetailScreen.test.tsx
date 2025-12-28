@@ -195,7 +195,8 @@ describe("RoutineDetailScreen navigation", () => {
 
   it("can add exercises while editing a routine without starting a session", async () => {
     const store = createStoreWithTemplate()
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } = renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
+      renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {
@@ -232,9 +233,13 @@ describe("RoutineDetailScreen navigation", () => {
 
   it("save persists edits and returns to routine detail", async () => {
     const store = RootStoreModel.create({})
-    const templateId = store.workoutStore.createTemplate("Upper Body A", ["bench-press", "overhead-press"])!
+    const templateId = store.workoutStore.createTemplate("Upper Body A", [
+      "bench-press",
+      "overhead-press",
+    ])!
 
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } = renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
+      renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {

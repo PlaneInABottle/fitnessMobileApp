@@ -71,7 +71,16 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       } finally {
         if (isMountedRef.current) setIsSaving(false)
       }
-    }, [canSave, isSaving, editTemplateId, existingTemplate, workoutStore, title, selectedExerciseIds, navigation])
+    }, [
+      canSave,
+      isSaving,
+      editTemplateId,
+      existingTemplate,
+      workoutStore,
+      title,
+      selectedExerciseIds,
+      navigation,
+    ])
 
     const handleAddExercise = useCallback(() => {
       navigation.navigate("ExerciseLibrary", { fromCreateRoutine: true })
