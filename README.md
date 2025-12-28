@@ -50,7 +50,7 @@ A modern, high-performance fitness tracking application built with React Native 
 
 To build the native Android and iOS directories:
 ```bash
-npx expo prebuild
+bunx expo prebuild
 ```
 
 For EAS builds:
