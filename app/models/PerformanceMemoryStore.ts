@@ -162,13 +162,15 @@ export const PerformanceMemoryStoreModel = types
       }
     },
 
-    getPreviousSetData(query: PlaceholderQuery): { weight?: number; reps?: number; time?: number; distance?: number } | undefined {
+    getPreviousSetData(
+      query: PlaceholderQuery,
+    ): { weight?: number; reps?: number; time?: number; distance?: number } | undefined {
       if (!query.exerciseId || !query.category || !query.setType) return undefined
       if (!isFiniteNumber(query.order) || query.order <= 0) return undefined
-      
+
       const entry = self.patternMemories.get(buildKey(query))
       if (!entry) return undefined
-      
+
       return {
         weight: entry.weight,
         reps: entry.reps,

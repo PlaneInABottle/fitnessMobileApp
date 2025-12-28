@@ -44,11 +44,11 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
       let completedSets = 0
       let volume = 0
-      
+
       for (const exercise of session.exercises) {
         for (const set of exercise.sets) {
           if (!set.isDone) continue
-          
+
           completedSets++
           const weight = set.weight ?? 0
           const reps = set.reps ?? 0

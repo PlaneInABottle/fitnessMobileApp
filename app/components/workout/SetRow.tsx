@@ -276,16 +276,16 @@ export function SetRow({
             style={[
               themed($input),
               isKgOrReps &&
-              !hasEnteredValue && {
-                color: colors.textDim,
-                fontFamily: typography.primary.medium,
-              },
+                !hasEnteredValue && {
+                  color: colors.textDim,
+                  fontFamily: typography.primary.medium,
+                },
               isKgOrReps &&
-              hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
+                hasEnteredValue && { color: colors.text, fontFamily: typography.primary.bold },
               !isKgOrReps &&
-              isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
+                isSuggested && { color: colors.textDim, fontFamily: typography.primary.medium },
               !isKgOrReps &&
-              isTouched && { color: colors.text, fontFamily: typography.primary.bold },
+                isTouched && { color: colors.text, fontFamily: typography.primary.bold },
               shouldForceDoneZero && { color: colors.text, fontFamily: typography.primary.bold },
             ]}
           />

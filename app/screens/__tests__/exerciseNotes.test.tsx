@@ -115,8 +115,8 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
 
     // Start from template, do not type anything, complete.
     store.workoutStore.startSessionFromTemplate(templateId)
-    const workoutExerciseId = store.workoutStore.currentSession?.exercises[0]?.id!
-    const setId = store.workoutStore.currentSession?.exercises[0]?.sets[0]?.id!
+    const workoutExerciseId = store.workoutStore.currentSession!.exercises[0].id
+    const setId = store.workoutStore.currentSession!.exercises[0].sets[0].id
     store.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, setId, { isDone: true })
     store.workoutStore.completeSession()
 

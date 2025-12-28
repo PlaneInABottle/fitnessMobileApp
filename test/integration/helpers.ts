@@ -35,7 +35,7 @@ export function markAllSetsComplete(root: RootStore, workoutExerciseId: string):
   const exercise = root.workoutStore.currentSession?.exercises.find(
     (e) => e.id === workoutExerciseId,
   )
-  
+
   if (!exercise) {
     throw new Error(`Workout exercise ${workoutExerciseId} not found`)
   }
@@ -89,12 +89,12 @@ export function completeAllSetsInSession(
     throw new Error("No active session")
   }
 
-  session.exercises.forEach((exercise, exerciseIndex) => {
+  session.exercises.forEach((exercise) => {
     const data = setData?.find((d) => d.workoutExerciseId === exercise.id)
 
     exercise.sets.forEach((set, setIndex) => {
       const updates: any = { isDone: true }
-      
+
       if (data) {
         if (data.weight !== undefined) updates.weight = data.weight + setIndex
         if (data.reps !== undefined) updates.reps = data.reps

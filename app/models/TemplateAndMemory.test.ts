@@ -1,7 +1,4 @@
-import { cast } from "mobx-state-tree"
-
 import { RootStoreModel } from "./RootStore"
-import { SetTypeId } from "./SetStore"
 
 describe("Template and Row Memory Integration", () => {
   beforeEach(() => {
@@ -62,9 +59,9 @@ describe("Template and Row Memory Integration", () => {
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
       const squatId = root.workoutStore.addExerciseToSession("squat")!
 
-      const firstBenchSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
-        ?.sets?.[0].id
+      const firstBenchSet = root.workoutStore.currentSession?.exercises.find(
+        (e) => e.id === benchId,
+      )?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstBenchSet!, {
         weight: 100,
         reps: 5,
@@ -75,9 +72,9 @@ describe("Template and Row Memory Integration", () => {
         reps: 3,
       })
 
-      const firstSquatSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === squatId)
-        ?.sets?.[0].id
+      const firstSquatSet = root.workoutStore.currentSession?.exercises.find(
+        (e) => e.id === squatId,
+      )?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(squatId, firstSquatSet!, {
         weight: 135,
         reps: 8,
@@ -109,9 +106,9 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstBenchSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
-        ?.sets?.[0].id
+      const firstBenchSet = root.workoutStore.currentSession?.exercises.find(
+        (e) => e.id === benchId,
+      )?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstBenchSet!, {
         weight: 100,
         reps: 5,
@@ -157,8 +154,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, { weight: 80, reps: 8 })
       root.workoutStore.addSetToWorkoutExercise(benchId, {
@@ -168,8 +164,7 @@ describe("Template and Row Memory Integration", () => {
       })
 
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, { isDone: true })
-      const secondSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const secondSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[1].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, secondSet!, { isDone: true })
 
@@ -178,8 +173,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const bench2Id = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const set1 = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === bench2Id)
+      const set1 = root.workoutStore.currentSession?.exercises.find((e) => e.id === bench2Id)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(bench2Id, set1!, { weight: 120, reps: 4 })
       root.workoutStore.addSetToWorkoutExercise(bench2Id, {
@@ -231,8 +225,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         setType: "warmup",
@@ -290,8 +283,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         weight: 100,
@@ -324,8 +316,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         weight: 100,
@@ -350,8 +341,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const bench2Id = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const set1 = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === bench2Id)
+      const set1 = root.workoutStore.currentSession?.exercises.find((e) => e.id === bench2Id)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(bench2Id, set1!, {
         weight: 105,
@@ -507,8 +497,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         setType: "warmup",
@@ -532,8 +521,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         setType: "dropset",
@@ -557,8 +545,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         setType: "warmup",
@@ -614,7 +601,7 @@ describe("Template and Row Memory Integration", () => {
       const root = RootStoreModel.create({})
 
       root.workoutStore.startNewSession()
-      const benchId = root.workoutStore.addExerciseToSession("bench-press")!
+      root.workoutStore.addExerciseToSession("bench-press")!
 
       const templateId = root.workoutStore.createTemplateFromSession("Minimal Template")!
 
@@ -646,8 +633,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         weight: 100,
@@ -707,8 +693,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         weight: 95,
@@ -721,8 +706,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const bench2Id = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const set1 = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === bench2Id)
+      const set1 = root.workoutStore.currentSession?.exercises.find((e) => e.id === bench2Id)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(bench2Id, set1!, { weight: 100, reps: 5 })
 
@@ -773,8 +757,7 @@ describe("Template and Row Memory Integration", () => {
       root.workoutStore.startNewSession()
       const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-      const firstSet = root.workoutStore.currentSession?.exercises
-        .find((e) => e.id === benchId)
+      const firstSet = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
         ?.sets?.[0].id
       root.workoutStore.updateSetInWorkoutExercise(benchId, firstSet!, {
         setType: "warmup",

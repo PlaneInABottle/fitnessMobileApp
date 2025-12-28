@@ -1,5 +1,5 @@
-import { RootStore } from "../../app/models/RootStore"
 import { createTestRootStore, markAllSetsComplete, simulateTime } from "./helpers"
+import { RootStore } from "../../app/models/RootStore"
 
 describe("Integration: Error Handling Flow", () => {
   let root: RootStore

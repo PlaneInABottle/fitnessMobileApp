@@ -1,10 +1,5 @@
+import { createTestRootStore, markAllSetsComplete, simulateTime } from "./helpers"
 import { RootStore } from "../../app/models/RootStore"
-import {
-  createTestRootStore,
-  markAllSetsComplete,
-  simulateTime,
-  assertPerformanceMemoryRecorded,
-} from "./helpers"
 
 describe("Integration: Performance Memory Flow", () => {
   let root: RootStore

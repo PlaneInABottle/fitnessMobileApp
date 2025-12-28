@@ -1,10 +1,5 @@
+import { createTestRootStore, markAllSetsComplete, simulateTime, expectNoErrors } from "./helpers"
 import { RootStore } from "../../app/models/RootStore"
-import {
-  createTestRootStore,
-  markAllSetsComplete,
-  simulateTime,
-  expectNoErrors,
-} from "./helpers"
 
 describe("Integration: Workout Creation Flow", () => {
   let root: RootStore

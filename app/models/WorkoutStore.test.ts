@@ -36,17 +36,19 @@ describe("WorkoutStore", () => {
     const exercise = root.workoutStore.currentSession?.exercises.find(
       (e) => e.id === workoutExerciseId!,
     )
-    
+
     // Mark first set (default set with weight 0) as done
     const firstSetId = exercise?.sets[0]?.id
     if (firstSetId) {
       root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId!, firstSetId, { isDone: true })
     }
-    
+
     // Mark second set (the one we just added with weight 100) as done
     const secondSetId = exercise?.sets[1]?.id
     if (secondSetId) {
-      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId!, secondSetId, { isDone: true })
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId!, secondSetId, {
+        isDone: true,
+      })
     }
 
     jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
@@ -304,8 +306,7 @@ describe("WorkoutStore", () => {
     root.workoutStore.startNewSession()
     const benchId = root.workoutStore.addExerciseToSession("bench-press")!
 
-    const firstSetId = root.workoutStore.currentSession?.exercises
-      .find((e) => e.id === benchId)
+    const firstSetId = root.workoutStore.currentSession?.exercises.find((e) => e.id === benchId)
       ?.sets?.[0].id
     root.workoutStore.updateSetInWorkoutExercise(benchId, firstSetId!, {
       weight: 100,
@@ -340,11 +341,9 @@ describe("WorkoutStore", () => {
     const bench2Id = root.workoutStore.currentSession?.exercises.find(
       (e) => e.exerciseId === "bench-press",
     )?.id
-    const set1Id = root.workoutStore.currentSession?.exercises
-      .find((e) => e.id === bench2Id)
+    const set1Id = root.workoutStore.currentSession?.exercises.find((e) => e.id === bench2Id)
       ?.sets?.[0].id
-    const set2Id = root.workoutStore.currentSession?.exercises
-      .find((e) => e.id === bench2Id)
+    const set2Id = root.workoutStore.currentSession?.exercises.find((e) => e.id === bench2Id)
       ?.sets?.[1].id
 
     root.workoutStore.updateSetInWorkoutExercise(bench2Id!, set1Id!, {

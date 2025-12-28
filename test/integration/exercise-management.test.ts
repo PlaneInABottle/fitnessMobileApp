@@ -1,5 +1,5 @@
-import { RootStore } from "../../app/models/RootStore"
 import { createTestRootStore, markAllSetsComplete, simulateTime } from "./helpers"
+import { RootStore } from "../../app/models/RootStore"
 
 describe("Integration: Exercise Management Flow", () => {
   let root: RootStore
@@ -78,9 +78,7 @@ describe("Integration: Exercise Management Flow", () => {
       const weId = root.workoutStore.addExerciseToSession(cardioId!)!
 
       // Verify default set has CARDIO-appropriate fields (time, not weight/reps)
-      const workoutExercise = root.workoutStore.currentSession?.exercises.find(
-        (e) => e.id === weId,
-      )
+      const workoutExercise = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)
       expect(workoutExercise).toBeDefined()
       expect(workoutExercise?.sets[0].time).toBeDefined()
 
@@ -130,9 +128,7 @@ describe("Integration: Exercise Management Flow", () => {
       expect(root.exerciseStore.hasExercise(customId)).toBe(false)
 
       // Verify workout exercise still exists (no cascade delete)
-      const workoutExercise = root.workoutStore.currentSession?.exercises.find(
-        (e) => e.id === weId,
-      )
+      const workoutExercise = root.workoutStore.currentSession?.exercises.find((e) => e.id === weId)
       expect(workoutExercise).toBeDefined()
       expect(workoutExercise?.exerciseId).toBe(customId)
 

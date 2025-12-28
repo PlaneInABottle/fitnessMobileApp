@@ -58,12 +58,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           timerRef.current = null
         }
       }
-    }, [session?.id, session?.startedAt])
+    }, [session?.id, session?.startedAt, session])
 
     useEffect(() => {
       // Reset state when session changes.
       setSelectedSetInfo(null)
-    }, [session?.id])
+    }, [session?.id, session])
 
     const completedSetsCount = workoutStore.completedSetsCount
     const completedVolumeKg = workoutStore.completedVolumeKg
@@ -190,24 +190,27 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                   const templateNote = templateExercise?.notes?.trim()
                   if (templateNote) return templateNote
 
-                  const previousNote = performanceMemoryStore.getPreviousNotes(we.exerciseId)?.trim()
+                  const previousNote = performanceMemoryStore
+                    .getPreviousNotes(we.exerciseId)
+                    ?.trim()
                   if (previousNote) return previousNote
 
                   return undefined
                 })()
 
                 // Pre-group template sets by type to avoid O(n²) filtering in render
-                const templateSetsByType: Partial<Record<SetTypeId, Array<any>>> | null = templateExercise
-                  ? (() => {
-                      const grouped: Partial<Record<SetTypeId, Array<any>>> = {}
-                      templateExercise.sets.forEach((ts) => {
-                        const type = (ts.setType as SetTypeId) ?? "working"
-                        if (!grouped[type]) grouped[type] = []
-                        grouped[type]!.push(ts)
-                      })
-                      return grouped
-                    })()
-                  : null
+                const templateSetsByType: Partial<Record<SetTypeId, Array<any>>> | null =
+                  templateExercise
+                    ? (() => {
+                        const grouped: Partial<Record<SetTypeId, Array<any>>> = {}
+                        templateExercise.sets.forEach((ts) => {
+                          const type = (ts.setType as SetTypeId) ?? "working"
+                          if (!grouped[type]) grouped[type] = []
+                          grouped[type]!.push(ts)
+                        })
+                        return grouped
+                      })()
+                    : null
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
@@ -245,9 +248,13 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                                     ? String(templateSet.weight)
                                     : undefined,
                                 reps:
-                                  templateSet.reps !== undefined ? String(templateSet.reps) : undefined,
+                                  templateSet.reps !== undefined
+                                    ? String(templateSet.reps)
+                                    : undefined,
                                 time:
-                                  templateSet.time !== undefined ? String(templateSet.time) : undefined,
+                                  templateSet.time !== undefined
+                                    ? String(templateSet.time)
+                                    : undefined,
                                 distance:
                                   templateSet.distance !== undefined
                                     ? String(templateSet.distance)
@@ -255,17 +262,28 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               }
                             }
 
-                            const memoryPlaceholders = performanceMemoryStore.getPlaceholdersForSet({
-                              exerciseId: we.exerciseId,
-                              category: exercise.category,
-                              setType,
-                              order: orderWithinType,
-                            })
+                            const memoryPlaceholders = performanceMemoryStore.getPlaceholdersForSet(
+                              {
+                                exerciseId: we.exerciseId,
+                                category: exercise.category,
+                                setType,
+                                order: orderWithinType,
+                              },
+                            )
 
                             return {
-                              weight: memoryPlaceholders.weight !== "-" ? memoryPlaceholders.weight : undefined,
-                              reps: memoryPlaceholders.reps !== "-" ? memoryPlaceholders.reps : undefined,
-                              time: memoryPlaceholders.time !== "-" ? memoryPlaceholders.time : undefined,
+                              weight:
+                                memoryPlaceholders.weight !== "-"
+                                  ? memoryPlaceholders.weight
+                                  : undefined,
+                              reps:
+                                memoryPlaceholders.reps !== "-"
+                                  ? memoryPlaceholders.reps
+                                  : undefined,
+                              time:
+                                memoryPlaceholders.time !== "-"
+                                  ? memoryPlaceholders.time
+                                  : undefined,
                               distance:
                                 memoryPlaceholders.distance !== "-"
                                   ? memoryPlaceholders.distance
