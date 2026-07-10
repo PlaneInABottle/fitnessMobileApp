@@ -1,6 +1,7 @@
 import { exec } from "child_process"
 
 import en from "../app/i18n/en"
+import { formatDate } from "../app/utils/formatDate"
 
 // Use this array for keys that for whatever reason aren't greppable so they
 // don't hold your test suite hostage by always failing.
@@ -52,6 +53,14 @@ function iterate(obj, stack, array) {
  */
 
 describe("i18n", () => {
+  test("keeps the English catalog product-only", () => {
+    expect(en).not.toHaveProperty("welcomeScreen")
+  })
+
+  test("formats dates in deterministic US English", () => {
+    expect(formatDate("2025-01-02")).toBe("Jan 02, 2025")
+  })
+
   test("There are no missing keys", (done) => {
     // Actual command output:
     // grep "[T\|t]x=[{]\?\"\S*\"[}]\?\|translate(\"\S*\"" -ohr './app' | grep -o "\".*\""

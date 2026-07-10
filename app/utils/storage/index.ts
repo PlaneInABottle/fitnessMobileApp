@@ -2,6 +2,9 @@ import { MMKV } from "react-native-mmkv"
 
 export const storage = new MMKV()
 
+const LEGACY_SECURE_STORAGE_ID = "secure"
+const LEGACY_ENCRYPTION_KEY_STORAGE_KEY = "MMKV_SECURE_ENCRYPTION_KEY"
+
 /**
  * Loads a string from storage.
  *
@@ -12,6 +15,17 @@ export function loadString(key: string): string | null {
     return storage.getString(key) ?? null
   } catch {
     // not sure why this would fail... even reading the RN docs I'm unclear
+    return null
+  }
+}
+
+function openLegacySecureStorage(): MMKV | null {
+  const encryptionKey = loadString(LEGACY_ENCRYPTION_KEY_STORAGE_KEY)
+  if (!encryptionKey || encryptionKey.length !== 16) return null
+
+  try {
+    return new MMKV({ id: LEGACY_SECURE_STORAGE_ID, encryptionKey })
+  } catch {
     return null
   }
 }
@@ -46,6 +60,15 @@ export function load<T>(key: string): T | null {
   }
 }
 
+export function loadLegacySecure<T>(key: string): T | null {
+  try {
+    const serializedValue = openLegacySecureStorage()?.getString(key)
+    return serializedValue ? (JSON.parse(serializedValue) as T) : null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Saves an object to storage.
  *
@@ -69,6 +92,13 @@ export function save(key: string, value: unknown): boolean {
 export function remove(key: string): void {
   try {
     storage.delete(key)
+  } catch {}
+}
+
+export function removeLegacySecure(key: string): void {
+  try {
+    openLegacySecureStorage()?.delete(key)
+    storage.delete(LEGACY_ENCRYPTION_KEY_STORAGE_KEY)
   } catch {}
 }
 

@@ -14,7 +14,7 @@ import "tsx/cjs"
  * You can read more about Expo's Configuration Resolution Rules here:
  * https://docs.expo.dev/workflow/configuration/#configuration-resolution-rules
  */
-module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
+export default ({ config }: ConfigContext): Partial<ExpoConfig> => {
   const existingPlugins = config.plugins ?? []
 
   return {
@@ -36,13 +36,7 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
-    owner: "smokymumbo",
+    owner: "planeinabottle",
     plugins: [...existingPlugins],
-    extra: {
-      ...config.extra,
-      eas: {
-        projectId: "your-project-id-here",
-      },
-    },
   }
 }

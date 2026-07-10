@@ -29,27 +29,27 @@ describe("SetOptionsBottomSheet", () => {
     it("renders all set type options when visible", () => {
       const { getByText } = renderBottomSheet()
 
-      expect(getByText("Isınma Seti")).toBeTruthy()
+      expect(getByText("Warm-up Set")).toBeTruthy()
       expect(getByText("Normal Set")).toBeTruthy()
-      expect(getByText("Tükeniş Seti")).toBeTruthy()
+      expect(getByText("Failure Set")).toBeTruthy()
       expect(getByText("Drop Set")).toBeTruthy()
-      expect(getByText("Seti Kaldır")).toBeTruthy()
+      expect(getByText("Remove Set")).toBeTruthy()
     })
 
     it("displays title", () => {
       const { getByText } = renderBottomSheet()
 
-      expect(getByText("Set Türünü Seç")).toBeTruthy()
+      expect(getByText("Select Set Type")).toBeTruthy()
     })
   })
 
   describe("callbacks", () => {
-    it("calls onDelete when Seti Kaldır is pressed", () => {
+    it("calls onDelete when Remove Set is pressed", () => {
       const onDelete = jest.fn()
       const onClose = jest.fn()
       const { getByText } = renderBottomSheet({ onDelete, onClose })
 
-      fireEvent.press(getByText("Seti Kaldır"))
+      fireEvent.press(getByText("Remove Set"))
 
       expect(onClose).toHaveBeenCalled()
       expect(onDelete).toHaveBeenCalled()
@@ -71,11 +71,11 @@ describe("SetOptionsBottomSheet", () => {
     it("has proper accessibility labels", () => {
       const { getByLabelText } = renderBottomSheet()
 
-      expect(getByLabelText("Isınma Seti")).toBeTruthy()
+      expect(getByLabelText("Warm-up Set")).toBeTruthy()
       expect(getByLabelText("Normal Set")).toBeTruthy()
-      expect(getByLabelText("Tükeniş Seti")).toBeTruthy()
+      expect(getByLabelText("Failure Set")).toBeTruthy()
       expect(getByLabelText("Drop Set")).toBeTruthy()
-      expect(getByLabelText("Seti Kaldır")).toBeTruthy()
+      expect(getByLabelText("Remove Set")).toBeTruthy()
     })
   })
 })

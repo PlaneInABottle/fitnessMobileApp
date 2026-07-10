@@ -32,7 +32,6 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | null>(null)
     const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
     const [showMuscleFilter, setShowMuscleFilter] = useState(false)
-    const [showEquipmentFilter, setShowEquipmentFilter] = useState(false)
 
     const exercises = useMemo(() => {
       let result = exerciseStore.searchExercises(query)
@@ -71,8 +70,8 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Egzersiz Ekle"
-          leftActionLabel="İptal"
+          title="Add Exercise"
+          leftActionLabel="Cancel"
           onLeftActionPress={navigation.goBack}
         />
 
@@ -94,14 +93,9 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
             contentContainerStyle={themed($filtersRow)}
           >
             <FilterChip
-              label={selectedMuscle || "Tüm Kaslar"}
+              label={selectedMuscle || "All muscles"}
               active={!!selectedMuscle}
               onPress={() => setShowMuscleFilter(true)}
-            />
-            <FilterChip
-              label="Tüm Ekipmanlar"
-              active={false}
-              onPress={() => setShowEquipmentFilter(true)}
             />
             {EXERCISE_CATEGORY_VALUES.map((cat) => (
               <FilterChip
@@ -159,7 +153,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
         <BottomSheet
           visible={showMuscleFilter}
           onClose={() => setShowMuscleFilter(false)}
-          title="Kas Grubu Seç"
+          title="Select Muscle Group"
         >
           <View style={themed($filterOptions)}>
             {MUSCLE_GROUPS.map((muscle) => (
@@ -170,41 +164,6 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
                 onPress={() => handleSelectMuscle(muscle)}
               />
             ))}
-          </View>
-        </BottomSheet>
-
-        {/* Equipment Filter Bottom Sheet */}
-        <BottomSheet
-          visible={showEquipmentFilter}
-          onClose={() => setShowEquipmentFilter(false)}
-          title="Ekipman Seç"
-        >
-          <View style={themed($filterOptions)}>
-            <FilterChip
-              label="Barbell"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Dumbbell"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Machine"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Bodyweight"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Cable"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
           </View>
         </BottomSheet>
       </Screen>

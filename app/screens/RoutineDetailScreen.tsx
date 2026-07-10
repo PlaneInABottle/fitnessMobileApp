@@ -12,8 +12,6 @@ import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-type AnalyticsTab = "volume" | "reps" | "duration"
-
 export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> = observer(
   function RoutineDetailScreen({ navigation, route }) {
     const { workoutStore, exerciseStore } = useStores()
@@ -22,7 +20,6 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
     const { templateId } = route.params
     const template = workoutStore.templates.get(templateId)
 
-    const [selectedTab, setSelectedTab] = useState<AnalyticsTab>("volume")
     const [isStarting, setIsStarting] = useState(false)
 
     const handleGoBack = useCallback(() => {
@@ -54,16 +51,16 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
               onPress={handleGoBack}
               style={$backButton}
               accessibilityRole="button"
-              accessibilityLabel="Geri"
+              accessibilityLabel="Back"
             >
               <Icon icon="caretLeft" size={20} color={theme.colors.tint} />
               <Text weight="semiBold" style={themed($backText)}>
-                Rutin
+                Routine
               </Text>
             </Pressable>
           </View>
           <View style={themed($notFoundContainer)}>
-            <Text style={themed($notFoundText)}>Rutin bulunamadı</Text>
+            <Text style={themed($notFoundText)}>Routine not found</Text>
           </View>
         </Screen>
       )
@@ -77,11 +74,11 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
             onPress={handleGoBack}
             style={$backButton}
             accessibilityRole="button"
-            accessibilityLabel="Geri"
+            accessibilityLabel="Back"
           >
             <Icon icon="caretLeft" size={20} color={theme.colors.tint} />
             <Text weight="semiBold" style={themed($backText)}>
-              Rutin
+              Routine
             </Text>
           </Pressable>
         </View>
@@ -92,14 +89,11 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
             <Text weight="bold" size="xxl" style={themed($routineName)}>
               {template.name}
             </Text>
-            <Text size="sm" style={themed($creatorText)}>
-              panout tarafından oluşturuldu
-            </Text>
           </View>
 
           {/* Start Button */}
           <Button
-            text="Rutini Başlat"
+            text="Start Routine"
             preset="filled"
             onPress={handleStartRoutine}
             disabled={isStarting}
@@ -107,90 +101,23 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
             textStyle={themed($startButtonText)}
           />
 
-          {/* Analytics Section */}
-          <View style={themed($analyticsSection)}>
-            {/* Large Metric Display */}
-            <View style={themed($metricDisplay)}>
-              <Text weight="bold" style={themed($metricValue)}>
-                15k kg
-              </Text>
-              <View style={$metricSubtitle}>
-                <Text size="sm" style={themed($metricDate)}>
-                  Son 30 gün
-                </Text>
-                <Icon icon="caretRight" size={14} color={theme.colors.textDim} />
-              </View>
-            </View>
-
-            {/* Progress Chart Placeholder */}
-            <View style={themed($chartPlaceholder)}>
-              <View style={themed($chartBars)}>
-                {[0.3, 0.5, 0.7, 0.4, 0.9, 0.6, 0.8].map((height, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      themed($chartBar),
-                      { height: `${height * 100}%` },
-                      index === 4 && { backgroundColor: theme.colors.tint },
-                    ]}
-                  />
-                ))}
-              </View>
-            </View>
-
-            {/* Tab Buttons */}
-            <View style={themed($tabContainer)}>
-              <Pressable
-                onPress={() => setSelectedTab("volume")}
-                style={[themed($tabButton), selectedTab === "volume" && themed($tabButtonActive)]}
-              >
-                <Text
-                  weight={selectedTab === "volume" ? "semiBold" : "normal"}
-                  style={[themed($tabText), selectedTab === "volume" && themed($tabTextActive)]}
-                >
-                  Hacim
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setSelectedTab("reps")}
-                style={[themed($tabButton), selectedTab === "reps" && themed($tabButtonActive)]}
-              >
-                <Text
-                  weight={selectedTab === "reps" ? "semiBold" : "normal"}
-                  style={[themed($tabText), selectedTab === "reps" && themed($tabTextActive)]}
-                >
-                  Tekrar
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setSelectedTab("duration")}
-                style={[themed($tabButton), selectedTab === "duration" && themed($tabButtonActive)]}
-              >
-                <Text
-                  weight={selectedTab === "duration" ? "semiBold" : "normal"}
-                  style={[themed($tabText), selectedTab === "duration" && themed($tabTextActive)]}
-                >
-                  Süre
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
           {/* Exercise List */}
           <View style={themed($exerciseSection)}>
             <Text weight="semiBold" size="lg" style={themed($sectionTitle)}>
-              Egzersizler ({template.exerciseIds.length})
+              Exercises ({template.exerciseIds.length})
             </Text>
 
             {template.exerciseIds.map((exerciseId) => {
               const exercise = exerciseStore.exercises.get(exerciseId)
               if (!exercise) return null
+              const plannedSetCount =
+                template.exercises.find((item) => item.exerciseId === exerciseId)?.sets.length ?? 0
 
               return (
                 <ExerciseListItem
                   key={exerciseId}
                   title={exercise.name}
-                  subtitle={`${3} set planlandı`}
+                  subtitle={`${plannedSetCount} ${plannedSetCount === 1 ? "set" : "sets"} planned`}
                 />
               )
             })}
@@ -201,10 +128,10 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
             onPress={handleEditRoutine}
             style={themed($editLink)}
             accessibilityRole="button"
-            accessibilityLabel="Rutini Düzenle"
+            accessibilityLabel="Edit routine"
           >
             <Text weight="semiBold" style={themed($editLinkText)}>
-              Rutini Düzenle
+              Edit Routine
             </Text>
           </Pressable>
         </ScrollView>
@@ -253,10 +180,6 @@ const $routineName: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-const $creatorText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
-
 const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
   borderRadius: 8,
@@ -267,81 +190,6 @@ const $startButtonText: ThemedStyle<TextStyle> = () => ({
   color: "#FFFFFF",
   fontSize: 16,
   fontWeight: "600",
-})
-
-const $analyticsSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.card,
-  borderRadius: 12,
-  padding: spacing.md,
-  gap: spacing.md,
-})
-
-const $metricDisplay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.xs,
-})
-
-const $metricValue: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  fontSize: 32,
-})
-
-const $metricSubtitle: ViewStyle = {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 4,
-}
-
-const $metricDate: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
-
-const $chartPlaceholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  height: 120,
-  backgroundColor: colors.cardSecondary,
-  borderRadius: 8,
-  justifyContent: "flex-end",
-  padding: 8,
-})
-
-const $chartBars: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "flex-end",
-  justifyContent: "space-around",
-  height: "100%",
-  gap: 8,
-})
-
-const $chartBar: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.textDim,
-  borderRadius: 4,
-  minHeight: 8,
-})
-
-const $tabContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  gap: spacing.sm,
-})
-
-const $tabButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flex: 1,
-  paddingVertical: spacing.sm,
-  paddingHorizontal: spacing.md,
-  borderRadius: 8,
-  backgroundColor: colors.cardSecondary,
-  alignItems: "center",
-})
-
-const $tabButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.tint,
-})
-
-const $tabText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-})
-
-const $tabTextActive: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
 })
 
 const $exerciseSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({

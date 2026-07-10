@@ -18,7 +18,6 @@ import { CreateRoutineScreen } from "@/screens/CreateRoutineScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { HomeScreen } from "@/screens/HomeScreen"
-import { ProfileScreen } from "@/screens/ProfileScreen"
 import { RoutineDetailScreen } from "@/screens/RoutineDetailScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
@@ -28,7 +27,6 @@ import type {
   AppStackParamList,
   HomeStackParamList,
   NavigationProps,
-  ProfileStackParamList,
   WorkoutStackParamList,
 } from "./navigationTypes"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
@@ -45,7 +43,6 @@ const Tab = createBottomTabNavigator<AppStackParamList>()
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
 const HomeStack = createNativeStackNavigator<HomeStackParamList>()
 const WorkoutStack = createNativeStackNavigator<WorkoutStackParamList>()
-const ProfileStack = createNativeStackNavigator<ProfileStackParamList>()
 
 const HomeStackNavigator = () => {
   const {
@@ -92,26 +89,6 @@ const WorkoutStackNavigator = () => {
   )
 }
 
-const ProfileStackNavigator = () => {
-  const {
-    theme: { colors },
-  } = useAppTheme()
-
-  return (
-    <ProfileStack.Navigator
-      screenOptions={{
-        headerShown: false,
-        navigationBarColor: colors.background,
-        contentStyle: {
-          backgroundColor: colors.background,
-        },
-      }}
-    >
-      <ProfileStack.Screen name="ProfileTab" component={ProfileScreen} />
-    </ProfileStack.Navigator>
-  )
-}
-
 const AppTabs = () => {
   const {
     theme: { colors },
@@ -124,6 +101,7 @@ const AppTabs = () => {
 
   return (
     <Tab.Navigator
+      initialRouteName="Workout"
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.background },
@@ -145,7 +123,7 @@ const AppTabs = () => {
         name="Home"
         component={HomeStackNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabBarIcon name="home" label="Ev" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabBarIcon name="home" label="Home" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -153,16 +131,7 @@ const AppTabs = () => {
         component={WorkoutStackNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name="dumbbell" label="Antrenman" focused={focused} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileStackNavigator}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon name="person" label="Profil" focused={focused} />
+            <TabBarIcon name="dumbbell" label="Workout" focused={focused} />
           ),
         }}
       />
@@ -173,7 +142,7 @@ const AppTabs = () => {
 export const AppNavigator = (props: NavigationProps) => {
   const { navigationTheme } = useAppTheme()
 
-  const exitRouteNames = [...exitRoutes, "WorkoutTab", "HomeTab", "ProfileTab"]
+  const exitRouteNames = [...exitRoutes, "WorkoutTab", "HomeTab"]
   useBackButtonHandler((routeName) => exitRouteNames.includes(routeName))
 
   return (

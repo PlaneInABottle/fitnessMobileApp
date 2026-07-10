@@ -94,27 +94,27 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       <Screen preset="scroll" safeAreaEdges={["top"]}>
         {/* Header */}
         <View style={themed($header)}>
-          <Pressable onPress={handleCancel} accessibilityRole="button" accessibilityLabel="İptal">
+          <Pressable onPress={handleCancel} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text weight="medium" style={themed($cancelText)}>
-              İptal
+              Cancel
             </Text>
           </Pressable>
 
           <Text weight="semiBold" size="lg" style={themed($headerTitle)}>
-            Rutin Oluştur
+            Create Routine
           </Text>
 
           <Pressable
             onPress={handleSave}
             disabled={!canSave || isSaving}
             accessibilityRole="button"
-            accessibilityLabel="Kaydet"
+            accessibilityLabel="Save"
           >
             <Text
               weight="semiBold"
               style={[themed($saveText), !canSave && themed($saveTextDisabled)]}
             >
-              Kaydet
+              Save
             </Text>
           </Pressable>
         </View>
@@ -125,7 +125,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           <TextField
             value={title}
             onChangeText={setTitle}
-            placeholder="Rutin başlığı"
+            placeholder="Routine title"
             autoCapitalize="sentences"
             autoCorrect={false}
             containerStyle={themed($titleInput)}
@@ -136,10 +136,10 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
             <View style={themed($emptyState)}>
               <Icon icon="dumbbell" size={64} color={theme.colors.textDim} />
               <Text size="lg" style={themed($emptyTitle)}>
-                Rutininize bir egzersiz ekleyerek başlayın
+                Start by adding an exercise to your routine
               </Text>
               <Button
-                text="+ Egzersiz ekle"
+                text="+ Add Exercise"
                 preset="filled"
                 onPress={handleAddExercise}
                 style={themed($addButton)}
@@ -150,7 +150,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
             <View style={themed($exerciseList)}>
               <View style={$sectionHeader}>
                 <Text weight="semiBold" size="lg" style={themed($sectionTitle)}>
-                  Egzersizler ({selectedExerciseIds.length})
+                  Exercises ({selectedExerciseIds.length})
                 </Text>
               </View>
 
@@ -171,7 +171,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
               })}
 
               <Button
-                text="+ Egzersiz ekle"
+                text="+ Add Exercise"
                 preset="default"
                 onPress={handleAddExercise}
                 style={themed($addMoreButton)}

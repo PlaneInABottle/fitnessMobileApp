@@ -4,10 +4,10 @@ import { ExerciseSetFieldKey } from "./ExerciseStore"
 import { SET_TYPE_IDS } from "./utils/constants"
 
 export const SET_TYPES = {
-  WARMUP: { name: "Warmup", label: "Isınma Seti", letter: "W" },
+  WARMUP: { name: "Warmup", label: "Warm-up Set", letter: "W" },
   WORKING: { name: "Working", label: "Normal Set", letter: "" },
   DROPSET: { name: "Drop Set", label: "Drop Set", letter: "D" },
-  FAILURE: { name: "Failure", label: "Tükeniş Seti", letter: "F" },
+  FAILURE: { name: "Failure", label: "Failure Set", letter: "F" },
 } as const
 
 export type SetTypeId = "warmup" | "working" | "dropset" | "failure"

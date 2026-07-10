@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { Alert, Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -61,17 +61,9 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
         <View style={themed($header)}>
           <View style={$headerLeft}>
             <Text preset="heading" style={themed($headerTitle)}>
-              Antrenman
+              Workout
             </Text>
           </View>
-          <Pressable
-            onPress={() => Alert.alert("Ayarlar", "Bu özellik yakında eklenecek")}
-            style={$settingsButton}
-            accessibilityRole="button"
-            accessibilityLabel="Settings"
-          >
-            <Icon icon="settings" size={24} color={theme.colors.text} />
-          </Pressable>
         </View>
 
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
@@ -85,7 +77,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
 
           {/* Start Empty Workout Button */}
           <Button
-            text="+ Boş Antrenmana Başla"
+            text="+ Start Empty Workout"
             preset="filled"
             onPress={handleStartEmptyWorkout}
             style={themed($startButton)}
@@ -96,7 +88,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
           <View style={themed($section)}>
             <View style={$sectionHeader}>
               <Text preset="subheading" style={themed($sectionTitle)}>
-                Rutinler
+                Routines
               </Text>
               <Pressable
                 onPress={() => navigation.navigate("CreateRoutine")}
@@ -118,7 +110,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
               <View style={$newRoutineButtonContent}>
                 <Text style={themed($newRoutineEmoji)}>✨</Text>
                 <Text weight="semiBold" style={themed($newRoutineText)}>
-                  Yeni Rutin
+                  New Routine
                 </Text>
                 <Icon icon="caretRight" size={18} color={theme.colors.textDim} />
               </View>
@@ -154,7 +146,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
             <View style={$resumeContent}>
               <Icon icon="caretRight" size={20} color="#FFFFFF" />
               <Text weight="semiBold" style={themed($resumeText)}>
-                Devam Eden Antrenman
+                Workout in Progress
               </Text>
             </View>
             <Icon icon="caretRight" size={20} color="#FFFFFF" />
@@ -185,10 +177,6 @@ const $headerLeft: ViewStyle = {
 const $headerTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
-
-const $settingsButton: ViewStyle = {
-  padding: 8,
-}
 
 const $scrollView: ThemedStyle<ViewStyle> = () => ({
   flex: 1,

@@ -35,19 +35,17 @@ jest.mock("i18next", () => ({
   },
 }))
 
-jest.mock("expo-localization", () => ({
-  ...jest.requireActual("expo-localization"),
-  getLocales: () => [{ languageTag: "en-US", textDirection: "ltr" }],
-}))
-
 jest.mock("react-native-keyboard-controller", () => {
   const React = require("react")
   const { ScrollView } = require("react-native")
   return {
     KeyboardProvider: ({ children }: any) => children,
-    KeyboardAwareScrollView: React.forwardRef((props: any, ref: any) =>
-      React.createElement(ScrollView, { ...props, ref }),
-    ),
+    KeyboardAwareScrollView: React.forwardRef(function MockKeyboardAwareScrollView(
+      props: any,
+      ref: any,
+    ) {
+      return React.createElement(ScrollView, { ...props, ref })
+    }),
   }
 })
 
@@ -77,7 +75,7 @@ jest.mock("@gorhom/bottom-sheet", () => {
     BottomSheetModalProvider: ({ children }: any) => children,
     BottomSheetBackdrop: () => null,
     BottomSheetView: ({ children }: any) => React.createElement(View, null, children),
-    BottomSheetModal: React.forwardRef(({ children }: any, ref: any) => {
+    BottomSheetModal: React.forwardRef(function MockBottomSheetModal({ children }: any, ref: any) {
       React.useImperativeHandle(ref, () => ({ present: jest.fn(), dismiss: jest.fn() }))
       return React.createElement(View, null, children)
     }),

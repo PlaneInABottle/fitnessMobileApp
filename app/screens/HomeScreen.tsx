@@ -17,7 +17,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
       {/* Header */}
       <View style={themed($header)}>
         <Text preset="heading" style={themed($headerTitle)}>
-          Ev
+          Home
         </Text>
       </View>
 
@@ -26,15 +26,15 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
         {/* Welcome Section */}
         <View style={themed($welcomeSection)}>
           <Text preset="subheading" style={themed($welcomeText)}>
-            Hoş Geldiniz! 👋
+            Welcome! 👋
           </Text>
-          <Text style={themed($subtitleText)}>Bugünkü antrenmanınıza hazır mısınız?</Text>
+          <Text style={themed($subtitleText)}>Ready for today&apos;s workout?</Text>
         </View>
 
         {/* Quick Stats Placeholder */}
         <View style={themed($statsContainer)}>
           <Text weight="semiBold" size="lg" style={themed($sectionTitle)}>
-            Özet
+            Summary
           </Text>
 
           <View style={themed($statsGrid)}>
@@ -44,7 +44,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                 0
               </Text>
               <Text size="sm" style={themed($statLabel)}>
-                Toplam Antrenman
+                Total Workouts
               </Text>
             </View>
 
@@ -54,7 +54,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                 0
               </Text>
               <Text size="sm" style={themed($statLabel)}>
-                Bu Hafta
+                This Week
               </Text>
             </View>
 
@@ -64,7 +64,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                 0 kg
               </Text>
               <Text size="sm" style={themed($statLabel)}>
-                Toplam Hacim
+                Total Volume
               </Text>
             </View>
           </View>
@@ -73,7 +73,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
         {/* Placeholder for future content */}
         <View style={themed($placeholderSection)}>
           <Icon icon="home" size={48} color={theme.colors.textDim} />
-          <Text style={themed($placeholderText)}>Yakında daha fazla özellik eklenecek</Text>
+          <Text style={themed($placeholderText)}>Your fitness overview will grow with you.</Text>
         </View>
       </View>
     </Screen>

@@ -1,4 +1,14 @@
-import { load, loadString, save, saveString, clear, remove, storage } from "."
+import {
+  clear,
+  load,
+  loadLegacySecure,
+  loadString,
+  remove,
+  removeLegacySecure,
+  save,
+  saveString,
+  storage,
+} from "."
 
 const VALUE_OBJECT = { x: 1 }
 const VALUE_STRING = JSON.stringify(VALUE_OBJECT)
@@ -58,5 +68,13 @@ describe("MMKV Storage", () => {
     expect(storage.getAllKeys()).toEqual(["string", "object"])
     clear()
     expect(storage.getAllKeys()).toEqual([])
+  })
+
+  it("handles absent legacy secure storage without creating new credentials", () => {
+    expect(loadLegacySecure("ROOT_STORE_SECURE")).toBeNull()
+
+    removeLegacySecure("ROOT_STORE_SECURE")
+
+    expect(storage.getString("MMKV_SECURE_ENCRYPTION_KEY")).toBeUndefined()
   })
 })

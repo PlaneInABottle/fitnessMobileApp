@@ -29,23 +29,23 @@ describe("HomeScreen", () => {
   it("renders correctly with header", () => {
     const { getByText } = renderHomeScreen()
 
-    expect(getByText("Ev")).toBeTruthy()
+    expect(getByText("Home")).toBeTruthy()
   })
 
   it("shows welcome message", () => {
     const { getByText } = renderHomeScreen()
 
-    expect(getByText("Hoş Geldiniz! 👋")).toBeTruthy()
-    expect(getByText("Bugünkü antrenmanınıza hazır mısınız?")).toBeTruthy()
+    expect(getByText("Welcome! 👋")).toBeTruthy()
+    expect(getByText("Ready for today's workout?")).toBeTruthy()
   })
 
   it("shows stats section with placeholders", () => {
     const { getByText } = renderHomeScreen()
 
-    expect(getByText("Özet")).toBeTruthy()
-    expect(getByText("Toplam Antrenman")).toBeTruthy()
-    expect(getByText("Bu Hafta")).toBeTruthy()
-    expect(getByText("Toplam Hacim")).toBeTruthy()
+    expect(getByText("Summary")).toBeTruthy()
+    expect(getByText("Total Workouts")).toBeTruthy()
+    expect(getByText("This Week")).toBeTruthy()
+    expect(getByText("Total Volume")).toBeTruthy()
   })
 
   it("shows stat values initialized to zero", () => {
@@ -62,6 +62,6 @@ describe("HomeScreen", () => {
   it("shows placeholder section for future features", () => {
     const { getByText } = renderHomeScreen()
 
-    expect(getByText("Yakında daha fazla özellik eklenecek")).toBeTruthy()
+    expect(getByText("Your fitness overview will grow with you.")).toBeTruthy()
   })
 })

@@ -151,11 +151,11 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    expect(queryByText("Set Türünü Seç")).toBeNull()
+    expect(queryByText("Select Set Type")).toBeNull()
 
     // Press on the set type indicator (opens SetOptionsBottomSheet)
     fireEvent.press(getAllByLabelText("Set type: working")[0])
-    await waitFor(() => expect(getByText("Set Türünü Seç")).toBeTruthy())
+    await waitFor(() => expect(getByText("Select Set Type")).toBeTruthy())
 
     fireEvent.press(getAllByLabelText("Toggle done")[0])
 

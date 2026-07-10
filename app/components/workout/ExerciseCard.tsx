@@ -10,7 +10,7 @@ import { Text } from "../Text"
 
 export interface ExerciseCardProps {
   exercise: Exercise
-  /** Note text like "Aynı devam" (Same as before) */
+  /** Note text such as "Same as before". */
   note?: string
   /** Whether to show the bottom separator line */
   showBottomSeparator?: boolean
@@ -84,7 +84,7 @@ export function ExerciseCard({
             weight="medium"
             style={themed(restTimerEnabled ? $restTimerValueOn : $restTimerValueOff)}
           >
-            {restTimerEnabled ? "AÇIK" : "KAPALI"}
+            {restTimerEnabled ? "ON" : "OFF"}
           </Text>
           <Switch
             value={restTimerEnabled}

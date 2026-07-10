@@ -120,12 +120,12 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       const hasData = session && session.exercises.length > 0
       if (hasData) {
         Alert.alert(
-          "Antrenmanı kaydetmediniz",
-          "Çıkmak istediğinizden emin misiniz? Tüm veriler kaybolacak.",
+          "Discard workout?",
+          "Are you sure you want to leave? This workout will be deleted.",
           [
-            { text: "İptal", style: "cancel" },
+            { text: "Cancel", style: "cancel" },
             {
-              text: "Çık",
+              text: "Discard",
               style: "destructive",
               onPress: () => {
                 workoutStore.discardSession()
@@ -143,10 +143,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Antrenman Kaydet"
+          title="Log Workout"
           leftActionLabel="Back"
           onLeftActionPress={handleGoBack}
-          rightActionLabel="Bitir"
+          rightActionLabel="Finish"
           onRightActionPress={() => navigation.navigate("WorkoutComplete")}
           showStats
           timeSeconds={elapsedSeconds}
@@ -327,7 +327,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                       })()}
 
                       <Button
-                        text="+ Set Ekle"
+                        text="+ Add Set"
                         preset="default"
                         onPress={() => handleAddSet(we.id, we.exerciseId)}
                         style={themed($addSetButton)}
@@ -338,7 +338,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               })}
 
               <Button
-                text="+ Egzersiz Ekle"
+                text="+ Add Exercise"
                 preset="filled"
                 onPress={() => navigation.navigate("ExerciseLibrary")}
                 style={themed($addExerciseButton)}

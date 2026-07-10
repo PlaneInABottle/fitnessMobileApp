@@ -42,7 +42,7 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
     <View style={[themed($container), $styleOverride]}>
       <View style={$statItem}>
         <Text size="xxs" style={themed($label)}>
-          Süre
+          Duration
         </Text>
         <Text
           weight="bold"
@@ -56,7 +56,7 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
       <View style={themed($separator)} />
       <View style={$statItem}>
         <Text size="xxs" style={themed($label)}>
-          Hacim
+          Volume
         </Text>
         <Text
           weight="bold"

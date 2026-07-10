@@ -125,8 +125,8 @@ describe("WorkoutStatsBar", () => {
         setsCount: 5,
       })
 
-      expect(getByText("Süre")).toBeTruthy()
-      expect(getByText("Hacim")).toBeTruthy()
+      expect(getByText("Duration")).toBeTruthy()
+      expect(getByText("Volume")).toBeTruthy()
       expect(getByText("Sets")).toBeTruthy()
     })
   })

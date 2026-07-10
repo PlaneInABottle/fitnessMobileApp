@@ -141,9 +141,9 @@ export function EmptyState(props: EmptyStateProps) {
     },
     workout: {
       icon: "dumbbell",
-      heading: "Henüz Antrenman Yok",
-      content: "İlk antrenmanını başlat ve ilerlemeni takip et",
-      button: "Antrenman Başlat",
+      heading: "No Workouts Yet",
+      content: "Start your first workout and track your progress",
+      button: "Start Workout",
     },
   }
 

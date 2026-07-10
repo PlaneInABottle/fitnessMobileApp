@@ -1,7 +1,7 @@
 /**
- * Fitness App Dark Theme Color Palette
+ * Fitness Tracker dark theme color palette.
  * PRIMARY theme designed for gym environment readability
- * Based on Hevy/Antrenman app design patterns
+ * Based on established fitness-tracking app design patterns.
  */
 const palette = {
   // Neutrals - Dark mode (true black base for OLED optimization)
@@ -52,7 +52,7 @@ const palette = {
 
 /**
  * Set type colors for workout tracking
- * These match the visual indicators in the Hevy/Antrenman screenshots
+ * These match the workout set indicators used throughout the app.
  */
 export const setTypeColors = {
   warmup: palette.warning500, // Yellow "W" indicator

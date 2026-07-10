@@ -63,12 +63,12 @@ function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
       ]
     case "TIMED":
       return [
-        { key: "time", label: "Sec", header: "SÜRE" },
+        { key: "time", label: "Sec", header: "TIME" },
         { label: "", header: "" },
       ]
     case "CARDIO":
       return [
-        { key: "time", label: "Sec", header: "SÜRE" },
+        { key: "time", label: "Sec", header: "TIME" },
         { key: "distance", label: "m", header: "MESAFE" },
       ]
   }
@@ -342,7 +342,7 @@ export function SetRow({
           <Text text="SET" style={themed($headerText)} />
         </View>
         <View style={$previousCell}>
-          <Text text="ÖNCEKİ" style={themed($headerText)} />
+          <Text text="PREVIOUS" style={themed($headerText)} />
         </View>
         <View style={$cell}>
           <Text text={field1.header || field1.label} style={themed($headerText)} />

@@ -14,8 +14,7 @@ export interface SessionOverlayBarProps {
 
 /**
  * Session overlay bar with dark theme styling (#1C1C1E background).
- * Displays "Antrenman Devam Ediyor" (Workout in Progress) with
- * blue "Devam" (Resume) button and red "Sil" (Delete) button.
+ * Displays the active workout with resume and discard actions.
  */
 export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarProps) {
   const { themed, theme } = useAppTheme()
@@ -23,7 +22,7 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
   return (
     <View style={themed($container)}>
       <View style={themed($headerSection)}>
-        <Text text="Devam Eden Antrenman" weight="semiBold" size="sm" style={themed($titleText)} />
+        <Text text="Workout in Progress" weight="semiBold" size="sm" style={themed($titleText)} />
       </View>
 
       <View style={themed($actions)}>
@@ -34,7 +33,7 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
           accessibilityRole="button"
         >
           <Icon icon="caretRight" size={16} color={theme.colors.tint} />
-          <Text text="Devam" weight="medium" size="lg" style={themed($resumeText)} />
+          <Text text="Resume" weight="medium" size="lg" style={themed($resumeText)} />
         </Pressable>
 
         <Pressable
@@ -44,7 +43,7 @@ export function SessionOverlayBar({ onContinue, onDiscard }: SessionOverlayBarPr
           accessibilityRole="button"
         >
           <Icon icon="x" size={14} color={theme.colors.error} />
-          <Text text="Sil" weight="medium" size="lg" style={themed($deleteText)} />
+          <Text text="Discard" weight="medium" size="lg" style={themed($deleteText)} />
         </Pressable>
       </View>
     </View>
