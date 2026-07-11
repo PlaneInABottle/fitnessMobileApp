@@ -1,10 +1,11 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { fireEvent, render } from "@testing-library/react-native"
+import { fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { HomeStackParamList } from "@/navigators/navigationTypes"
 import { HomeScreen } from "@/screens/HomeScreen"
+import { WorkoutHistoryScreen } from "@/screens/WorkoutHistoryScreen"
 import { ThemeProvider } from "@/theme/context"
 
 const Stack = createNativeStackNavigator<HomeStackParamList>()
@@ -16,6 +17,7 @@ function renderHomeScreen(store = RootStoreModel.create({})) {
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="HomeTab" component={HomeScreen} />
+            <Stack.Screen name="WorkoutHistory" component={WorkoutHistoryScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>
@@ -126,5 +128,42 @@ describe("HomeScreen", () => {
     expect(getByText("Bench Press")).toBeTruthy()
     expect(getByText("1 set")).toBeTruthy()
     expect(getByText("500 kg")).toBeTruthy()
+  })
+
+  it("opens completed workout details", async () => {
+    const store = RootStoreModel.create({
+      workoutStore: {
+        sessionHistory: [
+          {
+            id: "history-details",
+            startedAt: new Date("2026-07-08T10:00:00Z").getTime(),
+            completedAt: new Date("2026-07-08T10:45:00Z").getTime(),
+            exercises: [
+              {
+                id: "history-exercise-details",
+                exerciseId: "bench-press",
+                sets: [
+                  {
+                    id: "history-set-details",
+                    setType: "working",
+                    weight: 100,
+                    reps: 5,
+                    isDone: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    })
+    const { getByText, getByTestId } = renderHomeScreen(store)
+
+    fireEvent.press(getByTestId("workout-history-history-details"))
+
+    await waitFor(() => expect(getByText("Workout details")).toBeTruthy())
+    expect(getByText("Bench Press")).toBeTruthy()
+    expect(getByText(/100 kg.*5 reps/)).toBeTruthy()
+    expect(getByText("Working")).toBeTruthy()
   })
 })

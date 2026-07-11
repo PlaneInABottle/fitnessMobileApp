@@ -54,11 +54,11 @@ function renderWorkoutFlow() {
 }
 
 describe("WorkoutTabScreen primary action", () => {
-  it("shows Start empty workout when no active session", () => {
+  it("shows Start workout when no active session", () => {
     const store = RootStoreModel.create({})
     const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
-    expect(getByText("Start empty workout")).toBeTruthy()
+    expect(getByText("Start workout")).toBeTruthy()
     expect(queryByText("Resume workout")).toBeNull()
   })
 
@@ -70,7 +70,7 @@ describe("WorkoutTabScreen primary action", () => {
     const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
     expect(getByText("Resume workout")).toBeTruthy()
-    expect(queryByText("Start empty workout")).toBeNull()
+    expect(queryByText("Start workout")).toBeNull()
   })
 
   it("navigates to ActiveWorkout when Resume indicator is pressed", async () => {
@@ -91,10 +91,9 @@ describe("WorkoutTabScreen primary action", () => {
     const store = RootStoreModel.create({})
     const { getByText } = renderWorkoutFlowWithStore(store)
 
-    // Initially shows Start Empty Workout button
-    expect(getByText("Start empty workout")).toBeTruthy()
+    expect(getByText("Start workout")).toBeTruthy()
 
-    fireEvent.press(getByText("Start empty workout"))
+    fireEvent.press(getByText("Start workout"))
 
     // Navigate back to WorkoutTab - session should be active
     await waitFor(() => {
@@ -108,12 +107,9 @@ describe("Workout MVP flow", () => {
     const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText } =
       renderWorkoutFlow()
 
-    fireEvent.press(getByText("Start empty workout"))
+    fireEvent.press(getByText("Start workout"))
 
-    await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
-
-    fireEvent.press(getByText("Add Exercise"))
-
+    await waitFor(() => expect(getByPlaceholderText("Search exercises")).toBeTruthy())
     fireEvent.changeText(
       getByPlaceholderText("Search exercises"),
       "barbell bench press medium grip",

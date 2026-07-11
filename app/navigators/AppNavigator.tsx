@@ -21,6 +21,7 @@ import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { RoutineDetailScreen } from "@/screens/RoutineDetailScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
+import { WorkoutHistoryScreen } from "@/screens/WorkoutHistoryScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { useAppTheme } from "@/theme/context"
 
@@ -61,6 +62,7 @@ const HomeStackNavigator = () => {
       }}
     >
       <HomeStack.Screen name="HomeTab" component={HomeScreen} />
+      <HomeStack.Screen name="WorkoutHistory" component={WorkoutHistoryScreen} />
     </HomeStack.Navigator>
   )
 }
@@ -106,8 +108,10 @@ const AppTabs = () => {
       initialRouteName="Home"
       screenOptions={({ route }) => {
         const focusedRoute = getFocusedRouteNameFromRoute(route)
-        const isNestedWorkoutFlow =
-          route.name === "Workout" && !!focusedRoute && focusedRoute !== "WorkoutTab"
+        const isNestedFlow =
+          !!focusedRoute &&
+          ((route.name === "Workout" && focusedRoute !== "WorkoutTab") ||
+            (route.name === "Home" && focusedRoute !== "HomeTab"))
 
         return {
           headerShown: false,
@@ -116,7 +120,7 @@ const AppTabs = () => {
             backgroundColor: colors.background,
             borderTopColor: colors.separator,
             borderTopWidth: 1,
-            display: isNestedWorkoutFlow ? "none" : "flex",
+            display: isNestedFlow ? "none" : "flex",
             height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
             paddingTop: tabBarPaddingTop,
             paddingBottom: tabBarPaddingBottom,

@@ -76,7 +76,15 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
 
   function handleStartWorkout() {
     if (!workoutStore.currentSession && !workoutStore.startNewSession()) return
-    openActiveWorkout()
+    navigation
+      .getParent<BottomTabNavigationProp<AppStackParamList>>()
+      ?.navigate("Workout", { screen: "ExerciseLibrary", params: { newWorkout: true } })
+  }
+
+  function browseExercises() {
+    navigation
+      .getParent<BottomTabNavigationProp<AppStackParamList>>()
+      ?.navigate("Workout", { screen: "ExerciseLibrary", params: { browseOnly: true } })
   }
 
   return (
@@ -124,6 +132,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
               onPress={handleStartWorkout}
               style={themed($startButton)}
             />
+            <Button text="Browse exercises" onPress={browseExercises} />
           </View>
         )}
 
@@ -232,7 +241,20 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                   : undefined
 
                 return (
-                  <View key={session.id} style={themed($historyCard)}>
+                  <Pressable
+                    key={session.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${templateName ?? "workout"} from ${format(
+                      session.completedAt ?? session.startedAt,
+                      "MMMM d, yyyy",
+                    )}`}
+                    testID={`workout-history-${session.id}`}
+                    onPress={() => navigation.navigate("WorkoutHistory", { sessionId: session.id })}
+                    style={({ pressed }) => [
+                      themed($historyCard),
+                      pressed && themed($historyCardPressed),
+                    ]}
+                  >
                     <View style={themed($historyHeader)}>
                       <View style={themed($historyTitleGroup)}>
                         <Text text={templateName ?? "Workout"} weight="semiBold" />
@@ -262,7 +284,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                       />
                       <Text text={`${numberFormatter.format(volume)} kg`} size="xs" />
                     </View>
-                  </View>
+                  </Pressable>
                 )
               })}
             </View>
@@ -412,6 +434,10 @@ const $historyCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderWidth: 1,
   gap: spacing.sm,
   padding: spacing.md,
+})
+
+const $historyCardPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.cardSecondary,
 })
 
 const $historyHeader: ThemedStyle<ViewStyle> = () => ({

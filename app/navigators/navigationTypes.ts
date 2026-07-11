@@ -6,15 +6,19 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 // Home stack screens
 export type HomeStackParamList = {
   HomeTab: undefined
+  WorkoutHistory: { sessionId: string }
 }
 
 // Workout stack screens
 export type WorkoutStackParamList = {
   WorkoutTab: undefined
   ActiveWorkout: undefined
-  ExerciseLibrary: { fromCreateRoutine?: boolean } | undefined
+  ExerciseLibrary:
+    | { browseOnly?: boolean; fromCreateRoutine?: boolean; newWorkout?: boolean }
+    | undefined
   ExerciseDetail: {
     exerciseId: string
+    returnToActiveWorkout?: boolean
     selectionContext?: "workout" | "routine"
   }
   WorkoutComplete: undefined

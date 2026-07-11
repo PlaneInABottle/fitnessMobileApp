@@ -16,7 +16,7 @@ import {
   CATALOG_LEVELS,
   CATALOG_SOURCE_CATEGORIES,
 } from "@/data/exerciseCatalog"
-import { getExerciseImages } from "@/data/exerciseMedia"
+import { getExerciseImages, getExerciseVideo } from "@/data/exerciseMedia"
 import {
   EXERCISE_CATEGORY_VALUES,
   MUSCLE_GROUPS,
@@ -34,6 +34,8 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     const { themed } = useAppTheme()
 
     const fromCreateRoutine = !!route.params?.fromCreateRoutine
+    const browseOnly = !!route.params?.browseOnly
+    const newWorkout = !!route.params?.newWorkout
     const session = workoutStore.currentSession
 
     const [query, setQuery] = useState("")
@@ -59,8 +61,19 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
       if (selectedSourceCategory) {
         result = result.filter((e) => e.sourceCategory === selectedSourceCategory)
       }
-      return result.slice().sort((a, b) => a.name.localeCompare(b.name))
+      return result.slice().sort((a, b) => {
+        const videoPriority = Number(!!getExerciseVideo(b.id)) - Number(!!getExerciseVideo(a.id))
+        return videoPriority || a.name.localeCompare(b.name)
+      })
     })()
+
+    function handleClose() {
+      if (newWorkout && workoutStore.currentSession?.exercises.length === 0) {
+        workoutStore.discardSession()
+      }
+      if (navigation.canGoBack()) navigation.goBack()
+      else navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
+    }
 
     function handleClearFilters() {
       setQuery("")
@@ -81,9 +94,11 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
 
         workoutStore.clearError()
         const workoutExerciseId = workoutStore.addExerciseToSession(exerciseId)
-        if (workoutExerciseId) navigation.goBack()
+        if (!workoutExerciseId) return
+        if (newWorkout) navigation.replace("ActiveWorkout")
+        else navigation.goBack()
       },
-      [fromCreateRoutine, navigation, workoutStore],
+      [fromCreateRoutine, navigation, newWorkout, workoutStore],
     )
 
     function handleSelectMuscle(muscle: string) {
@@ -105,24 +120,30 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
             item.primaryMuscles?.join(", ") || item.muscleGroups.join(", ") || item.category
           }
           imageSource={item.imageUrl ?? getExerciseImages(item.id)?.[0]}
+          hasVideo={!!getExerciseVideo(item.id)}
           onPress={() =>
             navigation.navigate("ExerciseDetail", {
               exerciseId: item.id,
-              selectionContext: fromCreateRoutine ? "routine" : "workout",
+              returnToActiveWorkout: newWorkout,
+              selectionContext: fromCreateRoutine
+                ? "routine"
+                : !browseOnly && session
+                  ? "workout"
+                  : undefined,
             })
           }
-          onAdd={() => handleAddExercise(item.id)}
+          onAdd={browseOnly ? undefined : () => handleAddExercise(item.id)}
         />
       ),
-      [fromCreateRoutine, handleAddExercise, navigation],
+      [browseOnly, fromCreateRoutine, handleAddExercise, navigation, newWorkout, session],
     )
 
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Add Exercise"
-          leftActionLabel="Cancel"
-          onLeftActionPress={navigation.goBack}
+          title={browseOnly ? "Exercise Library" : "Add Exercise"}
+          leftActionLabel={browseOnly ? "Back" : "Cancel"}
+          onLeftActionPress={handleClose}
         />
 
         <View style={themed($searchContainer)}>
@@ -158,12 +179,12 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
           </ScrollView>
         </View>
 
-        {!session && !fromCreateRoutine ? (
+        {!session && !fromCreateRoutine && !browseOnly ? (
           <View style={themed($messageContainer)}>
             <ErrorMessage
               message="No active workout session."
               actionLabel="Start New"
-              onActionPress={() => navigation.popToTop()}
+              onActionPress={() => navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })}
             />
           </View>
         ) : (

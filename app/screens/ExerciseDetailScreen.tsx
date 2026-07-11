@@ -48,7 +48,15 @@ export const ExerciseDetailScreen: FC<WorkoutStackScreenProps<"ExerciseDetail">>
       }
 
       workoutStore.clearError()
-      if (workoutStore.addExerciseToSession(exercise.id)) navigation.pop(2)
+      if (!workoutStore.addExerciseToSession(exercise.id)) return
+      if (route.params.returnToActiveWorkout) {
+        navigation.reset({
+          index: 1,
+          routes: [{ name: "WorkoutTab" }, { name: "ActiveWorkout" }],
+        })
+      } else {
+        navigation.pop(2)
+      }
     }
 
     return (

@@ -34,7 +34,9 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
       if (isStarting) return
       setIsStarting(true)
       try {
-        if (workoutStore.startNewSession()) navigation.navigate("ActiveWorkout")
+        if (workoutStore.startNewSession()) {
+          navigation.navigate("ExerciseLibrary", { newWorkout: true })
+        }
       } finally {
         setIsStarting(false)
       }
@@ -82,11 +84,15 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
 
           {/* Primary workout action */}
           <Button
-            text={hasActiveSession ? "Resume workout" : "Start empty workout"}
+            text={hasActiveSession ? "Resume workout" : "Start workout"}
             preset="filled"
             onPress={handlePrimaryWorkoutAction}
             style={themed($startButton)}
             textStyle={themed($startButtonText)}
+          />
+          <Button
+            text="Browse exercise library"
+            onPress={() => navigation.navigate("ExerciseLibrary", { browseOnly: true })}
           />
 
           {/* Routines Section */}

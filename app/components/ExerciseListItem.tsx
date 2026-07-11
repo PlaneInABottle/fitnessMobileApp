@@ -14,6 +14,8 @@ export interface ExerciseListItemProps {
   subtitle: string
   /** Local asset module or remote URL for the exercise thumbnail. */
   imageSource?: number | string
+  /** Whether a motion demonstration is available. */
+  hasVideo?: boolean
   /** Callback when the row is pressed */
   onPress?: () => void
   /** Optional callback for the add button */
@@ -33,6 +35,7 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
     title,
     subtitle,
     imageSource,
+    hasVideo = false,
     onPress,
     onAdd,
     actionIcon = "add",
@@ -49,6 +52,7 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
       ]}
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityLabel={`${title}. ${subtitle}${hasVideo ? ". Video demonstration available" : ""}`}
     >
       <View style={themed($thumbnail)}>
         {imageSource ? (
@@ -61,6 +65,11 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
         ) : (
           <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
         )}
+        {hasVideo ? (
+          <View style={themed($videoBadge)}>
+            <Ionicons name="play" size={10} color={theme.colors.palette.neutral100} />
+          </View>
+        ) : null}
       </View>
       <View style={$content}>
         <Text weight="medium" size="sm" style={themed($title)} numberOfLines={1}>
@@ -105,6 +114,19 @@ const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({
   justifyContent: "center",
   alignItems: "center",
   marginRight: 12,
+  overflow: "hidden",
+})
+
+const $videoBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  alignItems: "center",
+  backgroundColor: colors.tint,
+  borderRadius: 8,
+  bottom: 4,
+  height: 20,
+  justifyContent: "center",
+  position: "absolute",
+  right: 4,
+  width: 20,
 })
 
 const $thumbnailImage: ImageStyle = {
