@@ -102,6 +102,34 @@ describe("WorkoutStore", () => {
     expect(root.workoutStore.sessionHistory[0].exercises[0].notes).toBe("")
   })
 
+  it("clears numeric values from incomplete sets", () => {
+    const root = RootStoreModel.create({})
+    root.workoutStore.startNewSession()
+    const workoutExerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+    const set = root.workoutStore.currentSession!.exercises[0].sets[0]
+
+    expect(
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, set.id, {
+        weight: 100,
+        reps: 5,
+      }),
+    ).toBe(true)
+    expect(set.weight).toBe(100)
+
+    expect(
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, set.id, {
+        weight: undefined,
+      }),
+    ).toBe(true)
+    expect(set.weight).toBeUndefined()
+    expect(set.reps).toBe(5)
+
+    expect(
+      root.workoutStore.updateSetInWorkoutExercise(workoutExerciseId, set.id, { isDone: true }),
+    ).toBe(false)
+    expect(set.isDone).toBe(false)
+  })
+
   it("creates default sets for non-strength exercises", () => {
     const root = RootStoreModel.create({})
 

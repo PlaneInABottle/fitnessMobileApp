@@ -16,6 +16,7 @@ type RootWithWorkoutDeps = {
     validateSetData(
       exerciseId: string,
       setData: Partial<SetData> | null | undefined,
+      options?: { allowIncomplete?: boolean },
     ):
       | { ok: true }
       | {
@@ -395,17 +396,20 @@ export const WorkoutStoreModel = types
       const set = workoutExercise.sets.find((s) => s.id === setId)
       if (!set) throw new Error("Set not found")
 
+      const hasPatch = (key: keyof SetData) => Object.prototype.hasOwnProperty.call(patch, key)
       const merged: Partial<SetData> = {
         setType: patch.setType !== undefined ? patch.setType : set.setType,
-        weight: patch.weight !== undefined ? patch.weight : set.weight,
-        reps: patch.reps !== undefined ? patch.reps : set.reps,
-        time: patch.time !== undefined ? patch.time : set.time,
-        distance: patch.distance !== undefined ? patch.distance : set.distance,
-        restTime: patch.restTime !== undefined ? patch.restTime : set.restTime,
+        weight: hasPatch("weight") ? patch.weight : set.weight,
+        reps: hasPatch("reps") ? patch.reps : set.reps,
+        time: hasPatch("time") ? patch.time : set.time,
+        distance: hasPatch("distance") ? patch.distance : set.distance,
+        restTime: hasPatch("restTime") ? patch.restTime : set.restTime,
         isDone: patch.isDone !== undefined ? patch.isDone : set.isDone,
       }
 
-      const validation = root.setStore.validateSetData(workoutExercise.exerciseId, merged)
+      const validation = root.setStore.validateSetData(workoutExercise.exerciseId, merged, {
+        allowIncomplete: !merged.isDone,
+      })
       if (!validation.ok) throw new Error(validation.error)
 
       set.setType = merged.setType as SetTypeId

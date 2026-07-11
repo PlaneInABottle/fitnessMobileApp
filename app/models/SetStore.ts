@@ -23,6 +23,7 @@ export type SetData = {
 }
 
 export type SetValidationResult = { ok: true } | { ok: false; error: string }
+export type SetValidationOptions = { allowIncomplete?: boolean }
 
 const FIELD_RANGES: Record<ExerciseSetFieldKey, { min: number; max: number }> = {
   weight: { min: 0, max: 500 },
@@ -72,6 +73,7 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
   validateSetData(
     exerciseId: string,
     setData: Partial<SetData> | null | undefined,
+    options: SetValidationOptions = {},
   ): SetValidationResult {
     if (!setData) return { ok: false, error: "Set data is required" }
 
@@ -99,7 +101,9 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
       const isRequired = requiredFields.includes(field)
 
       if (value === undefined) {
-        if (isRequired) return { ok: false, error: `${field} is required` }
+        if (isRequired && !options.allowIncomplete) {
+          return { ok: false, error: `${field} is required` }
+        }
         continue
       }
 
