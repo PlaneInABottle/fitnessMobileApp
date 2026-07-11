@@ -6,7 +6,7 @@
  */
 import { View, ViewStyle } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { NavigationContainer } from "@react-navigation/native"
+import { getFocusedRouteNameFromRoute, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -103,22 +103,29 @@ const AppTabs = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="Workout"
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.background },
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.separator,
-          borderTopWidth: 1,
-          height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
-          paddingTop: tabBarPaddingTop,
-          paddingBottom: tabBarPaddingBottom,
-        },
-        tabBarItemStyle: {
-          paddingVertical: 0,
-        },
-        tabBarShowLabel: false,
+      initialRouteName="Home"
+      screenOptions={({ route }) => {
+        const focusedRoute = getFocusedRouteNameFromRoute(route)
+        const isNestedWorkoutFlow =
+          route.name === "Workout" && !!focusedRoute && focusedRoute !== "WorkoutTab"
+
+        return {
+          headerShown: false,
+          sceneStyle: { backgroundColor: colors.background },
+          tabBarStyle: {
+            backgroundColor: colors.background,
+            borderTopColor: colors.separator,
+            borderTopWidth: 1,
+            display: isNestedWorkoutFlow ? "none" : "flex",
+            height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
+            paddingTop: tabBarPaddingTop,
+            paddingBottom: tabBarPaddingBottom,
+          },
+          tabBarItemStyle: {
+            paddingVertical: 0,
+          },
+          tabBarShowLabel: false,
+        }
       }}
     >
       <Tab.Screen

@@ -109,7 +109,7 @@ function renderFromWorkoutTab(store = createStoreWithTemplate()) {
 }
 
 describe("RoutineDetailScreen navigation", () => {
-  it("navigates to detail when more options pressed from workout tab", async () => {
+  it("navigates to detail when a routine row is pressed", async () => {
     const store = createStoreWithTemplate()
     const { getByText, getByLabelText } = renderFromWorkoutTab(store)
 
@@ -118,8 +118,7 @@ describe("RoutineDetailScreen navigation", () => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
 
-    // Click on "More options" to navigate to detail
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     // Wait for detail screen
     await waitFor(() => {
@@ -135,7 +134,7 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
       expect(getByText("Start Routine")).toBeTruthy()
@@ -158,7 +157,7 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
       expect(getByLabelText("Edit routine")).toBeTruthy()
@@ -179,7 +178,7 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
       expect(getByLabelText("Edit routine")).toBeTruthy()
@@ -221,7 +220,7 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
       expect(getByLabelText("Edit routine")).toBeTruthy()

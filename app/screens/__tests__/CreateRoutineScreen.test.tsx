@@ -138,8 +138,7 @@ describe("CreateRoutineScreen navigation from WorkoutTab", () => {
   it("navigates to create routine when add button pressed", async () => {
     const { getByLabelText, getByText } = renderFromWorkoutTab()
 
-    // Press the "+" button to add routine
-    fireEvent.press(getByLabelText("Add routine"))
+    fireEvent.press(getByLabelText("Create routine"))
 
     await waitFor(() => {
       expect(getByText("Create Routine")).toBeTruthy()
@@ -150,7 +149,7 @@ describe("CreateRoutineScreen navigation from WorkoutTab", () => {
     const { getByLabelText, getByText } = renderFromWorkoutTab()
 
     // Navigate to CreateRoutine
-    fireEvent.press(getByLabelText("Add routine"))
+    fireEvent.press(getByLabelText("Create routine"))
 
     await waitFor(() => {
       expect(getByText("Create Routine")).toBeTruthy()
@@ -165,10 +164,12 @@ describe("CreateRoutineScreen navigation from WorkoutTab", () => {
     })
   })
 
-  it("can navigate via New Routine pill", async () => {
-    const { getByText } = renderFromWorkoutTab()
+  it("exposes one clear routine creation action", async () => {
+    const { getAllByLabelText, getByText } = renderFromWorkoutTab()
 
-    fireEvent.press(getByText("New Routine"))
+    const createActions = getAllByLabelText("Create routine")
+    expect(createActions).toHaveLength(1)
+    fireEvent.press(createActions[0])
 
     await waitFor(() => {
       expect(getByText("Create Routine")).toBeTruthy()

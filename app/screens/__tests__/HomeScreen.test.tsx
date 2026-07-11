@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { render } from "@testing-library/react-native"
+import { fireEvent, render } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { HomeStackParamList } from "@/navigators/navigationTypes"
@@ -43,10 +43,32 @@ describe("HomeScreen", () => {
   })
 
   it("shows an actionable empty state", () => {
-    const { getByText, getByTestId } = renderHomeScreen()
+    const { store, getByText, getByTestId } = renderHomeScreen()
 
     expect(getByText("Ready to train?")).toBeTruthy()
     expect(getByTestId("home-start-workout")).toBeTruthy()
+    expect(getByText("No completed workouts yet")).toBeTruthy()
+
+    fireEvent.press(getByTestId("home-start-workout"))
+    expect(store.workoutStore.currentSession).toBeDefined()
+  })
+
+  it("does not count sessions without completed sets as workouts", () => {
+    const store = RootStoreModel.create({
+      workoutStore: {
+        sessionHistory: [
+          {
+            id: "empty-history",
+            startedAt: new Date("2026-07-08T10:00:00Z").getTime(),
+            completedAt: new Date("2026-07-08T10:01:00Z").getTime(),
+            exercises: [],
+          },
+        ],
+      },
+    })
+    const { getByText, getByTestId } = renderHomeScreen(store)
+
+    expect(getByTestId("home-total-workouts").props.children).toBe("0")
     expect(getByText("No completed workouts yet")).toBeTruthy()
   })
 

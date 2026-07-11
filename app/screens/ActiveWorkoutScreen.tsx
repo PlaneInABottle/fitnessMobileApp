@@ -140,6 +140,20 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       }
     }
 
+    function handleFinish() {
+      if (completedSetsCount === 0) {
+        Alert.alert(
+          "Complete a set first",
+          session?.exercises.length
+            ? "Mark at least one set as done before finishing this workout."
+            : "Add an exercise and complete at least one set before finishing this workout.",
+        )
+        return
+      }
+
+      navigation.navigate("WorkoutComplete")
+    }
+
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
@@ -147,7 +161,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           leftActionLabel="Back"
           onLeftActionPress={handleGoBack}
           rightActionLabel="Finish"
-          onRightActionPress={() => navigation.navigate("WorkoutComplete")}
+          onRightActionPress={handleFinish}
           showStats
           timeSeconds={elapsedSeconds}
           volumeKg={completedVolumeKg}

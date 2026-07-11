@@ -144,6 +144,12 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               actionLabel="Go Home"
               onActionPress={() => navigation.popToTop()}
             />
+          ) : totalSets === 0 ? (
+            <ErrorMessage
+              message="Complete at least one set before finishing this workout."
+              actionLabel="Return to Workout"
+              onActionPress={() => navigation.goBack()}
+            />
           ) : (
             <>
               {!!workoutStore.lastError && (
@@ -199,7 +205,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                   </View>
                   <View style={themed($statDivider)} />
                   <View style={$statItem}>
-                    <Text text="Set" size="xs" style={themed($statLabel)} />
+                    <Text text="Sets" size="xs" style={themed($statLabel)} />
                     <Text
                       testID="workoutComplete.totalSets"
                       text={totalSets.toString()}

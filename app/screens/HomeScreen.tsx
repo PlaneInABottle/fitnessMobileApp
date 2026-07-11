@@ -35,11 +35,15 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
   const { exerciseStore, performanceMemoryStore, workoutStore } = useStores()
   const now = new Date()
   const weekStart = getStartOfCurrentWeek(now)
-  const history = [...workoutStore.sessionHistory].sort(
-    (a, b) =>
-      (b.completedAt?.getTime() ?? b.startedAt.getTime()) -
-      (a.completedAt?.getTime() ?? a.startedAt.getTime()),
-  )
+  const history = [...workoutStore.sessionHistory]
+    .filter((session) =>
+      session.exercises.some((exercise) => exercise.sets.some((set) => set.isDone)),
+    )
+    .sort(
+      (a, b) =>
+        (b.completedAt?.getTime() ?? b.startedAt.getTime()) -
+        (a.completedAt?.getTime() ?? a.startedAt.getTime()),
+    )
 
   let totalVolume = 0
   let totalMinutes = 0
@@ -64,10 +68,15 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
   const recentSessions = history.slice(0, 5)
   const personalRecordCount = performanceMemoryStore.personalRecords.size
 
-  function openWorkoutTab() {
+  function openActiveWorkout() {
     navigation
       .getParent<BottomTabNavigationProp<AppStackParamList>>()
-      ?.navigate("Workout", { screen: "WorkoutTab" })
+      ?.navigate("Workout", { screen: "ActiveWorkout" })
+  }
+
+  function handleStartWorkout() {
+    if (!workoutStore.currentSession && !workoutStore.startNewSession()) return
+    openActiveWorkout()
   }
 
   return (
@@ -87,7 +96,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
             accessibilityRole="button"
             accessibilityLabel="Resume active workout"
             testID="home-resume-workout"
-            onPress={openWorkoutTab}
+            onPress={openActiveWorkout}
             style={themed($activeWorkout)}
           >
             <View style={themed($activeWorkoutCopy)}>
@@ -112,7 +121,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
               text="Start workout"
               preset="filled"
               testID="home-start-workout"
-              onPress={openWorkoutTab}
+              onPress={handleStartWorkout}
               style={themed($startButton)}
             />
           </View>
@@ -123,8 +132,8 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
             Training summary
           </Text>
 
-          <View style={themed($statsGrid)}>
-            <View style={themed($statCard)}>
+          <View style={themed($statsBand)}>
+            <View style={$statItem}>
               <Text
                 testID="home-total-workouts"
                 text={history.length.toString()}
@@ -135,7 +144,8 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
               <Text text="Workouts" size="sm" style={themed($statLabel)} />
             </View>
 
-            <View style={themed($statCard)}>
+            <View style={themed($statDivider)} />
+            <View style={$statItem}>
               <Text
                 testID="home-week-workouts"
                 text={workoutsThisWeek.toString()}
@@ -146,7 +156,8 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
               <Text text="This week" size="sm" style={themed($statLabel)} />
             </View>
 
-            <View style={themed($statCard)}>
+            <View style={themed($statDivider)} />
+            <View style={$statItem}>
               <Text
                 testID="home-total-volume"
                 text={numberFormatter.format(totalVolume)}
@@ -157,7 +168,8 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
               <Text text="Volume (kg)" size="sm" style={themed($statLabel)} />
             </View>
 
-            <View style={themed($statCard)}>
+            <View style={themed($statDivider)} />
+            <View style={$statItem}>
               <Text
                 testID="home-total-minutes"
                 text={numberFormatter.format(totalMinutes)}
@@ -335,31 +347,39 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-const $statsGrid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: spacing.sm,
-})
-
-const $statCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexBasis: "47%",
-  flexGrow: 1,
+const $statsBand: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "stretch",
   backgroundColor: colors.card,
   borderColor: colors.separator,
   borderRadius: 8,
   borderWidth: 1,
+  flexDirection: "row",
+  minHeight: 88,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.md,
+})
+
+const $statItem: ViewStyle = {
+  alignItems: "center",
+  flex: 1,
   justifyContent: "center",
-  minHeight: 96,
-  padding: spacing.md,
-  gap: spacing.xs,
+  gap: 2,
+}
+
+const $statDivider: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.separator,
+  width: 1,
 })
 
 const $statValue: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
+  fontSize: 20,
 })
 
 const $statLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
+  fontSize: 11,
+  textAlign: "center",
 })
 
 const $summaryFootnote: ThemedStyle<TextStyle> = ({ colors }) => ({

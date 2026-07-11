@@ -1,5 +1,4 @@
 import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
-import Ionicons from "@expo/vector-icons/Ionicons"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -33,11 +32,10 @@ function formatTime(seconds: number): string {
 
 /**
  * Horizontal stats bar for displaying workout metrics.
- * Shows time, volume, sets count, and anatomy placeholder.
  */
 export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
   const { timeSeconds, volumeKg, setsCount, style: $styleOverride } = props
-  const { themed, theme } = useAppTheme()
+  const { themed } = useAppTheme()
 
   return (
     <View style={[themed($container), $styleOverride]}>
@@ -82,12 +80,6 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
           {setsCount}
         </Text>
       </View>
-      <View style={themed($separator)} />
-      <View style={$statItem}>
-        <View style={themed($anatomyPlaceholder)}>
-          <Ionicons name="barbell-outline" size={21} color={theme.colors.textDim} />
-        </View>
-      </View>
     </View>
   )
 }
@@ -124,11 +116,4 @@ const $value: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $valueBlue: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
-})
-
-const $anatomyPlaceholder: ThemedStyle<ViewStyle> = () => ({
-  width: 32,
-  height: 32,
-  justifyContent: "center",
-  alignItems: "center",
 })

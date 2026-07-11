@@ -1,9 +1,9 @@
 import { Pressable, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-import { Button } from "./Button"
 import { Icon } from "./Icon"
 import { Text } from "./Text"
 
@@ -14,85 +14,102 @@ export interface RoutineCardProps {
   exercisePreview: string
   /** Callback when "Start Routine" is pressed */
   onStart: () => void
-  /** Optional callback for the menu button */
-  onMenu?: () => void
+  /** Optional callback for opening routine details */
+  onOpen?: () => void
   /** Optional style override */
   style?: StyleProp<ViewStyle>
 }
 
 /**
- * Card component displaying a workout routine with title,
- * exercise preview, and start button.
+ * Compact routine row with separate detail and start actions.
  */
 export function RoutineCard(props: RoutineCardProps) {
-  const { title, exercisePreview, onStart, onMenu, style: $styleOverride } = props
+  const { title, exercisePreview, onStart, onOpen, style: $styleOverride } = props
   const { themed, theme } = useAppTheme()
 
   return (
     <View style={[themed($container), $styleOverride]}>
-      <View style={$header}>
-        <Text weight="bold" size="lg" style={themed($title)}>
-          {title}
-        </Text>
-        {onMenu && (
-          <Pressable
-            onPress={onMenu}
-            style={$menuButton}
-            accessibilityRole="button"
-            accessibilityLabel="More options"
-          >
-            <Icon icon="more" size={20} color={theme.colors.textDim} />
-          </Pressable>
-        )}
-      </View>
-      <Text size="sm" style={themed($exercisePreview)} numberOfLines={2} ellipsizeMode="tail">
-        {exercisePreview}
-      </Text>
-      <Button
-        text="Start Routine"
-        preset="filled"
+      <Pressable
+        onPress={onOpen}
+        disabled={!onOpen}
+        accessibilityRole={onOpen ? "button" : undefined}
+        accessibilityLabel={onOpen ? `Open ${title}` : undefined}
+        style={({ pressed }) => [themed($details), pressed && themed($detailsPressed)]}
+      >
+        <View style={$copy}>
+          <Text weight="semiBold" style={themed($title)} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text size="xs" style={themed($exercisePreview)} numberOfLines={2} ellipsizeMode="tail">
+            {exercisePreview}
+          </Text>
+        </View>
+        {onOpen && <Icon icon="caretRight" size={18} color={theme.colors.textDim} />}
+      </Pressable>
+
+      <Pressable
         onPress={onStart}
-        style={themed($startButton)}
-        textStyle={themed($startButtonText)}
-      />
+        style={({ pressed }) => [themed($startButton), pressed && themed($startButtonPressed)]}
+        accessibilityRole="button"
+        accessibilityLabel={`Start ${title}`}
+      >
+        <Ionicons name="play" size={16} color="#FFFFFF" />
+        <Text text="Start" size="xs" weight="semiBold" style={$startButtonText} />
+      </Pressable>
     </View>
   )
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "center",
   backgroundColor: colors.card,
-  borderRadius: 12,
-  padding: spacing.md,
+  borderColor: colors.separator,
+  borderRadius: 8,
+  borderWidth: 1,
+  flexDirection: "row",
+  minHeight: 76,
+  overflow: "hidden",
+  paddingRight: spacing.sm,
 })
 
-const $header: ViewStyle = {
-  flexDirection: "row",
-  justifyContent: "space-between",
+const $details: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
-  marginBottom: 8,
-}
+  flex: 1,
+  flexDirection: "row",
+  gap: spacing.sm,
+  minHeight: 76,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
+})
+
+const $detailsPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.cardSecondary,
+})
+
+const $copy: ViewStyle = { flex: 1, gap: 3 }
 
 const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   flex: 1,
 })
 
-const $menuButton: ViewStyle = {
-  padding: 4,
-}
-
 const $exercisePreview: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  marginBottom: 16,
 })
 
-const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $startButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "center",
   backgroundColor: colors.tint,
-  borderRadius: 8,
+  borderRadius: 6,
+  flexDirection: "row",
+  gap: spacing.xs,
+  justifyContent: "center",
   minHeight: 44,
+  paddingHorizontal: spacing.sm,
 })
 
-const $startButtonText: ThemedStyle<TextStyle> = () => ({
+const $startButtonPressed: ThemedStyle<ViewStyle> = () => ({ opacity: 0.78 })
+
+const $startButtonText: TextStyle = {
   color: "#FFFFFF",
-  fontWeight: "600",
-})
+}

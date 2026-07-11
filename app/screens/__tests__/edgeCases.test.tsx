@@ -1,3 +1,4 @@
+import { Alert } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { render, fireEvent, waitFor } from "@testing-library/react-native"
@@ -45,16 +46,26 @@ describe("Edge Cases - Empty Session State", () => {
     await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
   })
 
-  it("can end empty session and complete workout", async () => {
+  it("prevents an empty session from being completed", async () => {
     const store = createStoreWithSession()
     const { getByText } = renderActiveWorkout(store)
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
 
-    await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
+    try {
+      await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
 
-    fireEvent.press(getByText("Finish"))
+      fireEvent.press(getByText("Finish"))
 
-    // Workout Complete screen should show - now Turkish
-    await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+      await waitFor(() =>
+        expect(alertSpy).toHaveBeenCalledWith(
+          "Complete a set first",
+          "Add an exercise and complete at least one set before finishing this workout.",
+        ),
+      )
+      expect(store.workoutStore.currentSession).toBeDefined()
+    } finally {
+      alertSpy.mockRestore()
+    }
   })
 })
 

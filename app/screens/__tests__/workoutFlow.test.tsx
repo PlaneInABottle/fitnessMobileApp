@@ -53,14 +53,13 @@ function renderWorkoutFlow() {
   return renderWorkoutFlowWithStore(store)
 }
 
-describe("WorkoutTabScreen Resume Button", () => {
-  it("shows Start Empty Workout when no active session", () => {
+describe("WorkoutTabScreen primary action", () => {
+  it("shows Start empty workout when no active session", () => {
     const store = RootStoreModel.create({})
     const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
-    // Button text changed to Turkish
-    expect(getByText("+ Start Empty Workout")).toBeTruthy()
-    expect(queryByText("Workout in Progress")).toBeNull()
+    expect(getByText("Start empty workout")).toBeTruthy()
+    expect(queryByText("Resume workout")).toBeNull()
   })
 
   it("shows Resume Workout indicator when session is active", () => {
@@ -68,11 +67,10 @@ describe("WorkoutTabScreen Resume Button", () => {
     store.workoutStore.startNewSession()
     store.workoutStore.addExerciseToSession("bench-press")
 
-    const { getByText } = renderWorkoutFlowWithStore(store)
+    const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
-    expect(getByText("Workout in Progress")).toBeTruthy()
-    // Start button still shows for creating new workout
-    expect(getByText("+ Start Empty Workout")).toBeTruthy()
+    expect(getByText("Resume workout")).toBeTruthy()
+    expect(queryByText("Start empty workout")).toBeNull()
   })
 
   it("navigates to ActiveWorkout when Resume indicator is pressed", async () => {
@@ -82,7 +80,7 @@ describe("WorkoutTabScreen Resume Button", () => {
 
     const { getByText } = renderWorkoutFlowWithStore(store)
 
-    fireEvent.press(getByText("Workout in Progress"))
+    fireEvent.press(getByText("Resume workout"))
 
     await waitFor(() => {
       expect(getByText("Bench Press")).toBeTruthy()
@@ -94,9 +92,9 @@ describe("WorkoutTabScreen Resume Button", () => {
     const { getByText } = renderWorkoutFlowWithStore(store)
 
     // Initially shows Start Empty Workout button
-    expect(getByText("+ Start Empty Workout")).toBeTruthy()
+    expect(getByText("Start empty workout")).toBeTruthy()
 
-    fireEvent.press(getByText("+ Start Empty Workout"))
+    fireEvent.press(getByText("Start empty workout"))
 
     // Navigate back to WorkoutTab - session should be active
     await waitFor(() => {
@@ -110,7 +108,7 @@ describe("Workout MVP flow", () => {
     const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText } =
       renderWorkoutFlow()
 
-    fireEvent.press(getByText("+ Start Empty Workout"))
+    fireEvent.press(getByText("Start empty workout"))
 
     await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
 
@@ -194,7 +192,7 @@ describe("Workout MVP flow", () => {
     try {
       const { getByLabelText, getByText, getByPlaceholderText } = renderWorkoutFlowWithStore(store)
 
-      fireEvent.press(getByText("Start Routine"))
+      fireEvent.press(getByLabelText("Start Template A"))
 
       await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
@@ -206,6 +204,20 @@ describe("Workout MVP flow", () => {
       fireEvent.press(getByLabelText("Add Squat"))
 
       await waitFor(() => expect(getByText("Squat")).toBeTruthy())
+
+      const squatExercise = store.workoutStore.currentSession?.exercises.find(
+        (exercise) => exercise.exerciseId === "squat",
+      )
+      const squatSet = squatExercise?.sets[0]
+      if (squatExercise && squatSet) {
+        act(() => {
+          store.workoutStore.updateSetInWorkoutExercise(squatExercise.id, squatSet.id, {
+            weight: 60,
+            reps: 5,
+            isDone: true,
+          })
+        })
+      }
 
       fireEvent.press(getByText("Finish"))
       await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
