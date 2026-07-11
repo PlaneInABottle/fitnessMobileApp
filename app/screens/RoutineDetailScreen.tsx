@@ -7,6 +7,7 @@ import { ExerciseListItem } from "@/components/ExerciseListItem"
 import { Icon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { getExerciseImages } from "@/data/exerciseMedia"
 import { useStores } from "@/models/RootStoreContext"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
@@ -108,7 +109,7 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
             </Text>
 
             {template.exerciseIds.map((exerciseId) => {
-              const exercise = exerciseStore.exercises.get(exerciseId)
+              const exercise = exerciseStore.getExercise(exerciseId)
               if (!exercise) return null
               const plannedSetCount =
                 template.exercises.find((item) => item.exerciseId === exerciseId)?.sets.length ?? 0
@@ -118,6 +119,8 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
                   key={exerciseId}
                   title={exercise.name}
                   subtitle={`${plannedSetCount} ${plannedSetCount === 1 ? "set" : "sets"} planned`}
+                  imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
+                  onPress={() => navigation.navigate("ExerciseDetail", { exerciseId })}
                 />
               )
             })}

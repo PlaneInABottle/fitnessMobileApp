@@ -37,6 +37,6 @@ export default ({ config }: ConfigContext): Partial<ExpoConfig> => {
       },
     },
     owner: "planeinabottle",
-    plugins: [...existingPlugins],
+    plugins: [...existingPlugins, "expo-image", "expo-video"],
   }
 }

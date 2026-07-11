@@ -212,7 +212,7 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                 )
                 const exerciseNames = session.exercises
                   .slice(0, 3)
-                  .map((exercise) => exerciseStore.exercises.get(exercise.exerciseId)?.name)
+                  .map((exercise) => exerciseStore.getExercise(exercise.exerciseId)?.name)
                   .filter((name): name is string => !!name)
                   .join(", ")
                 const templateName = session.templateId

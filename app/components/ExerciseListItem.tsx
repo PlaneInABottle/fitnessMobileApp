@@ -1,9 +1,10 @@
-import { Image, ImageStyle, Pressable, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import { ImageStyle, Pressable, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import { Image } from "expo-image"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-import { Icon } from "./Icon"
 import { Text } from "./Text"
 
 export interface ExerciseListItemProps {
@@ -11,14 +12,14 @@ export interface ExerciseListItemProps {
   title: string
   /** Subtitle - typically muscle group */
   subtitle: string
-  /** Optional image URL for the exercise thumbnail */
-  imageUrl?: string
+  /** Local asset module or remote URL for the exercise thumbnail. */
+  imageSource?: number | string
   /** Callback when the row is pressed */
   onPress?: () => void
   /** Optional callback for the add button */
   onAdd?: () => void
-  /** Label for the add button (default: "+") */
-  addLabel?: string
+  /** Icon for the trailing action. */
+  actionIcon?: "add" | "remove"
   /** Optional style override */
   style?: StyleProp<ViewStyle>
 }
@@ -28,7 +29,15 @@ export interface ExerciseListItemProps {
  * Shows thumbnail, title, subtitle, and optional add button.
  */
 export function ExerciseListItem(props: ExerciseListItemProps) {
-  const { title, subtitle, imageUrl, onPress, onAdd, addLabel = "+", style: $styleOverride } = props
+  const {
+    title,
+    subtitle,
+    imageSource,
+    onPress,
+    onAdd,
+    actionIcon = "add",
+    style: $styleOverride,
+  } = props
   const { themed, theme } = useAppTheme()
 
   return (
@@ -42,10 +51,15 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
       accessibilityRole="button"
     >
       <View style={themed($thumbnail)}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={$thumbnailImage} />
+        {imageSource ? (
+          <Image
+            source={imageSource}
+            style={$thumbnailImage}
+            contentFit="contain"
+            transition={120}
+          />
         ) : (
-          <Icon icon="ladybug" size={24} color={theme.colors.textDim} />
+          <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
         )}
       </View>
       <View style={$content}>
@@ -61,10 +75,10 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
           onPress={() => onAdd()}
           style={themed($addButton)}
           accessibilityRole="button"
-          accessibilityLabel="Add exercise"
+          accessibilityLabel={`${actionIcon === "add" ? "Add" : "Remove"} ${title}`}
         >
           <View style={themed($addIconContainer)}>
-            <Text style={themed($addIcon)}>{addLabel}</Text>
+            <Ionicons name={actionIcon === "add" ? "add" : "remove"} size={22} color="#FFFFFF" />
           </View>
         </Pressable>
       )}
@@ -84,9 +98,9 @@ const $containerPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  width: 48,
-  height: 48,
-  borderRadius: 24,
+  width: 56,
+  height: 56,
+  borderRadius: 6,
   backgroundColor: colors.cardSecondary,
   justifyContent: "center",
   alignItems: "center",
@@ -94,9 +108,9 @@ const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $thumbnailImage: ImageStyle = {
-  width: 48,
-  height: 48,
-  borderRadius: 24,
+  width: 56,
+  height: 56,
+  borderRadius: 6,
 }
 
 const $content: ViewStyle = {
@@ -124,11 +138,4 @@ const $addIconContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
   justifyContent: "center",
   alignItems: "center",
-})
-
-const $addIcon: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
-  fontSize: 20,
-  fontWeight: "600",
-  lineHeight: 22,
 })

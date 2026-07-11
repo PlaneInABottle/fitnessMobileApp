@@ -107,14 +107,8 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const {
-      store,
-      getByText,
-      getByTestId,
-      getByLabelText,
-      getAllByLabelText,
-      getByPlaceholderText,
-    } = renderWorkoutFlow()
+    const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText } =
+      renderWorkoutFlow()
 
     fireEvent.press(getByText("+ Start Empty Workout"))
 
@@ -122,12 +116,12 @@ describe("Workout MVP flow", () => {
 
     fireEvent.press(getByText("Add Exercise"))
 
-    // ExerciseLibraryScreen now uses ExerciseListItem with onAdd callback - multiple exercises show
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-
-    // Find and press the add button for Bench Press (first one)
-    const addButtons = getAllByLabelText("Add exercise")
-    fireEvent.press(addButtons[0])
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
+    )
+    await waitFor(() => expect(getByLabelText("Add Bench Press")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Bench Press"))
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
@@ -198,8 +192,7 @@ describe("Workout MVP flow", () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
 
     try {
-      const { getByText, getByPlaceholderText, getAllByLabelText } =
-        renderWorkoutFlowWithStore(store)
+      const { getByLabelText, getByText, getByPlaceholderText } = renderWorkoutFlowWithStore(store)
 
       fireEvent.press(getByText("Start Routine"))
 
@@ -208,9 +201,9 @@ describe("Workout MVP flow", () => {
       fireEvent.press(getByText("+ Add Exercise"))
       await waitFor(() => expect(getByText("Add Exercise")).toBeTruthy())
 
-      fireEvent.changeText(getByPlaceholderText("Search exercises"), "squat")
-      await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-      fireEvent.press(getAllByLabelText("Add exercise")[0])
+      fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell full squat")
+      await waitFor(() => expect(getByLabelText("Add Squat")).toBeTruthy())
+      fireEvent.press(getByLabelText("Add Squat"))
 
       await waitFor(() => expect(getByText("Squat")).toBeTruthy())
 

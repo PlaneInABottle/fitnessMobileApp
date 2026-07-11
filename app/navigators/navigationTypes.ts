@@ -13,6 +13,10 @@ export type WorkoutStackParamList = {
   WorkoutTab: undefined
   ActiveWorkout: undefined
   ExerciseLibrary: { fromCreateRoutine?: boolean } | undefined
+  ExerciseDetail: {
+    exerciseId: string
+    selectionContext?: "workout" | "routine"
+  }
   WorkoutComplete: undefined
   CreateRoutine: { editTemplateId?: string } | undefined
   RoutineDetail: { templateId: string }

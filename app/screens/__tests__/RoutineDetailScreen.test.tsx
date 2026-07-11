@@ -173,8 +173,7 @@ describe("RoutineDetailScreen navigation", () => {
 
   it("can add exercises while editing a routine without starting a session", async () => {
     const store = createStoreWithTemplate()
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
-      renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText } = renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {
@@ -197,9 +196,9 @@ describe("RoutineDetailScreen navigation", () => {
       expect(getByText("Add Exercise")).toBeTruthy()
     })
 
-    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell deadlift")
+    await waitFor(() => expect(getByLabelText("Add Deadlift")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Deadlift"))
 
     await waitFor(() => {
       expect(getByText("Exercises (3)")).toBeTruthy()
@@ -216,8 +215,7 @@ describe("RoutineDetailScreen navigation", () => {
       "overhead-press",
     ])!
 
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
-      renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText } = renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {
@@ -243,9 +241,9 @@ describe("RoutineDetailScreen navigation", () => {
       expect(getByText("Add Exercise")).toBeTruthy()
     })
 
-    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell deadlift")
+    await waitFor(() => expect(getByLabelText("Add Deadlift")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Deadlift"))
 
     await waitFor(() => {
       expect(getByText("Exercises (3)")).toBeTruthy()

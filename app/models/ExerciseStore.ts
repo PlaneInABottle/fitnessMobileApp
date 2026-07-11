@@ -1,24 +1,19 @@
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { getSnapshot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+
+import {
+  CATALOG_MUSCLE_GROUPS,
+  EXERCISE_CATALOG,
+  getCatalogExercise,
+  type CatalogExercise,
+} from "@/data/exerciseCatalog"
 
 import { generateId, sanitizeText } from "./utils/common"
 
 export const EXERCISE_CATEGORY_VALUES = ["STRENGTH", "BODYWEIGHT", "TIMED", "CARDIO"] as const
 export type ExerciseCategory = (typeof EXERCISE_CATEGORY_VALUES)[number]
 
-export const MUSCLE_GROUPS = [
-  "Chest",
-  "Back",
-  "Shoulders",
-  "Biceps",
-  "Triceps",
-  "Forearms",
-  "Core",
-  "Quads",
-  "Hamstrings",
-  "Glutes",
-  "Calves",
-] as const
-export type MuscleGroup = (typeof MUSCLE_GROUPS)[number]
+export const MUSCLE_GROUPS = CATALOG_MUSCLE_GROUPS
+export type MuscleGroup = string
 
 export type ExerciseSetFieldKey = "weight" | "reps" | "time" | "distance" | "restTime"
 
@@ -44,6 +39,13 @@ function sanitizeImageUrl(value: string): string {
   return sanitized
 }
 
+function normalizeSearchText(value: string): string {
+  return sanitizeText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+}
+
 export const ExerciseModel = types.model("Exercise", {
   id: types.identifier,
   name: types.string,
@@ -53,7 +55,26 @@ export const ExerciseModel = types.model("Exercise", {
   imageUrl: types.maybe(types.string),
 })
 
-export interface Exercise extends Instance<typeof ExerciseModel> {}
+export interface Exercise {
+  id: string
+  sourceId?: string
+  name: string
+  category: ExerciseCategory
+  muscleGroups: readonly string[]
+  instructions?: string
+  imageUrl?: string
+  sourceCategory?: string
+  primaryMuscles?: readonly string[]
+  secondaryMuscles?: readonly string[]
+  equipment?: string
+  level?: string
+  force?: string
+  mechanic?: string
+  instructionSteps?: readonly string[]
+  hasImages?: boolean
+}
+
+export interface CustomExercise extends Instance<typeof ExerciseModel> {}
 export interface ExerciseSnapshotIn extends SnapshotIn<typeof ExerciseModel> {}
 export interface ExerciseSnapshotOut extends SnapshotOut<typeof ExerciseModel> {}
 
@@ -64,112 +85,166 @@ export type ExerciseInput = Omit<Partial<ExerciseSnapshotIn>, "id"> & {
   muscleGroups?: string[]
 }
 
-const DEFAULT_EXERCISES: ExerciseSnapshotIn[] = [
-  {
+const LEGACY_DEFAULT_IDS = [
+  "bench-press",
+  "squat",
+  "deadlift",
+  "overhead-press",
+  "pull-up",
+  "plank",
+  "running",
+] as const
+
+const LEGACY_DEFAULT_SNAPSHOTS: Record<string, ExerciseSnapshotIn> = {
+  "bench-press": {
     id: "bench-press",
     name: "Bench Press",
     category: "STRENGTH",
     muscleGroups: ["chest", "triceps", "shoulders"],
   },
-  {
+  "squat": {
     id: "squat",
     name: "Squat",
     category: "STRENGTH",
     muscleGroups: ["quadriceps", "glutes", "hamstrings"],
   },
-  {
+  "deadlift": {
     id: "deadlift",
     name: "Deadlift",
     category: "STRENGTH",
     muscleGroups: ["back", "glutes", "hamstrings"],
   },
-  {
+  "overhead-press": {
     id: "overhead-press",
     name: "Overhead Press",
     category: "STRENGTH",
     muscleGroups: ["shoulders", "triceps"],
   },
-  {
+  "pull-up": {
     id: "pull-up",
     name: "Pull Up",
     category: "BODYWEIGHT",
     muscleGroups: ["back", "biceps"],
   },
-  {
+  "plank": {
     id: "plank",
     name: "Plank",
     category: "TIMED",
     muscleGroups: ["core"],
   },
-  {
-    id: "running",
-    name: "Running",
-    category: "CARDIO",
-    muscleGroups: [],
-  },
-]
+  "running": { id: "running", name: "Running", category: "CARDIO", muscleGroups: [] },
+}
+
+function isUnmodifiedLegacyDefault(id: string, value: any): boolean {
+  const expected = LEGACY_DEFAULT_SNAPSHOTS[id]
+  if (!expected || !value || typeof value !== "object") return false
+  return (
+    value.id === expected.id &&
+    value.name === expected.name &&
+    value.category === expected.category &&
+    JSON.stringify(value.muscleGroups ?? []) === JSON.stringify(expected.muscleGroups ?? []) &&
+    value.instructions == null &&
+    value.imageUrl == null
+  )
+}
+
+function mergeCatalogOverride(
+  catalogExercise: CatalogExercise,
+  override?: CustomExercise,
+): Exercise {
+  if (!override) return catalogExercise
+  return { ...catalogExercise, ...getSnapshot(override) }
+}
 
 export const ExerciseStoreModel = types
   .model("ExerciseStore", {
-    exercises: types.optional(types.map(ExerciseModel), {}),
-    hasSeededDefaults: types.optional(types.boolean, false),
+    customExercises: types.optional(types.map(ExerciseModel), {}),
+    hiddenCatalogExerciseIds: types.optional(types.array(types.string), []),
   })
   .views((self) => ({
+    get exercises(): ReadonlyMap<string, Exercise> {
+      const hidden = new Set(self.hiddenCatalogExerciseIds)
+      const exercises = new Map<string, Exercise>()
+
+      EXERCISE_CATALOG.forEach((catalogExercise) => {
+        if (hidden.has(catalogExercise.id)) return
+        exercises.set(
+          catalogExercise.id,
+          mergeCatalogOverride(catalogExercise, self.customExercises.get(catalogExercise.id)),
+        )
+      })
+
+      self.customExercises.forEach((customExercise, id) => {
+        const exerciseId = String(id)
+        if (!getCatalogExercise(exerciseId)) exercises.set(exerciseId, customExercise)
+      })
+      return exercises
+    },
+
+    get allExercises(): Exercise[] {
+      return Array.from(this.exercises.values())
+    },
+
+    getExercise(id: string): Exercise | undefined {
+      if (self.hiddenCatalogExerciseIds.includes(id)) return undefined
+      const customExercise = self.customExercises.get(id)
+      const catalogExercise = getCatalogExercise(id)
+      if (catalogExercise) return mergeCatalogOverride(catalogExercise, customExercise)
+      return customExercise
+    },
+
     hasExercise(id: string): boolean {
-      return self.exercises.has(id)
+      return this.getExercise(id) !== undefined
     },
 
     getExerciseCategory(id: string): ExerciseCategory | undefined {
-      return self.exercises.get(id)?.category
+      if (self.hiddenCatalogExerciseIds.includes(id)) return undefined
+      return self.customExercises.get(id)?.category ?? getCatalogExercise(id)?.category
     },
 
     getExercisesByCategory(category: ExerciseCategory): Exercise[] {
-      return Array.from(self.exercises.values()).filter(
-        (exercise) => exercise.category === category,
-      )
+      return this.allExercises.filter((exercise) => exercise.category === category)
     },
 
     searchExercises(query: string): Exercise[] {
-      const q = sanitizeText(query).toLowerCase()
-      if (!q) return Array.from(self.exercises.values())
+      const q = normalizeSearchText(query)
+      if (!q) return this.allExercises
 
-      return Array.from(self.exercises.values()).filter((exercise) => {
-        if (exercise.name.toLowerCase().includes(q)) return true
-        if (exercise.category.toLowerCase().includes(q)) return true
-        return exercise.muscleGroups.some((mg) => mg.toLowerCase().includes(q))
+      return this.allExercises.filter((exercise) => {
+        if (normalizeSearchText(exercise.name).includes(q)) return true
+        if (exercise.sourceId && normalizeSearchText(exercise.sourceId).includes(q)) return true
+        if (normalizeSearchText(exercise.category).includes(q)) return true
+        if (exercise.sourceCategory && normalizeSearchText(exercise.sourceCategory).includes(q)) {
+          return true
+        }
+        if (exercise.equipment && normalizeSearchText(exercise.equipment).includes(q)) return true
+        return exercise.muscleGroups.some((muscle) => normalizeSearchText(muscle).includes(q))
       })
     },
 
     getRequiredFieldsForExercise(id: string): readonly ExerciseSetFieldKey[] {
-      const exercise = self.exercises.get(id)
-      if (!exercise) return []
-      return EXERCISE_CATEGORIES[exercise.category].required
+      const category =
+        self.customExercises.get(id)?.category ??
+        (self.hiddenCatalogExerciseIds.includes(id) ? undefined : getCatalogExercise(id)?.category)
+      return category ? EXERCISE_CATEGORIES[category].required : []
     },
   }))
   .actions((self) => ({
-    afterCreate() {
-      if (self.hasSeededDefaults) return
-
-      if (self.exercises.size === 0) {
-        DEFAULT_EXERCISES.forEach((exercise) => self.exercises.set(exercise.id, exercise))
-      }
-
-      self.hasSeededDefaults = true
-    },
-
     addExercise(exercise: ExerciseInput): string {
       const providedId = sanitizeText(exercise.id ?? "")
       let id = providedId || generateId()
+      const idExists = (candidate: string) =>
+        self.customExercises.has(candidate) || getCatalogExercise(candidate) !== undefined
 
       if (providedId) {
         let suffix = 1
-        while (self.exercises.has(id)) {
+        while (idExists(id)) {
           id = `${providedId}-${suffix++}`
         }
       } else {
         let attempts = 0
         const maxAttempts = 100
-        while (self.exercises.has(id)) {
+        while (idExists(id)) {
           if (++attempts >= maxAttempts) {
             throw new Error("Failed to generate unique exercise ID after maximum attempts")
           }
@@ -180,7 +255,7 @@ export const ExerciseStoreModel = types
       const name = sanitizeText(exercise.name, MAX_EXERCISE_NAME_LENGTH)
       if (!name) throw new Error("Exercise name is required")
 
-      self.exercises.set(id, {
+      self.customExercises.set(id, {
         id,
         name,
         category: exercise.category,
@@ -195,7 +270,18 @@ export const ExerciseStoreModel = types
     },
 
     updateExercise(id: string, patch: Partial<Omit<ExerciseInput, "id">>): boolean {
-      const exercise = self.exercises.get(id)
+      let exercise = self.customExercises.get(id)
+      if (!exercise) {
+        const catalogExercise = getCatalogExercise(id)
+        if (!catalogExercise || self.hiddenCatalogExerciseIds.includes(id)) return false
+        self.customExercises.set(id, {
+          id,
+          name: catalogExercise.name,
+          category: catalogExercise.category,
+          muscleGroups: [...catalogExercise.muscleGroups],
+        })
+        exercise = self.customExercises.get(id)
+      }
       if (!exercise) return false
 
       if (patch.name !== undefined) {
@@ -226,9 +312,42 @@ export const ExerciseStoreModel = types
     },
 
     removeExercise(id: string): boolean {
-      return self.exercises.delete(id)
+      if (self.hiddenCatalogExerciseIds.includes(id)) return false
+      if (getCatalogExercise(id)) {
+        self.customExercises.delete(id)
+        self.hiddenCatalogExerciseIds.push(id)
+        return true
+      }
+      return self.customExercises.delete(id)
     },
   }))
+
+export function migrateExerciseStoreSnapshot(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {}
+  const candidate = value as Record<string, any>
+
+  if (candidate.customExercises && typeof candidate.customExercises === "object") {
+    return {
+      customExercises: candidate.customExercises,
+      hiddenCatalogExerciseIds: Array.isArray(candidate.hiddenCatalogExerciseIds)
+        ? candidate.hiddenCatalogExerciseIds.filter((id: unknown) => typeof id === "string")
+        : [],
+    }
+  }
+
+  const oldExercises =
+    candidate.exercises && typeof candidate.exercises === "object" ? candidate.exercises : {}
+  const customExercises = Object.fromEntries(
+    Object.entries(oldExercises).filter(
+      ([id, exercise]) => !isUnmodifiedLegacyDefault(id, exercise),
+    ),
+  )
+  const hiddenCatalogExerciseIds = candidate.hasSeededDefaults
+    ? LEGACY_DEFAULT_IDS.filter((id) => !(id in oldExercises))
+    : []
+
+  return { customExercises, hiddenCatalogExerciseIds }
+}
 
 export interface ExerciseStore extends Instance<typeof ExerciseStoreModel> {}
 export interface ExerciseStoreSnapshotIn extends SnapshotIn<typeof ExerciseStoreModel> {}

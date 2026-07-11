@@ -16,6 +16,7 @@ import Config from "@/config"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
 import { CreateRoutineScreen } from "@/screens/CreateRoutineScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
+import { ExerciseDetailScreen } from "@/screens/ExerciseDetailScreen"
 import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { RoutineDetailScreen } from "@/screens/RoutineDetailScreen"
@@ -82,6 +83,7 @@ const WorkoutStackNavigator = () => {
       <WorkoutStack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
       <WorkoutStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} />
       <WorkoutStack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
+      <WorkoutStack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
       <WorkoutStack.Screen name="WorkoutComplete" component={WorkoutCompleteScreen} />
       <WorkoutStack.Screen name="CreateRoutine" component={CreateRoutineScreen} />
       <WorkoutStack.Screen name="RoutineDetail" component={RoutineDetailScreen} />

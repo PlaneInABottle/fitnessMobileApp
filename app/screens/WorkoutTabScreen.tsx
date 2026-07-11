@@ -49,7 +49,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
     function getExercisePreview(exerciseIds: string[]): string {
       const names = exerciseIds
         .slice(0, 4)
-        .map((id) => exerciseStore.exercises.get(id)?.name ?? "Unknown")
+        .map((id) => exerciseStore.getExercise(id)?.name ?? "Unknown")
       if (exerciseIds.length > 4) {
         return names.join(", ") + ` +${exerciseIds.length - 4} more`
       }

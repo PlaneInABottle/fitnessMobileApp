@@ -60,6 +60,23 @@ jest.mock("@expo/vector-icons/Ionicons", () => {
   }
 })
 
+jest.mock("expo-video", () => {
+  const React = require("react")
+  const { View } = require("react-native")
+
+  return {
+    useVideoPlayer: (source: unknown, setup?: (player: any) => void) => {
+      const setupRef = React.useRef(setup)
+      return React.useMemo(() => {
+        const player = { source, loop: false, muted: false, play: jest.fn(), pause: jest.fn() }
+        setupRef.current?.(player)
+        return player
+      }, [source])
+    },
+    VideoView: ({ player: _player, ...props }: any) => React.createElement(View, props),
+  }
+})
+
 jest.mock("react-native-safe-area-context", () => {
   const actual = jest.requireActual("react-native-safe-area-context")
 

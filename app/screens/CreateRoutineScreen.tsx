@@ -9,6 +9,7 @@ import { ExerciseListItem } from "@/components/ExerciseListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
+import { getExerciseImages } from "@/data/exerciseMedia"
 import { useStores } from "@/models/RootStoreContext"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
@@ -155,7 +156,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
               </View>
 
               {selectedExerciseIds.map((exerciseId) => {
-                const exercise = exerciseStore.exercises.get(exerciseId)
+                const exercise = exerciseStore.getExercise(exerciseId)
                 if (!exercise) return null
 
                 return (
@@ -163,9 +164,10 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
                     key={exerciseId}
                     title={exercise.name}
                     subtitle={exercise.muscleGroups.join(", ") || exercise.category}
+                    imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
                     onPress={() => handleRemoveExercise(exerciseId)}
                     onAdd={() => handleRemoveExercise(exerciseId)}
-                    addLabel="−"
+                    actionIcon="remove"
                   />
                 )
               })}

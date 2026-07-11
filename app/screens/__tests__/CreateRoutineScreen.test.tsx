@@ -90,7 +90,7 @@ describe("CreateRoutineScreen", () => {
   })
 
   it("selecting an exercise returns to routine and adds it", async () => {
-    const { getByText, getAllByLabelText } = renderCreateRoutineScreen()
+    const { getByLabelText, getByPlaceholderText, getByText } = renderCreateRoutineScreen()
 
     fireEvent.press(getByText("+ Add Exercise"))
 
@@ -98,9 +98,12 @@ describe("CreateRoutineScreen", () => {
       expect(getByText("Add Exercise")).toBeTruthy()
     })
 
-    // Select first exercise from the library
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
+    )
+    await waitFor(() => expect(getByLabelText("Add Bench Press")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Bench Press"))
 
     await waitFor(() => {
       expect(getByText("Exercises (1)")).toBeTruthy()

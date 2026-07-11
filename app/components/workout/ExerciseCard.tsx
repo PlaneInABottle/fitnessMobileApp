@@ -1,5 +1,8 @@
-import { Pressable, Switch, TextStyle, View, ViewStyle } from "react-native"
+import { ImageStyle, Pressable, Switch, TextStyle, View, ViewStyle } from "react-native"
+import { Image } from "expo-image"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
+import { getExerciseImages } from "@/data/exerciseMedia"
 import type { Exercise } from "@/models/ExerciseStore"
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
@@ -36,6 +39,7 @@ export function ExerciseCard({
   const { themed, theme } = useAppTheme()
 
   const _muscles = exercise.muscleGroups.length ? exercise.muscleGroups.join(", ") : "—"
+  const imageSource = exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]
 
   return (
     <View style={themed([$container, !showBottomSeparator && $containerNoSeparator])}>
@@ -43,7 +47,11 @@ export function ExerciseCard({
       <View style={$styles.row}>
         {/* Thumbnail */}
         <View style={themed($thumbnail)}>
-          <Icon icon="ladybug" size={24} color={theme.colors.textDim} />
+          {imageSource ? (
+            <Image source={imageSource} style={$thumbnailImage} contentFit="contain" />
+          ) : (
+            <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
+          )}
         </View>
 
         {/* Exercise Info */}
@@ -121,6 +129,12 @@ const $thumbnail: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignItems: "center",
   marginRight: 12,
 })
+
+const $thumbnailImage: ImageStyle = {
+  width: 44,
+  height: 44,
+  borderRadius: 8,
+}
 
 const $infoContainer: ViewStyle = {
   flex: 1,

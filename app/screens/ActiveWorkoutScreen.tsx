@@ -180,7 +180,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               )}
 
               {session.exercises.map((we) => {
-                const exercise = exerciseStore.exercises.get(we.exerciseId)
+                const exercise = exerciseStore.getExercise(we.exerciseId)
                 if (!exercise) return null
 
                 const templateExercise = template?.exercises.find(
@@ -215,7 +215,13 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard exercise={exercise} showBottomSeparator={false} />
+                    <ExerciseCard
+                      exercise={exercise}
+                      showBottomSeparator={false}
+                      onPress={() =>
+                        navigation.navigate("ExerciseDetail", { exerciseId: exercise.id })
+                      }
+                    />
 
                     <NoteInput
                       value={we.notes}

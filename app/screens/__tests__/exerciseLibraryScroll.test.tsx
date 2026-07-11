@@ -1,7 +1,7 @@
-import { ScrollView, StyleSheet } from "react-native"
+import { FlatList, ScrollView } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { render } from "@testing-library/react-native"
+import { fireEvent, render } from "@testing-library/react-native"
 
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
@@ -15,7 +15,7 @@ describe("ExerciseLibraryScreen scrolling", () => {
     const store = RootStoreModel.create({})
     store.workoutStore.startNewSession()
 
-    const { UNSAFE_getAllByType } = render(
+    const { UNSAFE_getAllByType, UNSAFE_getByType, getByPlaceholderText, getByText } = render(
       <RootStoreProvider value={store}>
         <ThemeProvider>
           <NavigationContainer>
@@ -30,18 +30,18 @@ describe("ExerciseLibraryScreen scrolling", () => {
       </RootStoreProvider>,
     )
 
-    // Screen now has a fixed header with filter chips (horizontal scroll)
-    // and main content scroll view for exercises
     const scrollViews = UNSAFE_getAllByType(ScrollView)
-    expect(scrollViews.length).toBeGreaterThanOrEqual(1)
+    expect(scrollViews.some((scrollView) => scrollView.props.horizontal)).toBe(true)
 
-    // Main content scroll should not have flex: 1 in contentContainerStyle
-    const mainScrollView = scrollViews.find(
-      (sv) => !sv.props.horizontal && sv.props.style?.flex === 1,
+    const exerciseList = UNSAFE_getByType(FlatList)
+    expect(exerciseList.props.data).toHaveLength(873)
+    expect(exerciseList.props.initialNumToRender).toBe(14)
+    expect(exerciseList.props.windowSize).toBe(7)
+
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
     )
-    if (mainScrollView) {
-      const flattened = StyleSheet.flatten(mainScrollView.props.contentContainerStyle)
-      expect(flattened?.flex).toBeUndefined()
-    }
+    expect(getByText("1 exercise")).toBeTruthy()
   })
 })

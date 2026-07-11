@@ -3,6 +3,7 @@ import { applySnapshot, getSnapshot, IDisposer, onSnapshot } from "mobx-state-tr
 
 import * as storage from "@/utils/storage"
 
+import { migrateExerciseStoreSnapshot } from "./ExerciseStore"
 import { migratePerformanceMemoryStoreSnapshotToV2 } from "./PerformanceMemoryStore"
 import { RootStore, RootStoreModel, RootStoreSnapshotIn, RootStoreSnapshotOut } from "./RootStore"
 
@@ -56,6 +57,8 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
       exerciseNotes: {},
     }
   }
+
+  ;(merged as any).exerciseStore = migrateExerciseStoreSnapshot((merged as any).exerciseStore)
 
   let didRestorePersistedState = false
 
