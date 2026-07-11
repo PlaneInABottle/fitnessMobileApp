@@ -48,8 +48,7 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
     // Previous notes display
     expect(getByDisplayValue("Previous note")).toBeTruthy()
 
-    // Placeholder is Turkish
-    const input = getByPlaceholderText("Buraya not ekleyin...")
+    const input = getByPlaceholderText("Add a note...")
 
     fireEvent.changeText(input, "Updated note")
 

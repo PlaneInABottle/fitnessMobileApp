@@ -1,11 +1,11 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
 import { ExerciseListItem } from "@/components/ExerciseListItem"
-import { Icon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
@@ -134,7 +134,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           {/* Exercise List or Empty State */}
           {selectedExerciseIds.length === 0 ? (
             <View style={themed($emptyState)}>
-              <Icon icon="dumbbell" size={64} color={theme.colors.textDim} />
+              <Ionicons name="barbell-outline" size={64} color={theme.colors.textDim} />
               <Text size="lg" style={themed($emptyTitle)}>
                 Start by adding an exercise to your routine
               </Text>

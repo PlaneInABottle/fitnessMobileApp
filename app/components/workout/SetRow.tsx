@@ -54,11 +54,11 @@ function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
     case "STRENGTH":
       return [
         { key: "weight", label: "Kg", header: "KG" },
-        { key: "reps", label: "Reps", header: "TEKRAR" },
+        { key: "reps", label: "Reps", header: "REPS" },
       ]
     case "BODYWEIGHT":
       return [
-        { key: "reps", label: "Reps", header: "TEKRAR" },
+        { key: "reps", label: "Reps", header: "REPS" },
         { label: "", header: "" },
       ]
     case "TIMED":
@@ -69,7 +69,7 @@ function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
     case "CARDIO":
       return [
         { key: "time", label: "Sec", header: "TIME" },
-        { key: "distance", label: "m", header: "MESAFE" },
+        { key: "distance", label: "m", header: "DISTANCE" },
       ]
   }
 }

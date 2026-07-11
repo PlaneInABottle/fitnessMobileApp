@@ -131,7 +131,7 @@ const AppTabs = () => {
         component={WorkoutStackNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name="dumbbell" label="Workout" focused={focused} />
+            <TabBarIcon name="barbell" label="Workout" focused={focused} />
           ),
         }}
       />

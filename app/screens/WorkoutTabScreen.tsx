@@ -1,5 +1,6 @@
 import { FC, useState } from "react"
 import { Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -108,7 +109,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
               accessibilityRole="button"
             >
               <View style={$newRoutineButtonContent}>
-                <Text style={themed($newRoutineEmoji)}>✨</Text>
+                <Ionicons name="add-circle-outline" size={22} color={theme.colors.tint} />
                 <Text weight="semiBold" style={themed($newRoutineText)}>
                   New Routine
                 </Text>
@@ -242,11 +243,6 @@ const $newRoutineButtonContent: ViewStyle = {
   alignItems: "center",
   gap: 10,
 }
-
-const $newRoutineEmoji: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  fontSize: 16,
-})
 
 const $newRoutineText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,

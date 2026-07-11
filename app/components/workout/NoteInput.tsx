@@ -17,7 +17,7 @@ export function NoteInput({ value, onChangeText, placeholder }: NoteInputProps) 
     <TextField
       value={value}
       onChangeText={onChangeText}
-      placeholder={placeholder ?? "Buraya not ekleyin..."}
+      placeholder={placeholder ?? "Add a note..."}
       multiline
       borderless
       accessibilityLabel="Exercise note"

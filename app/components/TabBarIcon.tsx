@@ -1,14 +1,13 @@
 import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-import { Icon, IconTypes } from "./Icon"
 import { Text } from "./Text"
 
 export interface TabBarIconProps {
-  /** Icon name from the icon registry */
-  name: IconTypes
+  name: "home" | "barbell"
   /** Label text below the icon */
   label: string
   /** Whether this tab is currently focused/active */
@@ -26,10 +25,11 @@ export function TabBarIcon(props: TabBarIconProps) {
   const { themed, theme } = useAppTheme()
 
   const iconColor = focused ? theme.colors.tint : theme.colors.tintInactive
+  const iconName = focused ? name : (`${name}-outline` as const)
 
   return (
     <View style={[themed($container), $styleOverride]}>
-      <Icon icon={name} size={22} color={iconColor} />
+      <Ionicons name={iconName} size={23} color={iconColor} />
       <Text
         size="xxs"
         weight={focused ? "medium" : "normal"}

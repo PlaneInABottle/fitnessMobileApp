@@ -163,6 +163,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
             />
           ) : session.exercises.length === 0 ? (
             <EmptyState
+              preset="workout"
               heading="No exercises yet"
               content="Add an exercise to start tracking sets."
               button="Add Exercise"

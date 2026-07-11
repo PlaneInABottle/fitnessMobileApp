@@ -49,6 +49,17 @@ jest.mock("react-native-keyboard-controller", () => {
   }
 })
 
+jest.mock("@expo/vector-icons/Ionicons", () => {
+  const React = require("react")
+  const { Text } = require("react-native")
+
+  return {
+    __esModule: true,
+    default: ({ name, ...props }: { name: string }) =>
+      React.createElement(Text, { ...props, accessibilityLabel: name }, name),
+  }
+})
+
 jest.mock("react-native-safe-area-context", () => {
   const actual = jest.requireActual("react-native-safe-area-context")
 
