@@ -6,6 +6,10 @@ import { calculateTotalVolume } from "./utils/calculations"
 import { generateId, sanitizeText, toFiniteNumber } from "./utils/common"
 import { SET_TYPE_IDS } from "./utils/constants"
 
+export const REST_TIME_OPTIONS = [0, 60, 90, 120, 180] as const
+export type RestTimeSeconds = (typeof REST_TIME_OPTIONS)[number]
+export const DEFAULT_REST_TIME_SECONDS: RestTimeSeconds = 90
+
 type RootWithWorkoutDeps = {
   exerciseStore: {
     hasExercise(id: string): boolean
@@ -63,6 +67,7 @@ export const WorkoutExerciseModel = types.model("WorkoutExercise", {
   id: types.identifier,
   exerciseId: types.string,
   notes: types.optional(types.string, ""),
+  restTime: types.optional(types.number, DEFAULT_REST_TIME_SECONDS),
   sets: types.optional(types.array(ExerciseSetModel), []),
 })
 
@@ -76,6 +81,7 @@ export const WorkoutSessionModel = types.model("WorkoutSession", {
   startedAt: types.Date,
   completedAt: types.maybe(types.Date),
   templateId: types.maybe(types.string),
+  restTimerEndsAt: types.maybe(types.Date),
 })
 
 export interface WorkoutSession extends Instance<typeof WorkoutSessionModel> {}
@@ -126,6 +132,7 @@ export const WorkoutStoreModel = types
   })
   .volatile(() => ({
     pendingRoutineExerciseId: undefined as string | undefined,
+    lastAlertedRestTimerEndMs: undefined as number | undefined,
   }))
   .views((self) => ({
     /**
@@ -188,6 +195,12 @@ export const WorkoutStoreModel = types
         return bTime - aTime
       })
     },
+
+    getRestTimerRemainingSeconds(now: number = Date.now()): number {
+      const endsAt = self.currentSession?.restTimerEndsAt
+      if (!endsAt) return 0
+      return Math.max(0, Math.ceil((endsAt.getTime() - now) / 1000))
+    },
   }))
   .actions((self) => {
     function requireCurrentSession(): WorkoutSession {
@@ -234,11 +247,19 @@ export const WorkoutStoreModel = types
       return base
     }
 
+    function requireRestTime(value: number): RestTimeSeconds {
+      if (!REST_TIME_OPTIONS.includes(value as RestTimeSeconds)) {
+        throw new Error("Invalid rest time")
+      }
+      return value as RestTimeSeconds
+    }
+
     function buildDefaultWorkingSetSnapshot(
       exerciseId: string,
       root: RootWithWorkoutDeps,
+      restTime: RestTimeSeconds = DEFAULT_REST_TIME_SECONDS,
     ): ExerciseSetSnapshotIn {
-      const setData = buildDefaultWorkingSetData(exerciseId, root)
+      const setData = { ...buildDefaultWorkingSetData(exerciseId, root), restTime }
       return {
         id: generateId(),
         ...buildSetSnapshot(setData),
@@ -278,11 +299,17 @@ export const WorkoutStoreModel = types
       return (template.exercises ?? []).map((te) => {
         if (!root.exerciseStore.hasExercise(te.exerciseId)) throw new Error("Invalid exerciseId")
 
+        const restTime = requireRestTime(
+          te.sets.find((set) => REST_TIME_OPTIONS.includes(set.restTime as RestTimeSeconds))
+            ?.restTime ?? DEFAULT_REST_TIME_SECONDS,
+        )
+
         const sets = te.sets.length
           ? te.sets.map((s) => {
               const setData: Partial<SetData> = {
                 ...buildDefaultWorkingSetData(te.exerciseId, root),
                 setType: s.setType as SetTypeId,
+                restTime,
               }
 
               const validation = root.setStore.validateSetData(te.exerciseId, setData)
@@ -293,11 +320,12 @@ export const WorkoutStoreModel = types
                 ...buildSetSnapshot(setData),
               }
             })
-          : [buildDefaultWorkingSetSnapshot(te.exerciseId, root)]
+          : [buildDefaultWorkingSetSnapshot(te.exerciseId, root, restTime)]
 
         return {
           id: generateId(),
           exerciseId: te.exerciseId,
+          restTime,
           sets,
         }
       })
@@ -309,6 +337,7 @@ export const WorkoutStoreModel = types
 
     function startNewSessionUnsafe() {
       if (self.currentSession) throw new Error("Session already active")
+      self.lastAlertedRestTimerEndMs = undefined
 
       self.currentSession = cast({
         id: generateId(),
@@ -328,7 +357,8 @@ export const WorkoutStoreModel = types
         cast({
           id: workoutExerciseId,
           exerciseId,
-          sets: [buildDefaultWorkingSetSnapshot(exerciseId, root)],
+          restTime: DEFAULT_REST_TIME_SECONDS,
+          sets: [buildDefaultWorkingSetSnapshot(exerciseId, root, DEFAULT_REST_TIME_SECONDS)],
         }),
       )
       return workoutExerciseId
@@ -336,6 +366,7 @@ export const WorkoutStoreModel = types
 
     function startSessionFromTemplateUnsafe(templateId: string) {
       if (self.currentSession) throw new Error("Session already active")
+      self.lastAlertedRestTimerEndMs = undefined
 
       const root = getAttachedRoot()
       const template = self.templates.get(templateId)
@@ -371,19 +402,33 @@ export const WorkoutStoreModel = types
     function addSetToWorkoutExerciseUnsafe(workoutExerciseId: string, setData: Partial<SetData>) {
       const root = getAttachedRoot()
       const workoutExercise = requireWorkoutExercise(workoutExerciseId)
+      const setDataWithRest = {
+        ...setData,
+        restTime: setData.restTime ?? workoutExercise.restTime,
+      }
 
-      const validation = root.setStore.validateSetData(workoutExercise.exerciseId, setData)
+      const validation = root.setStore.validateSetData(workoutExercise.exerciseId, setDataWithRest)
       if (!validation.ok) throw new Error(validation.error)
 
       workoutExercise.sets.push({
         id: generateId(),
-        ...buildSetSnapshot(setData),
+        ...buildSetSnapshot(setDataWithRest),
       })
     }
 
     function updateWorkoutExerciseNotesUnsafe(workoutExerciseId: string, notes: string) {
       const workoutExercise = requireWorkoutExercise(workoutExerciseId)
       workoutExercise.notes = notes
+    }
+
+    function setExerciseRestTimeUnsafe(workoutExerciseId: string, restTime: number) {
+      const workoutExercise = requireWorkoutExercise(workoutExerciseId)
+      const nextRestTime = requireRestTime(restTime)
+
+      workoutExercise.restTime = nextRestTime
+      workoutExercise.sets.forEach((set) => {
+        if (!set.isDone) set.restTime = nextRestTime
+      })
     }
 
     function updateSetInWorkoutExerciseUnsafe(
@@ -395,6 +440,7 @@ export const WorkoutStoreModel = types
       const workoutExercise = requireWorkoutExercise(workoutExerciseId)
       const set = workoutExercise.sets.find((s) => s.id === setId)
       if (!set) throw new Error("Set not found")
+      const wasDone = set.isDone
 
       const hasPatch = (key: keyof SetData) => Object.prototype.hasOwnProperty.call(patch, key)
       const merged: Partial<SetData> = {
@@ -419,6 +465,12 @@ export const WorkoutStoreModel = types
       set.distance = merged.distance as any
       set.restTime = merged.restTime as any
       set.isDone = merged.isDone as any
+
+      if (!wasDone && set.isDone && (set.restTime ?? workoutExercise.restTime) > 0) {
+        requireCurrentSession().restTimerEndsAt = new Date(
+          Date.now() + (set.restTime ?? workoutExercise.restTime) * 1000,
+        )
+      }
     }
 
     function completeSessionUnsafe(skipTemplateUpdate: boolean = false) {
@@ -589,6 +641,18 @@ export const WorkoutStoreModel = types
       workoutExercise.sets.splice(setIndex, 1)
     }
 
+    function addRestTimerSecondsUnsafe(seconds: number) {
+      const session = requireCurrentSession()
+      if (!Number.isFinite(seconds) || seconds <= 0) throw new Error("Invalid timer extension")
+
+      const currentEnd = session.restTimerEndsAt?.getTime() ?? 0
+      session.restTimerEndsAt = new Date(Math.max(Date.now(), currentEnd) + seconds * 1000)
+    }
+
+    function skipRestTimerUnsafe() {
+      requireCurrentSession().restTimerEndsAt = undefined
+    }
+
     return {
       clearError() {
         self.lastError = undefined
@@ -681,6 +745,49 @@ export const WorkoutStoreModel = types
           setError(e)
           return false
         }
+      },
+
+      setExerciseRestTime(workoutExerciseId: string, restTime: number): boolean {
+        try {
+          setExerciseRestTimeUnsafe(workoutExerciseId, restTime)
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      addRestTimerSeconds(seconds: number): boolean {
+        try {
+          addRestTimerSecondsUnsafe(seconds)
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      skipRestTimer(): boolean {
+        try {
+          skipRestTimerUnsafe()
+          self.lastError = undefined
+          return true
+        } catch (e) {
+          setError(e)
+          return false
+        }
+      },
+
+      consumeRestTimerExpiry(): boolean {
+        const endMs = self.currentSession?.restTimerEndsAt?.getTime()
+        if (endMs === undefined || endMs > Date.now() || self.lastAlertedRestTimerEndMs === endMs) {
+          return false
+        }
+
+        self.lastAlertedRestTimerEndMs = endMs
+        return true
       },
 
       completeSession(skipTemplateUpdate: boolean = false): boolean {

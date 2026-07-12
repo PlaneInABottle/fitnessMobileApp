@@ -49,13 +49,13 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-    const warmupButtons = getAllByLabelText("Set type: warmup")
+    const warmupButtons = getAllByLabelText("Set type for Bench Press, set 1: warmup")
     expect(within(warmupButtons[0]).getByText("W")).toBeTruthy()
 
-    const dropsetButtons = getAllByLabelText("Set type: dropset")
+    const dropsetButtons = getAllByLabelText("Set type for Bench Press, set 3: dropset")
     expect(within(dropsetButtons[0]).getByText("D")).toBeTruthy()
 
-    const workingButtons = getAllByLabelText("Set type: working")
+    const workingButtons = getAllByLabelText(/Set type for Bench Press, set (2|4): working/)
     expect(workingButtons).toHaveLength(2)
     expect(within(workingButtons[0]).getByText("1")).toBeTruthy()
     expect(within(workingButtons[1]).getByText("2")).toBeTruthy()
@@ -88,7 +88,7 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     // Mark set done: placeholder values should be copied into the set data.
-    fireEvent.press(getAllByLabelText("Toggle done")[0])
+    fireEvent.press(getAllByLabelText("Mark Bench Press, set 1 complete")[0])
 
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets?.[0]?.weight).toBe(100)
@@ -126,14 +126,14 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("0 kg")
     expect(readText(getByLabelText("workout-stats-sets-value"))).toBe("0")
 
-    fireEvent.press(getAllByLabelText("Toggle done")[0])
+    fireEvent.press(getAllByLabelText("Mark Bench Press, set 1 complete")[0])
 
     await waitFor(() => {
       expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("500 kg")
       expect(readText(getByLabelText("workout-stats-sets-value"))).toBe("1")
     })
 
-    fireEvent.press(getAllByLabelText("Toggle done")[0])
+    fireEvent.press(getAllByLabelText("Mark Bench Press, set 1 incomplete")[0])
 
     await waitFor(() => {
       expect(readText(getByLabelText("workout-stats-volume-value"))).toBe("0 kg")
@@ -154,13 +154,59 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
     expect(queryByText("Select Set Type")).toBeNull()
 
     // Press on the set type indicator (opens SetOptionsBottomSheet)
-    fireEvent.press(getAllByLabelText("Set type: working")[0])
+    fireEvent.press(getAllByLabelText("Set type for Bench Press, set 1: working")[0])
     await waitFor(() => expect(getByText("Select Set Type")).toBeTruthy())
 
-    fireEvent.press(getAllByLabelText("Toggle done")[0])
+    fireEvent.press(getAllByLabelText("Mark Bench Press, set 1 complete")[0])
 
     // Still editable (inputs remain) - labels updated to match new SetRow design
-    expect(getAllByLabelText("Kg").length).toBeGreaterThan(0)
-    expect(getAllByLabelText("Reps").length).toBeGreaterThan(0)
+    expect(getAllByLabelText(/weight in kilograms/).length).toBeGreaterThan(0)
+    expect(getAllByLabelText(/repetitions/).length).toBeGreaterThan(0)
+  })
+
+  it("starts the selected rest timer only when a set transitions to done", async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+    const store = RootStoreModel.create({})
+    store.workoutStore.startNewSession()
+    const exerciseId = store.workoutStore.addExerciseToSession("bench-press")!
+    const set = store.workoutStore.currentSession!.exercises[0].sets[0]
+    store.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, { weight: 100, reps: 5 })
+
+    const { getByLabelText, getByText, queryByText, unmount } = renderActiveWorkout(store)
+
+    try {
+      await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+      expect(getByLabelText("Rest timer for Bench Press: off")).toBeTruthy()
+      expect(
+        getByLabelText("Rest timer for Bench Press: 90 seconds").props.accessibilityState,
+      ).toEqual({ selected: true })
+      expect(getByLabelText("Rest timer for Bench Press: 120 seconds")).toBeTruthy()
+      expect(getByLabelText("Rest timer for Bench Press: 180 seconds")).toBeTruthy()
+      fireEvent.press(getByLabelText("Rest timer for Bench Press: 60 seconds"))
+      expect(store.workoutStore.currentSession?.exercises[0].restTime).toBe(60)
+
+      fireEvent.press(getByLabelText("Mark Bench Press, set 1 complete"))
+      expect(store.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:00.000Z",
+      )
+      expect(getByText("1:00")).toBeTruthy()
+
+      jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
+      fireEvent.press(getByLabelText("Mark Bench Press, set 1 incomplete"))
+      expect(store.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:00.000Z",
+      )
+
+      fireEvent.press(getByLabelText("Add 30 seconds to rest timer"))
+      expect(store.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:30.000Z",
+      )
+      fireEvent.press(getByLabelText("Skip rest timer"))
+      expect(queryByText("Rest timer")).toBeNull()
+    } finally {
+      unmount()
+      jest.useRealTimers()
+    }
   })
 })

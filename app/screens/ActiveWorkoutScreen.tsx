@@ -8,11 +8,13 @@ import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
 import { NoteInput } from "@/components/workout/NoteInput"
+import { RestTimerBar } from "@/components/workout/RestTimerBar"
 import { SetOptionsBottomSheet } from "@/components/workout/SetOptionsBottomSheet"
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
 import type { SetData, SetTypeId } from "@/models/SetStore"
+import type { RestTimeSeconds } from "@/models/WorkoutStore"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -116,6 +118,10 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       )
     }
 
+    function handleRestTimeChange(workoutExerciseId: string, seconds: RestTimeSeconds) {
+      workoutStore.setExerciseRestTime(workoutExerciseId, seconds)
+    }
+
     function handleGoBack() {
       const hasData = session && session.exercises.length > 0
       if (hasData) {
@@ -167,6 +173,15 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
           volumeKg={completedVolumeKg}
           setsCount={completedSetsCount}
         />
+
+        {session?.restTimerEndsAt ? (
+          <RestTimerBar
+            endsAt={session.restTimerEndsAt}
+            onAddThirty={() => workoutStore.addRestTimerSeconds(30)}
+            onSkip={workoutStore.skipRestTimer}
+            onExpire={workoutStore.consumeRestTimerExpiry}
+          />
+        ) : null}
 
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
           {!session ? (
@@ -232,6 +247,8 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                     <ExerciseCard
                       exercise={exercise}
                       showBottomSeparator={false}
+                      restTime={we.restTime as RestTimeSeconds}
+                      onRestTimeChange={(seconds) => handleRestTimeChange(we.id, seconds)}
                       onPress={() =>
                         navigation.navigate("ExerciseDetail", { exerciseId: exercise.id })
                       }
@@ -328,13 +345,14 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               allowEmptyNumbers={false}
                               index={displayIndex}
                               rowIndex={i}
+                              exerciseName={exercise.name}
+                              setNumber={i + 1}
                               isDone={s.isDone}
                               placeholders={placeholders}
                               previousValue={previousValue}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                               onDone={() => handleToggleDone(we.id, s.id)}
-                              doneButtonLabel="Toggle done"
                               value={{
                                 setType: s.setType,
                                 weight: s.weight,

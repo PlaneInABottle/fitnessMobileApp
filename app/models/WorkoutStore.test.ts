@@ -1,3 +1,5 @@
+import { getSnapshot } from "mobx-state-tree"
+
 import { RootStoreModel } from "./RootStore"
 
 describe("WorkoutStore", () => {
@@ -504,6 +506,129 @@ describe("WorkoutStore", () => {
       const result = root.workoutStore.deleteSetFromWorkoutExercise("weId", "setId")
       expect(result).toBe(false)
       expect(root.workoutStore.lastError).toBe("No active session")
+    })
+  })
+
+  describe("rest timer", () => {
+    it("starts only on an incomplete-to-done transition and new sets inherit the exercise duration", () => {
+      jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+      const root = RootStoreModel.create({})
+      root.workoutStore.startNewSession()
+      const exerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+      const exercise = root.workoutStore.currentSession!.exercises[0]
+      const firstSet = exercise.sets[0]
+
+      expect(exercise.restTime).toBe(90)
+      expect(firstSet.restTime).toBe(90)
+      expect(root.workoutStore.setExerciseRestTime(exerciseId, 60)).toBe(true)
+      expect(firstSet.restTime).toBe(60)
+
+      root.workoutStore.addSetToWorkoutExercise(exerciseId, {
+        setType: "working",
+        weight: 80,
+        reps: 8,
+      })
+      expect(exercise.sets[1].restTime).toBe(60)
+
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, firstSet.id, {
+        weight: 80,
+        reps: 8,
+        isDone: true,
+      })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:00.000Z",
+      )
+
+      jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, firstSet.id, { isDone: false })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:00.000Z",
+      )
+    })
+
+    it("adds time, reports expiry, and skips without using a relative countdown", () => {
+      jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+      const root = RootStoreModel.create({})
+      root.workoutStore.startNewSession()
+      const exerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+      const set = root.workoutStore.currentSession!.exercises[0].sets[0]
+      root.workoutStore.setExerciseRestTime(exerciseId, 60)
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, {
+        weight: 100,
+        reps: 5,
+        isDone: true,
+      })
+
+      expect(root.workoutStore.getRestTimerRemainingSeconds()).toBe(60)
+      jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
+      expect(root.workoutStore.addRestTimerSeconds(30)).toBe(true)
+      expect(root.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:30.000Z",
+      )
+
+      jest.setSystemTime(new Date("2025-01-01T00:02:00Z"))
+      expect(root.workoutStore.getRestTimerRemainingSeconds()).toBe(0)
+      expect(root.workoutStore.consumeRestTimerExpiry()).toBe(true)
+      expect(root.workoutStore.consumeRestTimerExpiry()).toBe(false)
+      expect(root.workoutStore.addRestTimerSeconds(30)).toBe(true)
+      expect(root.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:02:30.000Z",
+      )
+
+      expect(root.workoutStore.skipRestTimer()).toBe(true)
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeUndefined()
+    })
+
+    it("keeps the timer off at zero and removes timer state with the workout", () => {
+      const root = RootStoreModel.create({})
+      root.workoutStore.startNewSession()
+      const exerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+      const set = root.workoutStore.currentSession!.exercises[0].sets[0]
+
+      root.workoutStore.setExerciseRestTime(exerciseId, 0)
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, {
+        weight: 100,
+        reps: 5,
+        isDone: true,
+      })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeUndefined()
+
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, { isDone: false })
+      root.workoutStore.setExerciseRestTime(exerciseId, 60)
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, { isDone: true })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeDefined()
+
+      root.workoutStore.discardSession()
+      expect(root.workoutStore.currentSession).toBeUndefined()
+      expect(getSnapshot(root.workoutStore)).not.toHaveProperty("restTimerEndsAt")
+    })
+
+    it("restores an absolute deadline and safely defaults old snapshots", () => {
+      jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+      const root = RootStoreModel.create({})
+      root.workoutStore.startNewSession()
+      const exerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+      const set = root.workoutStore.currentSession!.exercises[0].sets[0]
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, {
+        weight: 100,
+        reps: 5,
+        isDone: true,
+      })
+
+      const snapshot = getSnapshot(root)
+      const restored = RootStoreModel.create(snapshot)
+      expect(restored.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
+        "2025-01-01T00:01:30.000Z",
+      )
+
+      const oldSnapshot = JSON.parse(JSON.stringify(snapshot))
+      delete oldSnapshot.workoutStore.currentSession.restTimerEndsAt
+      delete oldSnapshot.workoutStore.currentSession.exercises[0].restTime
+      delete oldSnapshot.workoutStore.currentSession.exercises[0].sets[0].restTime
+
+      const restoredOld = RootStoreModel.create(oldSnapshot)
+      expect(restoredOld.workoutStore.currentSession?.restTimerEndsAt).toBeUndefined()
+      expect(restoredOld.workoutStore.currentSession?.exercises[0].restTime).toBe(90)
     })
   })
 })

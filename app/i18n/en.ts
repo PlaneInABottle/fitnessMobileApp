@@ -5,16 +5,16 @@ const en = {
     back: "Back",
   },
   errorScreen: {
-    title: "Something went wrong!",
+    title: "Something went wrong",
     friendlySubtitle:
-      "Fitness Tracker ran into an unexpected problem. Reset the app to return to your workouts.",
-    reset: "RESET APP",
+      "Fitness Tracker could not continue. Restart the app to return to your workouts.",
+    reset: "Restart app",
   },
   emptyStateComponent: {
     generic: {
-      heading: "So empty... so sad",
-      content: "No data found yet. Try clicking the button to refresh or reload the app.",
-      button: "Let's try this again",
+      heading: "Nothing here yet",
+      content: "Refresh to check your workout data again.",
+      button: "Refresh",
     },
   },
 }

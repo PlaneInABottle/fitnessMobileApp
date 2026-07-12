@@ -44,44 +44,42 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
   const { themed, theme } = useAppTheme()
 
   return (
-    <Pressable
-      style={({ pressed }) => [
-        themed($container),
-        pressed && themed($containerPressed),
-        $styleOverride,
-      ]}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${title}. ${subtitle}${hasVideo ? ". Video demonstration available" : ""}`}
-    >
-      <View style={themed($thumbnail)}>
-        {imageSource ? (
-          <Image
-            source={imageSource}
-            style={$thumbnailImage}
-            contentFit="contain"
-            transition={120}
-          />
-        ) : (
-          <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
-        )}
-        {hasVideo ? (
-          <View style={themed($videoBadge)}>
-            <Ionicons name="play" size={10} color={theme.colors.palette.neutral100} />
-          </View>
-        ) : null}
-      </View>
-      <View style={$content}>
-        <Text weight="medium" size="sm" style={themed($title)} numberOfLines={1}>
-          {title}
-        </Text>
-        <Text size="xs" style={themed($subtitle)} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      </View>
+    <View style={[themed($container), $styleOverride]}>
+      <Pressable
+        style={({ pressed }) => [themed($mainAction), pressed && themed($containerPressed)]}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. ${subtitle}${hasVideo ? ". Video demonstration available" : ""}`}
+      >
+        <View style={themed($thumbnail)}>
+          {imageSource ? (
+            <Image
+              source={imageSource}
+              style={$thumbnailImage}
+              contentFit="contain"
+              transition={120}
+            />
+          ) : (
+            <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
+          )}
+          {hasVideo ? (
+            <View style={themed($videoBadge)}>
+              <Ionicons name="play" size={10} color={theme.colors.palette.neutral100} />
+            </View>
+          ) : null}
+        </View>
+        <View style={$content}>
+          <Text weight="medium" size="sm" style={themed($title)} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text size="xs" style={themed($subtitle)} numberOfLines={1}>
+            {subtitle}
+          </Text>
+        </View>
+      </Pressable>
       {onAdd && (
         <Pressable
-          onPress={() => onAdd()}
+          onPress={onAdd}
           style={themed($addButton)}
           accessibilityRole="button"
           accessibilityLabel={`${actionIcon === "add" ? "Add" : "Remove"} ${title}`}
@@ -91,7 +89,7 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
           </View>
         </Pressable>
       )}
-    </Pressable>
+    </View>
   )
 }
 
@@ -100,6 +98,13 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   paddingVertical: spacing.sm,
   paddingHorizontal: spacing.md,
+})
+
+const $mainAction: ThemedStyle<ViewStyle> = () => ({
+  alignItems: "center",
+  flex: 1,
+  flexDirection: "row",
+  minWidth: 0,
 })
 
 const $containerPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({

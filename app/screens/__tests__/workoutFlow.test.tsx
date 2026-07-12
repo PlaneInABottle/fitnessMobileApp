@@ -120,8 +120,8 @@ describe("Workout MVP flow", () => {
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     // First set is created by default when exercise is added
-    const reps1 = getByLabelText("Reps")
-    const kg1 = getByLabelText("Kg")
+    const reps1 = getByLabelText("Bench Press, set 1, repetitions")
+    const kg1 = getByLabelText("Bench Press, set 1, weight in kilograms")
 
     fireEvent.changeText(reps1, "5")
     fireEvent.changeText(kg1, "60")
