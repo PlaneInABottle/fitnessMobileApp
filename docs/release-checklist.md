@@ -8,14 +8,15 @@
 - Run `bun run deps:check` and `bunx expo-doctor`.
 - Complete a workout on a physical device or simulator and verify history after relaunch.
 - Verify light and dark themes, empty states, long exercise names, and numeric input.
-- Enable GitHub Pages from the repository `docs/` directory and verify the privacy and support URLs.
+- Confirm the GitHub Pages workflow has deployed `docs/` and verify the privacy and support URLs.
 
 ## EAS setup
 
 ```bash
-bunx eas-cli@20.5.1 login
-bunx eas-cli@20.5.1 init
-bunx eas-cli@20.5.1 build:version:set --platform all
+bunx eas-cli@21.0.1 login
+bunx eas-cli@21.0.1 init
+bunx eas-cli@21.0.1 build:version:set --platform android
+bunx eas-cli@21.0.1 build:version:set --platform ios
 ```
 
 No EAS environment variables are required. The app has no backend or API credentials.
@@ -23,8 +24,8 @@ No EAS environment variables are required. The app has no backend or API credent
 ## Candidate builds
 
 ```bash
-bunx eas-cli@20.5.1 build --profile preview --platform android
-bunx eas-cli@20.5.1 build --profile preview:simulator --platform ios
+bunx eas-cli@21.0.1 build --profile preview --platform android
+bunx eas-cli@21.0.1 build --profile preview:simulator --platform ios
 ```
 
 - Install both candidates and repeat the core workout flow.
@@ -34,8 +35,8 @@ bunx eas-cli@20.5.1 build --profile preview:simulator --platform ios
 ## Store release
 
 ```bash
-bunx eas-cli@20.5.1 build --profile production --platform all
-bunx eas-cli@20.5.1 submit --profile production --platform all
+bunx eas-cli@21.0.1 build --profile production --platform all
+bunx eas-cli@21.0.1 submit --profile production --platform all
 ```
 
 - Complete App Store privacy as "Data Not Collected."

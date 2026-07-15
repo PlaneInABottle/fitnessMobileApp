@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 20.5.1",
+    "version": ">= 21.0.1",
     "appVersionSource": "remote"
   },
   "build": {
@@ -9,6 +9,7 @@
       "distribution": "internal",
       "environment": "development",
       "node": "24.18.0",
+      "bun": "1.3.14",
       "android": {
         "buildType": "apk"
       },
@@ -26,6 +27,7 @@
       "distribution": "internal",
       "environment": "preview",
       "node": "24.18.0",
+      "bun": "1.3.14",
       "android": {
         "buildType": "apk"
       }
@@ -39,6 +41,7 @@
     "production": {
       "environment": "production",
       "node": "24.18.0",
+      "bun": "1.3.14",
       "autoIncrement": true
     }
   },

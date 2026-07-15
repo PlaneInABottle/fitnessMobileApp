@@ -12,7 +12,7 @@ A modern, high-performance fitness tracking application built with React Native 
 
 ### Key Technologies
 
-React Native 0.81.5 with New Architecture (Hermes), Expo 54.0.29 (dev client), MobX State Tree 7.0.2 for global state, React Navigation 7.x (native stack + bottom tabs), TypeScript 5.9.2 (strict mode), i18next + react-i18next (internationalization), Maestro (E2E testing), MMKV (fast persistent storage), Secure Storage (encrypted tokens).
+React Native 0.86.0 with New Architecture (Hermes), Expo 57.0.4 (dev client), MobX State Tree 7.0.2 for global state, React Navigation 7.x (native stack + bottom tabs), TypeScript 6.0.3 (strict mode), i18next + react-i18next (internationalization), Maestro (E2E testing), and MMKV (local persistent storage).
 </project_identity>
 
 ---
@@ -99,7 +99,7 @@ Strict 5-Store Architecture:
 
 ### Storage & Persistence
 - **MMKV**: High-frequency performance data and store snapshots.
-- **Secure Storage**: Sensitive user data or tokens.
+- The app has no accounts, tokens, or remote backend credentials.
 - **Migrations**: Always provide migration logic when changing store models.
 </architecture>
 

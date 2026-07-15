@@ -12,8 +12,11 @@ import { useStores } from "@/models/RootStoreContext"
 import type { AppStackParamList, HomeStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { openLinkInBrowser } from "@/utils/openLinkInBrowser"
 
 const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 })
+const privacyPolicyUrl = "https://planeinabottle.github.io/fitnessMobileApp/privacy/"
+const supportUrl = "https://planeinabottle.github.io/fitnessMobileApp/support/"
 
 function getStartOfCurrentWeek(now: Date): number {
   const start = new Date(now)
@@ -290,6 +293,39 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
             </View>
           )}
         </View>
+
+        <View style={themed($legalFooter)}>
+          <Text
+            text="Workout data is stored only on this device."
+            size="sm"
+            style={themed($subtitleText)}
+          />
+          <View style={themed($legalLinks)}>
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="Open privacy policy"
+              testID="home-privacy-policy"
+              onPress={() => openLinkInBrowser(privacyPolicyUrl)}
+              style={({ pressed }) => [themed($legalLink), pressed && $legalLinkPressed]}
+            >
+              <Text
+                text="Privacy policy"
+                size="sm"
+                weight="semiBold"
+                style={themed($legalLinkText)}
+              />
+            </Pressable>
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="Open support website"
+              testID="home-support"
+              onPress={() => openLinkInBrowser(supportUrl)}
+              style={({ pressed }) => [themed($legalLink), pressed && $legalLinkPressed]}
+            >
+              <Text text="Support" size="sm" weight="semiBold" style={themed($legalLinkText)} />
+            </Pressable>
+          </View>
+        </View>
       </View>
     </Screen>
   )
@@ -461,4 +497,30 @@ const $historyMetrics: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   gap: spacing.lg,
   paddingTop: spacing.sm,
+})
+
+const $legalFooter: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  borderTopColor: colors.separator,
+  borderTopWidth: 1,
+  gap: spacing.xs,
+  paddingTop: spacing.lg,
+})
+
+const $legalLinks: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: spacing.md,
+})
+
+const $legalLink: ThemedStyle<ViewStyle> = () => ({
+  justifyContent: "center",
+  minHeight: 44,
+})
+
+const $legalLinkPressed: ViewStyle = {
+  opacity: 0.7,
+}
+
+const $legalLinkText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
 })

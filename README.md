@@ -6,8 +6,8 @@ and a history dashboard. Workout data stays on the device and the app does not r
 
 ## Requirements
 
-- Node.js 24
-- Bun 1.3 or newer
+- Node.js 24.18.0
+- Bun 1.3.14
 - Xcode for iOS builds or Android Studio for Android builds
 - A development build; Expo Go cannot load the MMKV native module used by this app
 
@@ -43,9 +43,9 @@ bunx expo-doctor
 After authenticating with EAS and linking the Expo project:
 
 ```bash
-bunx eas-cli@20.5.1 build --profile preview --platform android
-bunx eas-cli@20.5.1 build --profile preview:simulator --platform ios
-bunx eas-cli@20.5.1 build --profile production --platform all
+bunx eas-cli@21.0.1 build --profile preview --platform android
+bunx eas-cli@21.0.1 build --profile preview:simulator --platform ios
+bunx eas-cli@21.0.1 build --profile production --platform all
 ```
 
 See [docs/release-checklist.md](docs/release-checklist.md) for the complete release process and

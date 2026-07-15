@@ -7,6 +7,9 @@ import type { HomeStackParamList } from "@/navigators/navigationTypes"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { WorkoutHistoryScreen } from "@/screens/WorkoutHistoryScreen"
 import { ThemeProvider } from "@/theme/context"
+import { openLinkInBrowser } from "@/utils/openLinkInBrowser"
+
+jest.mock("@/utils/openLinkInBrowser")
 
 const Stack = createNativeStackNavigator<HomeStackParamList>()
 
@@ -29,6 +32,7 @@ function renderHomeScreen(store = RootStoreModel.create({})) {
 
 describe("HomeScreen", () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     jest.useFakeTimers({ doNotFake: ["nextTick", "setImmediate"] })
     jest.setSystemTime(new Date("2026-07-09T12:00:00Z"))
   })
@@ -53,6 +57,22 @@ describe("HomeScreen", () => {
 
     fireEvent.press(getByTestId("home-start-workout"))
     expect(store.workoutStore.currentSession).toBeDefined()
+  })
+
+  it("opens the published privacy and support pages", () => {
+    const { getByTestId } = renderHomeScreen()
+
+    fireEvent.press(getByTestId("home-privacy-policy"))
+    fireEvent.press(getByTestId("home-support"))
+
+    expect(openLinkInBrowser).toHaveBeenNthCalledWith(
+      1,
+      "https://planeinabottle.github.io/fitnessMobileApp/privacy/",
+    )
+    expect(openLinkInBrowser).toHaveBeenNthCalledWith(
+      2,
+      "https://planeinabottle.github.io/fitnessMobileApp/support/",
+    )
   })
 
   it("does not count sessions without completed sets as workouts", () => {
