@@ -1,7 +1,7 @@
 # Release Checklist
 
 - [x] Add the public support and privacy policy URLs.
-- [ ] Add the App Store review contact name, email, and phone number.
+- [x] Add the App Store review contact name, email, and phone number.
 - [x] Confirm the final app name, bundle identifier, package name, version, and build numbers.
 - [x] Verify every exercise media asset is covered by the chosen license and include required attribution.
 - [x] Recheck Apple App Privacy and Google Data Safety answers against local workout and analytics behavior.
