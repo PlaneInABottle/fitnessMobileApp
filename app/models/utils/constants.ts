@@ -2,14 +2,9 @@
  * Shared constants across stores
  */
 
-import { SetTypeId } from "../SetStore"
-
 /**
  * Valid set type IDs
  */
-export const SET_TYPE_IDS: readonly SetTypeId[] = [
-  "warmup",
-  "working",
-  "dropset",
-  "failure",
-] as const
+export const SET_TYPE_IDS = ["warmup", "working", "dropset", "failure"] as const
+
+export type SetTypeId = (typeof SET_TYPE_IDS)[number]

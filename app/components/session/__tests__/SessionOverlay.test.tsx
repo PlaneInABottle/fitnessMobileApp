@@ -87,8 +87,8 @@ describe("SessionOverlay", () => {
     it("is hidden when no active session", () => {
       const { queryByText } = renderSessionOverlay()
 
-      expect(queryByText("Devam")).toBeNull()
-      expect(queryByText("Sil")).toBeNull()
+      expect(queryByText("Resume")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
     })
 
     it("renders when session is active", () => {
@@ -97,8 +97,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam")).toBeTruthy()
-      expect(getByText("Sil")).toBeTruthy()
+      expect(getByText("Resume")).toBeTruthy()
+      expect(getByText("Discard")).toBeTruthy()
     })
   })
 
@@ -109,7 +109,7 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Devam"))
+      fireEvent.press(getByText("Resume"))
 
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith(
@@ -126,13 +126,13 @@ describe("SessionOverlay", () => {
   })
 
   describe("discard confirmation flow", () => {
-    it("shows discard modal when Sil is pressed", async () => {
+    it("shows discard modal when Discard is pressed", async () => {
       const store = RootStoreModel.create({})
       store.workoutStore.startNewSession()
 
       const { getByText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Sil"))
+      fireEvent.press(getByText("Discard"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -146,7 +146,7 @@ describe("SessionOverlay", () => {
 
       const { getByText, queryByText, getByLabelText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Sil"))
+      fireEvent.press(getByText("Discard"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -169,7 +169,7 @@ describe("SessionOverlay", () => {
 
       const { getByText, queryByText, getByLabelText } = renderSessionOverlay(store)
 
-      fireEvent.press(getByText("Sil"))
+      fireEvent.press(getByText("Discard"))
 
       await waitFor(() => {
         expect(getByText("Discard Workout?")).toBeTruthy()
@@ -198,8 +198,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam")).toBeNull()
-      expect(queryByText("Sil")).toBeNull()
+      expect(queryByText("Resume")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
     })
 
     it("hides overlay on ExerciseLibrary screen", () => {
@@ -213,8 +213,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam")).toBeNull()
-      expect(queryByText("Sil")).toBeNull()
+      expect(queryByText("Resume")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
     })
 
     it("hides overlay on WorkoutComplete screen", () => {
@@ -228,8 +228,8 @@ describe("SessionOverlay", () => {
 
       const { queryByText } = renderSessionOverlay(store)
 
-      expect(queryByText("Devam")).toBeNull()
-      expect(queryByText("Sil")).toBeNull()
+      expect(queryByText("Resume")).toBeNull()
+      expect(queryByText("Discard")).toBeNull()
     })
 
     it("shows overlay on WorkoutTab screen", () => {
@@ -243,14 +243,14 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam")).toBeTruthy()
-      expect(getByText("Sil")).toBeTruthy()
+      expect(getByText("Resume")).toBeTruthy()
+      expect(getByText("Discard")).toBeTruthy()
     })
 
     it("shows overlay on other tab screens", () => {
       mockGetRootState.mockReturnValue({
         index: 0,
-        routes: [{ name: "ProfileTab" }],
+        routes: [{ name: "HomeTab" }],
       })
 
       const store = RootStoreModel.create({})
@@ -258,8 +258,8 @@ describe("SessionOverlay", () => {
 
       const { getByText } = renderSessionOverlay(store)
 
-      expect(getByText("Devam")).toBeTruthy()
-      expect(getByText("Sil")).toBeTruthy()
+      expect(getByText("Resume")).toBeTruthy()
+      expect(getByText("Discard")).toBeTruthy()
     })
 
     it("subscribes to navigation state changes", () => {
@@ -281,7 +281,7 @@ describe("SessionOverlay", () => {
       const { getByText } = renderSessionOverlay(store)
 
       // Since route is empty string (not in hidden routes), overlay should show
-      expect(getByText("Devam")).toBeTruthy()
+      expect(getByText("Resume")).toBeTruthy()
     })
   })
 })

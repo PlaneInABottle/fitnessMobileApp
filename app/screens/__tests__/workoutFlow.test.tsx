@@ -53,14 +53,13 @@ function renderWorkoutFlow() {
   return renderWorkoutFlowWithStore(store)
 }
 
-describe("WorkoutTabScreen Resume Button", () => {
-  it("shows Start Empty Workout when no active session", () => {
+describe("WorkoutTabScreen primary action", () => {
+  it("shows Start workout when no active session", () => {
     const store = RootStoreModel.create({})
     const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
-    // Button text changed to Turkish
-    expect(getByText("+ Boş Antrenmana Başla")).toBeTruthy()
-    expect(queryByText("Devam Eden Antrenman")).toBeNull()
+    expect(getByText("Start workout")).toBeTruthy()
+    expect(queryByText("Resume workout")).toBeNull()
   })
 
   it("shows Resume Workout indicator when session is active", () => {
@@ -68,12 +67,10 @@ describe("WorkoutTabScreen Resume Button", () => {
     store.workoutStore.startNewSession()
     store.workoutStore.addExerciseToSession("bench-press")
 
-    const { getByText } = renderWorkoutFlowWithStore(store)
+    const { getByText, queryByText } = renderWorkoutFlowWithStore(store)
 
-    // Resume bar at bottom shows "Devam Eden Antrenman"
-    expect(getByText("Devam Eden Antrenman")).toBeTruthy()
-    // Start button still shows for creating new workout
-    expect(getByText("+ Boş Antrenmana Başla")).toBeTruthy()
+    expect(getByText("Resume workout")).toBeTruthy()
+    expect(queryByText("Start workout")).toBeNull()
   })
 
   it("navigates to ActiveWorkout when Resume indicator is pressed", async () => {
@@ -83,7 +80,7 @@ describe("WorkoutTabScreen Resume Button", () => {
 
     const { getByText } = renderWorkoutFlowWithStore(store)
 
-    fireEvent.press(getByText("Devam Eden Antrenman"))
+    fireEvent.press(getByText("Resume workout"))
 
     await waitFor(() => {
       expect(getByText("Bench Press")).toBeTruthy()
@@ -94,10 +91,9 @@ describe("WorkoutTabScreen Resume Button", () => {
     const store = RootStoreModel.create({})
     const { getByText } = renderWorkoutFlowWithStore(store)
 
-    // Initially shows Start Empty Workout button
-    expect(getByText("+ Boş Antrenmana Başla")).toBeTruthy()
+    expect(getByText("Start workout")).toBeTruthy()
 
-    fireEvent.press(getByText("+ Boş Antrenmana Başla"))
+    fireEvent.press(getByText("Start workout"))
 
     // Navigate back to WorkoutTab - session should be active
     await waitFor(() => {
@@ -108,33 +104,24 @@ describe("WorkoutTabScreen Resume Button", () => {
 
 describe("Workout MVP flow", () => {
   it("runs through start -> add exercise -> add set -> complete -> save template", async () => {
-    const {
-      store,
-      getByText,
-      getByTestId,
-      getByLabelText,
-      getAllByLabelText,
-      getByPlaceholderText,
-    } = renderWorkoutFlow()
+    const { store, getByText, getByTestId, getByLabelText, getByPlaceholderText } =
+      renderWorkoutFlow()
 
-    fireEvent.press(getByText("+ Boş Antrenmana Başla"))
+    fireEvent.press(getByText("Start workout"))
 
-    await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
-
-    fireEvent.press(getByText("Add Exercise"))
-
-    // ExerciseLibraryScreen now uses ExerciseListItem with onAdd callback - multiple exercises show
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-
-    // Find and press the add button for Bench Press (first one)
-    const addButtons = getAllByLabelText("Add exercise")
-    fireEvent.press(addButtons[0])
+    await waitFor(() => expect(getByPlaceholderText("Search exercises")).toBeTruthy())
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
+    )
+    await waitFor(() => expect(getByLabelText("Add Bench Press")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Bench Press"))
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     // First set is created by default when exercise is added
-    const reps1 = getByLabelText("Reps")
-    const kg1 = getByLabelText("Kg")
+    const reps1 = getByLabelText("Bench Press, set 1, repetitions")
+    const kg1 = getByLabelText("Bench Press, set 1, weight in kilograms")
 
     fireEvent.changeText(reps1, "5")
     fireEvent.changeText(kg1, "60")
@@ -157,7 +144,7 @@ describe("Workout MVP flow", () => {
     }
 
     // Add second set
-    fireEvent.press(getByText("+ Set Ekle"))
+    fireEvent.press(getByText("+ Add Set"))
 
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(2)
@@ -173,19 +160,18 @@ describe("Workout MVP flow", () => {
       })
     }
 
-    // End button is now "Bitir" in Turkish
-    fireEvent.press(getByText("Bitir"))
+    fireEvent.press(getByText("Finish"))
 
-    await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
+    await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
 
     expect(getByTestId("workoutComplete.exerciseCount").props.children).toBe("1")
     expect(getByTestId("workoutComplete.totalSets").props.children).toBe("2")
 
-    fireEvent.press(getByText("Şablon Olarak Kaydet"))
-    fireEvent.changeText(getByPlaceholderText("Şablon adı"), "Upper A")
-    fireEvent.press(getByText("Kaydet"))
+    fireEvent.press(getByText("Save as Routine"))
+    fireEvent.changeText(getByPlaceholderText("Routine name"), "Upper A")
+    fireEvent.press(getByText("Save"))
 
-    await waitFor(() => expect(getByText("Rutinler")).toBeTruthy())
+    await waitFor(() => expect(getByText("Routines")).toBeTruthy())
 
     expect(
       Array.from(store.workoutStore.templates.values()).some((t: any) => t.name === "Upper A"),
@@ -200,40 +186,53 @@ describe("Workout MVP flow", () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
 
     try {
-      const { getByText, getByPlaceholderText, getAllByLabelText } =
-        renderWorkoutFlowWithStore(store)
+      const { getByLabelText, getByText, getByPlaceholderText } = renderWorkoutFlowWithStore(store)
 
-      fireEvent.press(getByText("Start Routine"))
+      fireEvent.press(getByLabelText("Start Template A"))
 
       await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
-      fireEvent.press(getByText("+ Egzersiz Ekle"))
-      await waitFor(() => expect(getByText("Egzersiz Ekle")).toBeTruthy())
+      fireEvent.press(getByText("+ Add Exercise"))
+      await waitFor(() => expect(getByText("Add Exercise")).toBeTruthy())
 
-      fireEvent.changeText(getByPlaceholderText("Search exercises"), "squat")
-      await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-      fireEvent.press(getAllByLabelText("Add exercise")[0])
+      fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell full squat")
+      await waitFor(() => expect(getByLabelText("Add Squat")).toBeTruthy())
+      fireEvent.press(getByLabelText("Add Squat"))
 
       await waitFor(() => expect(getByText("Squat")).toBeTruthy())
 
-      fireEvent.press(getByText("Bitir"))
-      await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
+      const squatExercise = store.workoutStore.currentSession?.exercises.find(
+        (exercise) => exercise.exerciseId === "squat",
+      )
+      const squatSet = squatExercise?.sets[0]
+      if (squatExercise && squatSet) {
+        act(() => {
+          store.workoutStore.updateSetInWorkoutExercise(squatExercise.id, squatSet.id, {
+            weight: 60,
+            reps: 5,
+            isDone: true,
+          })
+        })
+      }
 
-      fireEvent.press(getByText("Bitti"))
+      fireEvent.press(getByText("Finish"))
+      await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+
+      fireEvent.press(getByText("Done"))
 
       await waitFor(() => expect(alertSpy).toHaveBeenCalled())
 
       const [title, message, buttons] = alertSpy.mock.calls[0]
-      expect(title).toBe("Şablonu güncelle?")
-      expect(message).toContain("Egzersiz: +1 / -0")
-      expect(message).toContain("Set: +1 / -0")
+      expect(title).toBe("Update routine?")
+      expect(message).toContain("Exercises: +1 / -0")
+      expect(message).toContain("Sets: +1 / -0")
 
-      const updateButton = (buttons as any[]).find((b) => b.text === "Güncelle")
+      const updateButton = (buttons as any[]).find((b) => b.text === "Update")
       await act(async () => {
         updateButton?.onPress?.()
       })
 
-      await waitFor(() => expect(getByText("Rutinler")).toBeTruthy())
+      await waitFor(() => expect(getByText("Routines")).toBeTruthy())
 
       expect(store.workoutStore.templates.get(templateId)?.exerciseIds.slice()).toEqual([
         "bench-press",

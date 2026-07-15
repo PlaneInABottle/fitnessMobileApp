@@ -57,40 +57,19 @@ describe("RoutineDetailScreen", () => {
   it("shows back button", () => {
     const { getByLabelText } = renderRoutineDetailScreen()
 
-    expect(getByLabelText("Geri")).toBeTruthy()
-  })
-
-  it("shows creator text", () => {
-    const { getByText } = renderRoutineDetailScreen()
-
-    expect(getByText("panout tarafından oluşturuldu")).toBeTruthy()
+    expect(getByLabelText("Back")).toBeTruthy()
   })
 
   it("shows start routine button", () => {
     const { getByText } = renderRoutineDetailScreen()
 
-    expect(getByText("Rutini Başlat")).toBeTruthy()
-  })
-
-  it("shows analytics placeholder section", () => {
-    const { getByText } = renderRoutineDetailScreen()
-
-    expect(getByText("15k kg")).toBeTruthy()
-    expect(getByText("Son 30 gün")).toBeTruthy()
-  })
-
-  it("shows analytics tabs", () => {
-    const { getByText } = renderRoutineDetailScreen()
-
-    expect(getByText("Hacim")).toBeTruthy()
-    expect(getByText("Tekrar")).toBeTruthy()
-    expect(getByText("Süre")).toBeTruthy()
+    expect(getByText("Start Routine")).toBeTruthy()
   })
 
   it("shows exercise list with count", () => {
     const { getByText } = renderRoutineDetailScreen()
 
-    expect(getByText("Egzersizler (2)")).toBeTruthy()
+    expect(getByText("Exercises (2)")).toBeTruthy()
     expect(getByText("Bench Press")).toBeTruthy()
     expect(getByText("Overhead Press")).toBeTruthy()
   })
@@ -98,14 +77,14 @@ describe("RoutineDetailScreen", () => {
   it("shows edit routine link", () => {
     const { getByLabelText } = renderRoutineDetailScreen()
 
-    expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+    expect(getByLabelText("Edit routine")).toBeTruthy()
   })
 
   it("shows not found message for non-existent template", () => {
     const store = RootStoreModel.create({})
     const { getByText } = renderRoutineDetailScreen(store, "non-existent-id")
 
-    expect(getByText("Rutin bulunamadı")).toBeTruthy()
+    expect(getByText("Routine not found")).toBeTruthy()
   })
 })
 
@@ -130,7 +109,7 @@ function renderFromWorkoutTab(store = createStoreWithTemplate()) {
 }
 
 describe("RoutineDetailScreen navigation", () => {
-  it("navigates to detail when more options pressed from workout tab", async () => {
+  it("navigates to detail when a routine row is pressed", async () => {
     const store = createStoreWithTemplate()
     const { getByText, getByLabelText } = renderFromWorkoutTab(store)
 
@@ -139,13 +118,11 @@ describe("RoutineDetailScreen navigation", () => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
 
-    // Click on "More options" to navigate to detail
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     // Wait for detail screen
     await waitFor(() => {
-      expect(getByText("Rutini Başlat")).toBeTruthy()
-      expect(getByText("panout tarafından oluşturuldu")).toBeTruthy()
+      expect(getByText("Start Routine")).toBeTruthy()
     })
   })
 
@@ -157,13 +134,13 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
-      expect(getByText("Rutini Başlat")).toBeTruthy()
+      expect(getByText("Start Routine")).toBeTruthy()
     })
 
-    fireEvent.press(getByText("Rutini Başlat"))
+    fireEvent.press(getByText("Start Routine"))
 
     await waitFor(() => {
       // Should navigate to ActiveWorkoutScreen which shows exercises
@@ -180,51 +157,50 @@ describe("RoutineDetailScreen navigation", () => {
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
-      expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+      expect(getByLabelText("Edit routine")).toBeTruthy()
     })
 
-    fireEvent.press(getByLabelText("Rutini Düzenle"))
+    fireEvent.press(getByLabelText("Edit routine"))
 
     await waitFor(() => {
-      expect(getByText("Rutin Oluştur")).toBeTruthy()
+      expect(getByText("Create Routine")).toBeTruthy()
     })
   })
 
   it("can add exercises while editing a routine without starting a session", async () => {
     const store = createStoreWithTemplate()
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
-      renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText } = renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
-      expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+      expect(getByLabelText("Edit routine")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("Rutini Düzenle"))
+    fireEvent.press(getByLabelText("Edit routine"))
 
     await waitFor(() => {
-      expect(getByText("Egzersizler (2)")).toBeTruthy()
-    })
-
-    fireEvent.press(getByText("+ Egzersiz ekle"))
-
-    await waitFor(() => {
-      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+      expect(getByText("Exercises (2)")).toBeTruthy()
     })
 
-    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.press(getByText("+ Add Exercise"))
 
     await waitFor(() => {
-      expect(getByText("Egzersizler (3)")).toBeTruthy()
+      expect(getByText("Add Exercise")).toBeTruthy()
+    })
+
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell deadlift")
+    await waitFor(() => expect(getByLabelText("Add Deadlift")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Deadlift"))
+
+    await waitFor(() => {
+      expect(getByText("Exercises (3)")).toBeTruthy()
       expect(getByText("Deadlift")).toBeTruthy()
     })
 
@@ -238,49 +214,48 @@ describe("RoutineDetailScreen navigation", () => {
       "overhead-press",
     ])!
 
-    const { getByLabelText, getByText, getByPlaceholderText, getAllByLabelText } =
-      renderFromWorkoutTab(store)
+    const { getByLabelText, getByText, getByPlaceholderText } = renderFromWorkoutTab(store)
 
     // Navigate to routine detail
     await waitFor(() => {
       expect(getByText("Upper Body A")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("More options"))
+    fireEvent.press(getByLabelText("Open Upper Body A"))
 
     await waitFor(() => {
-      expect(getByLabelText("Rutini Düzenle")).toBeTruthy()
+      expect(getByLabelText("Edit routine")).toBeTruthy()
     })
-    fireEvent.press(getByLabelText("Rutini Düzenle"))
+    fireEvent.press(getByLabelText("Edit routine"))
 
     await waitFor(() => {
-      expect(getByText("Rutin Oluştur")).toBeTruthy()
+      expect(getByText("Create Routine")).toBeTruthy()
     })
 
-    const titleInput = getByPlaceholderText("Rutin başlığı")
+    const titleInput = getByPlaceholderText("Routine title")
     expect(titleInput.props.value).toBe("Upper Body A")
 
     // Add an exercise via ExerciseLibrary (routine mode)
-    fireEvent.press(getByText("+ Egzersiz ekle"))
+    fireEvent.press(getByText("+ Add Exercise"))
     await waitFor(() => {
-      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+      expect(getByText("Add Exercise")).toBeTruthy()
     })
 
-    fireEvent.changeText(getByPlaceholderText("Search exercises"), "deadlift")
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.changeText(getByPlaceholderText("Search exercises"), "barbell deadlift")
+    await waitFor(() => expect(getByLabelText("Add Deadlift")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Deadlift"))
 
     await waitFor(() => {
-      expect(getByText("Egzersizler (3)")).toBeTruthy()
+      expect(getByText("Exercises (3)")).toBeTruthy()
       expect(getByText("Deadlift")).toBeTruthy()
     })
 
     fireEvent.changeText(titleInput, "Upper Body A Updated")
-    fireEvent.press(getByLabelText("Kaydet"))
+    fireEvent.press(getByLabelText("Save"))
 
     await waitFor(() => {
-      expect(getByText("Rutini Başlat")).toBeTruthy()
+      expect(getByText("Start Routine")).toBeTruthy()
       expect(getByText("Upper Body A Updated")).toBeTruthy()
-      expect(getByText("Egzersizler (3)")).toBeTruthy()
+      expect(getByText("Exercises (3)")).toBeTruthy()
     })
 
     expect(store.workoutStore.templates.get(templateId)?.name).toBe("Upper Body A Updated")
@@ -292,25 +267,5 @@ describe("RoutineDetailScreen navigation", () => {
 
     expect(store.workoutStore.currentSession).toBeUndefined()
     expect(store.workoutStore.sessionHistory).toHaveLength(0)
-  })
-})
-
-describe("RoutineDetailScreen analytics tabs", () => {
-  it("can switch between analytics tabs", () => {
-    const { getByText } = renderRoutineDetailScreen()
-
-    // Click on Tekrar tab
-    fireEvent.press(getByText("Tekrar"))
-
-    // Click on Süre tab
-    fireEvent.press(getByText("Süre"))
-
-    // Click back to Hacim tab
-    fireEvent.press(getByText("Hacim"))
-
-    // All tabs should still be visible
-    expect(getByText("Hacim")).toBeTruthy()
-    expect(getByText("Tekrar")).toBeTruthy()
-    expect(getByText("Süre")).toBeTruthy()
   })
 })

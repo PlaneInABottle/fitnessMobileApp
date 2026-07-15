@@ -1,4 +1,5 @@
 import { Image, ImageProps, ImageStyle, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
 import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/theme/context"
@@ -141,9 +142,9 @@ export function EmptyState(props: EmptyStateProps) {
     },
     workout: {
       icon: "dumbbell",
-      heading: "Henüz Antrenman Yok",
-      content: "İlk antrenmanını başlat ve ilerlemeni takip et",
-      button: "Antrenman Başlat",
+      heading: "No Workouts Yet",
+      content: "Start your first workout and track your progress",
+      button: "Start Workout",
     },
   }
 
@@ -213,7 +214,11 @@ export function EmptyState(props: EmptyStateProps) {
     <View style={$containerStyles}>
       {isIconPresent && (
         <View style={themed($iconContainer)}>
-          <Icon icon={icon} size={48} color={theme.colors.textDim} />
+          {icon === "dumbbell" ? (
+            <Ionicons name="barbell-outline" size={48} color={theme.colors.textDim} />
+          ) : (
+            <Icon icon={icon} size={48} color={theme.colors.textDim} />
+          )}
         </View>
       )}
 

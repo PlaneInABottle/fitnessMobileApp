@@ -8,7 +8,7 @@ function renderRoutineCard(props: {
   title: string
   exercisePreview: string
   onStart: jest.Mock
-  onMenu?: jest.Mock
+  onOpen?: jest.Mock
 }) {
   return render(
     <ThemeProvider>
@@ -21,11 +21,11 @@ function renderRoutineCard(props: {
 
 describe("RoutineCard", () => {
   const mockOnStart = jest.fn()
-  const mockOnMenu = jest.fn()
+  const mockOnOpen = jest.fn()
 
   beforeEach(() => {
     mockOnStart.mockClear()
-    mockOnMenu.mockClear()
+    mockOnOpen.mockClear()
   })
 
   describe("rendering", () => {
@@ -49,14 +49,14 @@ describe("RoutineCard", () => {
       expect(getByText("Deadlift, Barbell Row, Lat Pulldown")).toBeTruthy()
     })
 
-    it("renders Start Routine button", () => {
+    it("renders a compact start action", () => {
       const { getByText } = renderRoutineCard({
         title: "Leg Day",
         exercisePreview: "Squat, Leg Press",
         onStart: mockOnStart,
       })
 
-      expect(getByText("Start Routine")).toBeTruthy()
+      expect(getByText("Start")).toBeTruthy()
     })
   })
 
@@ -68,32 +68,32 @@ describe("RoutineCard", () => {
         onStart: mockOnStart,
       })
 
-      fireEvent.press(getByText("Start Routine"))
+      fireEvent.press(getByText("Start"))
 
       expect(mockOnStart).toHaveBeenCalledTimes(1)
     })
 
-    it("calls onMenu when menu button is pressed", () => {
+    it("calls onOpen when the routine details are pressed", () => {
       const { getByLabelText } = renderRoutineCard({
         title: "Lower Body",
         exercisePreview: "Exercises",
         onStart: mockOnStart,
-        onMenu: mockOnMenu,
+        onOpen: mockOnOpen,
       })
 
-      fireEvent.press(getByLabelText("More options"))
+      fireEvent.press(getByLabelText("Open Lower Body"))
 
-      expect(mockOnMenu).toHaveBeenCalledTimes(1)
+      expect(mockOnOpen).toHaveBeenCalledTimes(1)
     })
 
-    it("does not render menu button when onMenu is not provided", () => {
+    it("does not expose an open action when onOpen is not provided", () => {
       const { queryByLabelText } = renderRoutineCard({
         title: "Core",
         exercisePreview: "Exercises",
         onStart: mockOnStart,
       })
 
-      expect(queryByLabelText("More options")).toBeNull()
+      expect(queryByLabelText("Open Core")).toBeNull()
     })
   })
 

@@ -51,22 +51,22 @@ describe("CreateRoutineScreen", () => {
   it("renders with empty state", () => {
     const { getByText, getByPlaceholderText } = renderCreateRoutineScreen()
 
-    expect(getByText("Rutin Oluştur")).toBeTruthy()
-    expect(getByPlaceholderText("Rutin başlığı")).toBeTruthy()
-    expect(getByText("Rutininize bir egzersiz ekleyerek başlayın")).toBeTruthy()
+    expect(getByText("Create Routine")).toBeTruthy()
+    expect(getByPlaceholderText("Routine title")).toBeTruthy()
+    expect(getByText("Start by adding an exercise to your routine")).toBeTruthy()
   })
 
   it("shows header with cancel and save buttons", () => {
     const { getByLabelText } = renderCreateRoutineScreen()
 
-    expect(getByLabelText("İptal")).toBeTruthy()
-    expect(getByLabelText("Kaydet")).toBeTruthy()
+    expect(getByLabelText("Cancel")).toBeTruthy()
+    expect(getByLabelText("Save")).toBeTruthy()
   })
 
   it("can enter routine title", () => {
     const { getByPlaceholderText } = renderCreateRoutineScreen()
 
-    const titleInput = getByPlaceholderText("Rutin başlığı")
+    const titleInput = getByPlaceholderText("Routine title")
     fireEvent.changeText(titleInput, "My Upper Body Routine")
 
     expect(titleInput.props.value).toBe("My Upper Body Routine")
@@ -75,35 +75,38 @@ describe("CreateRoutineScreen", () => {
   it("shows add exercise button in empty state", () => {
     const { getByText } = renderCreateRoutineScreen()
 
-    expect(getByText("+ Egzersiz ekle")).toBeTruthy()
+    expect(getByText("+ Add Exercise")).toBeTruthy()
   })
 
   it("add exercise button navigates to library", async () => {
     const { getByText } = renderCreateRoutineScreen()
 
-    fireEvent.press(getByText("+ Egzersiz ekle"))
+    fireEvent.press(getByText("+ Add Exercise"))
 
     // ExerciseLibraryScreen should show the header
     await waitFor(() => {
-      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+      expect(getByText("Add Exercise")).toBeTruthy()
     })
   })
 
   it("selecting an exercise returns to routine and adds it", async () => {
-    const { getByText, getAllByLabelText } = renderCreateRoutineScreen()
+    const { getByLabelText, getByPlaceholderText, getByText } = renderCreateRoutineScreen()
 
-    fireEvent.press(getByText("+ Egzersiz ekle"))
+    fireEvent.press(getByText("+ Add Exercise"))
 
     await waitFor(() => {
-      expect(getByText("Egzersiz Ekle")).toBeTruthy()
+      expect(getByText("Add Exercise")).toBeTruthy()
     })
 
-    // Select first exercise from the library
-    await waitFor(() => expect(getAllByLabelText("Add exercise").length).toBeGreaterThan(0))
-    fireEvent.press(getAllByLabelText("Add exercise")[0])
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
+    )
+    await waitFor(() => expect(getByLabelText("Add Bench Press")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Bench Press"))
 
     await waitFor(() => {
-      expect(getByText("Egzersizler (1)")).toBeTruthy()
+      expect(getByText("Exercises (1)")).toBeTruthy()
       expect(getByText("Bench Press")).toBeTruthy()
     })
   })
@@ -112,7 +115,7 @@ describe("CreateRoutineScreen", () => {
     const { getByLabelText } = renderCreateRoutineScreen()
 
     // Save button exists but should be disabled (visually indicated by color)
-    const saveButton = getByLabelText("Kaydet")
+    const saveButton = getByLabelText("Save")
     expect(saveButton).toBeTruthy()
     expect(saveButton.props.accessibilityState?.disabled).toBe(true)
   })
@@ -121,11 +124,11 @@ describe("CreateRoutineScreen", () => {
     const { getByPlaceholderText, getByLabelText } = renderCreateRoutineScreen()
 
     // Enter title but don't add exercises
-    const titleInput = getByPlaceholderText("Rutin başlığı")
+    const titleInput = getByPlaceholderText("Routine title")
     fireEvent.changeText(titleInput, "My Routine")
 
     // Save button should still be disabled
-    const saveButton = getByLabelText("Kaydet")
+    const saveButton = getByLabelText("Save")
     expect(saveButton).toBeTruthy()
     expect(saveButton.props.accessibilityState?.disabled).toBe(true)
   })
@@ -135,11 +138,10 @@ describe("CreateRoutineScreen navigation from WorkoutTab", () => {
   it("navigates to create routine when add button pressed", async () => {
     const { getByLabelText, getByText } = renderFromWorkoutTab()
 
-    // Press the "+" button to add routine
-    fireEvent.press(getByLabelText("Add routine"))
+    fireEvent.press(getByLabelText("Create routine"))
 
     await waitFor(() => {
-      expect(getByText("Rutin Oluştur")).toBeTruthy()
+      expect(getByText("Create Routine")).toBeTruthy()
     })
   })
 
@@ -147,29 +149,30 @@ describe("CreateRoutineScreen navigation from WorkoutTab", () => {
     const { getByLabelText, getByText } = renderFromWorkoutTab()
 
     // Navigate to CreateRoutine
-    fireEvent.press(getByLabelText("Add routine"))
+    fireEvent.press(getByLabelText("Create routine"))
 
     await waitFor(() => {
-      expect(getByText("Rutin Oluştur")).toBeTruthy()
+      expect(getByText("Create Routine")).toBeTruthy()
     })
 
     // Press cancel
-    fireEvent.press(getByLabelText("İptal"))
+    fireEvent.press(getByLabelText("Cancel"))
 
     // Should go back to workout tab
     await waitFor(() => {
-      expect(getByText("Rutinler")).toBeTruthy()
+      expect(getByText("Routines")).toBeTruthy()
     })
   })
 
-  it("can navigate via Yeni Rutin pill", async () => {
-    const { getByText } = renderFromWorkoutTab()
+  it("exposes one clear routine creation action", async () => {
+    const { getAllByLabelText, getByText } = renderFromWorkoutTab()
 
-    // Press "Yeni Rutin" pill
-    fireEvent.press(getByText("Yeni Rutin"))
+    const createActions = getAllByLabelText("Create routine")
+    expect(createActions).toHaveLength(1)
+    fireEvent.press(createActions[0])
 
     await waitFor(() => {
-      expect(getByText("Rutin Oluştur")).toBeTruthy()
+      expect(getByText("Create Routine")).toBeTruthy()
     })
   })
 })

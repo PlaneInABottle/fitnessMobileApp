@@ -1,5 +1,5 @@
-import { FC, useMemo, useState } from "react"
-import { ScrollView, View, ViewStyle } from "react-native"
+import { FC, useCallback, useState } from "react"
+import { FlatList, ListRenderItem, ScrollView, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { BottomSheet } from "@/components/BottomSheet"
@@ -8,12 +8,20 @@ import { EmptyState } from "@/components/EmptyState"
 import { ExerciseListItem } from "@/components/ExerciseListItem"
 import { FilterChip } from "@/components/FilterChip"
 import { Screen } from "@/components/Screen"
+import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
+import {
+  CATALOG_EQUIPMENT,
+  CATALOG_LEVELS,
+  CATALOG_SOURCE_CATEGORIES,
+} from "@/data/exerciseCatalog"
+import { getExerciseImages, getExerciseVideo } from "@/data/exerciseMedia"
 import {
   EXERCISE_CATEGORY_VALUES,
   MUSCLE_GROUPS,
   type ExerciseCategory,
+  type Exercise,
 } from "@/models/ExerciseStore"
 import { useStores } from "@/models/RootStoreContext"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
@@ -26,54 +34,116 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     const { themed } = useAppTheme()
 
     const fromCreateRoutine = !!route.params?.fromCreateRoutine
+    const browseOnly = !!route.params?.browseOnly
+    const newWorkout = !!route.params?.newWorkout
     const session = workoutStore.currentSession
 
     const [query, setQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | null>(null)
     const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
-    const [showMuscleFilter, setShowMuscleFilter] = useState(false)
-    const [showEquipmentFilter, setShowEquipmentFilter] = useState(false)
+    const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null)
+    const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+    const [selectedSourceCategory, setSelectedSourceCategory] = useState<string | null>(null)
+    const [showFilters, setShowFilters] = useState(false)
 
-    const exercises = useMemo(() => {
+    const exercises = (() => {
       let result = exerciseStore.searchExercises(query)
       if (selectedCategory) {
         result = result.filter((e) => e.category === selectedCategory)
       }
       if (selectedMuscle) {
-        result = result.filter((e) => e.muscleGroups.includes(selectedMuscle))
+        result = result.filter((e) =>
+          e.muscleGroups.some((muscle) => muscle.toLowerCase() === selectedMuscle.toLowerCase()),
+        )
       }
-      return result.slice().sort((a, b) => a.name.localeCompare(b.name))
-    }, [exerciseStore, query, selectedCategory, selectedMuscle])
+      if (selectedEquipment) result = result.filter((e) => e.equipment === selectedEquipment)
+      if (selectedLevel) result = result.filter((e) => e.level === selectedLevel)
+      if (selectedSourceCategory) {
+        result = result.filter((e) => e.sourceCategory === selectedSourceCategory)
+      }
+      return result.slice().sort((a, b) => {
+        const videoPriority = Number(!!getExerciseVideo(b.id)) - Number(!!getExerciseVideo(a.id))
+        return videoPriority || a.name.localeCompare(b.name)
+      })
+    })()
+
+    function handleClose() {
+      if (newWorkout && workoutStore.currentSession?.exercises.length === 0) {
+        workoutStore.discardSession()
+      }
+      if (navigation.canGoBack()) navigation.goBack()
+      else navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
+    }
 
     function handleClearFilters() {
       setQuery("")
       setSelectedCategory(null)
       setSelectedMuscle(null)
+      setSelectedEquipment(null)
+      setSelectedLevel(null)
+      setSelectedSourceCategory(null)
     }
 
-    function handleAddExercise(exerciseId: string) {
-      if (fromCreateRoutine) {
-        workoutStore.setPendingRoutineExerciseId(exerciseId)
-        navigation.goBack()
-        return
-      }
+    const handleAddExercise = useCallback(
+      (exerciseId: string) => {
+        if (fromCreateRoutine) {
+          workoutStore.setPendingRoutineExerciseId(exerciseId)
+          navigation.goBack()
+          return
+        }
 
-      workoutStore.clearError()
-      const workoutExerciseId = workoutStore.addExerciseToSession(exerciseId)
-      if (workoutExerciseId) navigation.goBack()
-    }
+        workoutStore.clearError()
+        const workoutExerciseId = workoutStore.addExerciseToSession(exerciseId)
+        if (!workoutExerciseId) return
+        if (newWorkout) navigation.replace("ActiveWorkout")
+        else navigation.goBack()
+      },
+      [fromCreateRoutine, navigation, newWorkout, workoutStore],
+    )
 
     function handleSelectMuscle(muscle: string) {
       setSelectedMuscle(muscle === selectedMuscle ? null : muscle)
-      setShowMuscleFilter(false)
     }
+
+    const activeFilterCount = [
+      selectedMuscle,
+      selectedEquipment,
+      selectedLevel,
+      selectedSourceCategory,
+    ].filter(Boolean).length
+
+    const renderExercise: ListRenderItem<Exercise> = useCallback(
+      ({ item }) => (
+        <ExerciseListItem
+          title={item.name}
+          subtitle={
+            item.primaryMuscles?.join(", ") || item.muscleGroups.join(", ") || item.category
+          }
+          imageSource={item.imageUrl ?? getExerciseImages(item.id)?.[0]}
+          hasVideo={!!getExerciseVideo(item.id)}
+          onPress={() =>
+            navigation.navigate("ExerciseDetail", {
+              exerciseId: item.id,
+              returnToActiveWorkout: newWorkout,
+              selectionContext: fromCreateRoutine
+                ? "routine"
+                : !browseOnly && session
+                  ? "workout"
+                  : undefined,
+            })
+          }
+          onAdd={browseOnly ? undefined : () => handleAddExercise(item.id)}
+        />
+      ),
+      [browseOnly, fromCreateRoutine, handleAddExercise, navigation, newWorkout, session],
+    )
 
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Egzersiz Ekle"
-          leftActionLabel="İptal"
-          onLeftActionPress={navigation.goBack}
+          title={browseOnly ? "Exercise Library" : "Add Exercise"}
+          leftActionLabel={browseOnly ? "Back" : "Cancel"}
+          onLeftActionPress={handleClose}
         />
 
         <View style={themed($searchContainer)}>
@@ -94,14 +164,9 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
             contentContainerStyle={themed($filtersRow)}
           >
             <FilterChip
-              label={selectedMuscle || "Tüm Kaslar"}
-              active={!!selectedMuscle}
-              onPress={() => setShowMuscleFilter(true)}
-            />
-            <FilterChip
-              label="Tüm Ekipmanlar"
-              active={false}
-              onPress={() => setShowEquipmentFilter(true)}
+              label={activeFilterCount ? `Filters (${activeFilterCount})` : "Filters"}
+              active={activeFilterCount > 0}
+              onPress={() => setShowFilters(true)}
             />
             {EXERCISE_CATEGORY_VALUES.map((cat) => (
               <FilterChip
@@ -114,103 +179,124 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
           </ScrollView>
         </View>
 
-        <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
-          {!session && !fromCreateRoutine ? (
+        {!session && !fromCreateRoutine && !browseOnly ? (
+          <View style={themed($messageContainer)}>
             <ErrorMessage
               message="No active workout session."
               actionLabel="Start New"
-              onActionPress={() => navigation.popToTop()}
+              onActionPress={() => navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })}
             />
-          ) : (
-            <>
-              {!fromCreateRoutine && !!workoutStore.lastError && (
-                <ErrorMessage
-                  message={workoutStore.lastError}
-                  actionLabel="Clear"
-                  onActionPress={workoutStore.clearError}
-                />
-              )}
-
-              {exercises.length === 0 ? (
+          </View>
+        ) : (
+          <View style={$listContainer}>
+            {!fromCreateRoutine && !!workoutStore.lastError && (
+              <ErrorMessage
+                message={workoutStore.lastError}
+                actionLabel="Clear"
+                onActionPress={workoutStore.clearError}
+              />
+            )}
+            <Text size="xs" style={themed($resultCount)}>
+              {exercises.length} {exercises.length === 1 ? "exercise" : "exercises"}
+            </Text>
+            <FlatList
+              data={exercises}
+              renderItem={renderExercise}
+              keyExtractor={(exercise) => exercise.id}
+              contentContainerStyle={themed($content)}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
+              initialNumToRender={14}
+              maxToRenderPerBatch={14}
+              windowSize={7}
+              getItemLayout={(_, index) => ({
+                length: EXERCISE_ROW_HEIGHT,
+                offset: EXERCISE_ROW_HEIGHT * index,
+                index,
+              })}
+              ListEmptyComponent={
                 <EmptyState
                   heading="No exercises found"
-                  content="Try a different search or category."
+                  content="Try a different search or filter."
                   button="Clear filters"
                   buttonOnPress={handleClearFilters}
                 />
-              ) : (
-                <View style={themed($list)}>
-                  {exercises.map((exercise) => (
-                    <ExerciseListItem
-                      key={exercise.id}
-                      title={exercise.name}
-                      subtitle={exercise.muscleGroups.join(", ") || exercise.category}
-                      onPress={() => handleAddExercise(exercise.id)}
-                      onAdd={() => handleAddExercise(exercise.id)}
-                    />
-                  ))}
-                </View>
-              )}
-            </>
-          )}
-        </ScrollView>
-
-        {/* Muscle Filter Bottom Sheet */}
-        <BottomSheet
-          visible={showMuscleFilter}
-          onClose={() => setShowMuscleFilter(false)}
-          title="Kas Grubu Seç"
-        >
-          <View style={themed($filterOptions)}>
-            {MUSCLE_GROUPS.map((muscle) => (
-              <FilterChip
-                key={muscle}
-                label={muscle}
-                active={selectedMuscle === muscle}
-                onPress={() => handleSelectMuscle(muscle)}
-              />
-            ))}
-          </View>
-        </BottomSheet>
-
-        {/* Equipment Filter Bottom Sheet */}
-        <BottomSheet
-          visible={showEquipmentFilter}
-          onClose={() => setShowEquipmentFilter(false)}
-          title="Ekipman Seç"
-        >
-          <View style={themed($filterOptions)}>
-            <FilterChip
-              label="Barbell"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Dumbbell"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Machine"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Bodyweight"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
-            />
-            <FilterChip
-              label="Cable"
-              active={false}
-              onPress={() => setShowEquipmentFilter(false)}
+              }
             />
           </View>
+        )}
+
+        <BottomSheet
+          visible={showFilters}
+          onClose={() => setShowFilters(false)}
+          title="Filter Exercises"
+          snapPoints={["85%"]}
+        >
+          <ScrollView contentContainerStyle={themed($filterSheetContent)}>
+            <Text weight="semiBold" style={themed($filterTitle)}>
+              Muscle
+            </Text>
+            <View style={themed($filterOptions)}>
+              {MUSCLE_GROUPS.map((muscle) => (
+                <FilterChip
+                  key={muscle}
+                  label={muscle}
+                  active={selectedMuscle === muscle}
+                  onPress={() => handleSelectMuscle(muscle)}
+                />
+              ))}
+            </View>
+            <Text weight="semiBold" style={themed($filterTitle)}>
+              Equipment
+            </Text>
+            <View style={themed($filterOptions)}>
+              {CATALOG_EQUIPMENT.map((equipment) => (
+                <FilterChip
+                  key={equipment}
+                  label={equipment}
+                  active={selectedEquipment === equipment}
+                  onPress={() =>
+                    setSelectedEquipment(selectedEquipment === equipment ? null : equipment)
+                  }
+                />
+              ))}
+            </View>
+            <Text weight="semiBold" style={themed($filterTitle)}>
+              Difficulty
+            </Text>
+            <View style={themed($filterOptions)}>
+              {CATALOG_LEVELS.map((level) => (
+                <FilterChip
+                  key={level}
+                  label={level}
+                  active={selectedLevel === level}
+                  onPress={() => setSelectedLevel(selectedLevel === level ? null : level)}
+                />
+              ))}
+            </View>
+            <Text weight="semiBold" style={themed($filterTitle)}>
+              Type
+            </Text>
+            <View style={themed($filterOptions)}>
+              {CATALOG_SOURCE_CATEGORIES.map((category) => (
+                <FilterChip
+                  key={category}
+                  label={category}
+                  active={selectedSourceCategory === category}
+                  onPress={() =>
+                    setSelectedSourceCategory(selectedSourceCategory === category ? null : category)
+                  }
+                />
+              ))}
+            </View>
+          </ScrollView>
         </BottomSheet>
       </Screen>
     )
   },
 )
+
+const EXERCISE_ROW_HEIGHT = 72
 
 const $searchContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
@@ -231,20 +317,35 @@ const $filtersRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingRight: spacing.md,
 })
 
-const $scrollView: ThemedStyle<ViewStyle> = () => ({
-  flex: 1,
+const $listContainer: ViewStyle = { flex: 1 }
+
+const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({ padding: spacing.md })
+
+const $resultCount: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.textDim,
+  paddingHorizontal: spacing.md,
+  paddingTop: spacing.sm,
 })
 
 const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
+  paddingBottom: spacing.xxl,
 })
 
-const $list: ThemedStyle<ViewStyle> = () => ({})
+const $filterSheetContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingBottom: spacing.xxl,
+})
+
+const $filterTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.text,
+  paddingHorizontal: spacing.md,
+  marginTop: spacing.md,
+  marginBottom: spacing.sm,
+})
 
 const $filterOptions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   flexWrap: "wrap",
   gap: spacing.sm,
   paddingHorizontal: spacing.md,
-  paddingBottom: spacing.lg,
 })

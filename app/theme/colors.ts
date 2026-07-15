@@ -1,5 +1,5 @@
 /**
- * Fitness App Light Theme Color Palette
+ * Fitness Tracker light theme color palette.
  * A lighter variant of the dark fitness theme for accessibility options
  */
 const palette = {

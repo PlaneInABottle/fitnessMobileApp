@@ -22,11 +22,11 @@ export interface SetOptionsBottomSheetProps {
 }
 
 const SET_TYPE_OPTIONS: Omit<SetTypeOption, "color">[] = [
-  { id: "warmup", letter: "W", label: "Isınma Seti" },
+  { id: "warmup", letter: "W", label: "Warm-up Set" },
   { id: "working", letter: "#", label: "Normal Set" },
-  { id: "failure", letter: "F", label: "Tükeniş Seti" },
+  { id: "failure", letter: "F", label: "Failure Set" },
   { id: "dropset", letter: "D", label: "Drop Set" },
-  { id: "remove", letter: "X", label: "Seti Kaldır" },
+  { id: "remove", letter: "X", label: "Remove Set" },
 ]
 
 export function SetOptionsBottomSheet({
@@ -55,7 +55,7 @@ export function SetOptionsBottomSheet({
   }
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Set Türünü Seç">
+    <BottomSheet visible={visible} onClose={onClose} title="Select Set Type">
       <View style={themed($optionsContainer)}>
         {SET_TYPE_OPTIONS.map((option) => {
           const color = getOptionColor(option.id)

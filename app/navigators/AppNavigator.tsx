@@ -6,7 +6,7 @@
  */
 import { View, ViewStyle } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { NavigationContainer } from "@react-navigation/native"
+import { getFocusedRouteNameFromRoute, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -16,11 +16,12 @@ import Config from "@/config"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
 import { CreateRoutineScreen } from "@/screens/CreateRoutineScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
+import { ExerciseDetailScreen } from "@/screens/ExerciseDetailScreen"
 import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { HomeScreen } from "@/screens/HomeScreen"
-import { ProfileScreen } from "@/screens/ProfileScreen"
 import { RoutineDetailScreen } from "@/screens/RoutineDetailScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
+import { WorkoutHistoryScreen } from "@/screens/WorkoutHistoryScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { useAppTheme } from "@/theme/context"
 
@@ -28,7 +29,6 @@ import type {
   AppStackParamList,
   HomeStackParamList,
   NavigationProps,
-  ProfileStackParamList,
   WorkoutStackParamList,
 } from "./navigationTypes"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
@@ -45,7 +45,6 @@ const Tab = createBottomTabNavigator<AppStackParamList>()
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
 const HomeStack = createNativeStackNavigator<HomeStackParamList>()
 const WorkoutStack = createNativeStackNavigator<WorkoutStackParamList>()
-const ProfileStack = createNativeStackNavigator<ProfileStackParamList>()
 
 const HomeStackNavigator = () => {
   const {
@@ -63,6 +62,7 @@ const HomeStackNavigator = () => {
       }}
     >
       <HomeStack.Screen name="HomeTab" component={HomeScreen} />
+      <HomeStack.Screen name="WorkoutHistory" component={WorkoutHistoryScreen} />
     </HomeStack.Navigator>
   )
 }
@@ -85,30 +85,11 @@ const WorkoutStackNavigator = () => {
       <WorkoutStack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
       <WorkoutStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} />
       <WorkoutStack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
+      <WorkoutStack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
       <WorkoutStack.Screen name="WorkoutComplete" component={WorkoutCompleteScreen} />
       <WorkoutStack.Screen name="CreateRoutine" component={CreateRoutineScreen} />
       <WorkoutStack.Screen name="RoutineDetail" component={RoutineDetailScreen} />
     </WorkoutStack.Navigator>
-  )
-}
-
-const ProfileStackNavigator = () => {
-  const {
-    theme: { colors },
-  } = useAppTheme()
-
-  return (
-    <ProfileStack.Navigator
-      screenOptions={{
-        headerShown: false,
-        navigationBarColor: colors.background,
-        contentStyle: {
-          backgroundColor: colors.background,
-        },
-      }}
-    >
-      <ProfileStack.Screen name="ProfileTab" component={ProfileScreen} />
-    </ProfileStack.Navigator>
   )
 }
 
@@ -124,28 +105,38 @@ const AppTabs = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        sceneStyle: { backgroundColor: colors.background },
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.separator,
-          borderTopWidth: 1,
-          height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
-          paddingTop: tabBarPaddingTop,
-          paddingBottom: tabBarPaddingBottom,
-        },
-        tabBarItemStyle: {
-          paddingVertical: 0,
-        },
-        tabBarShowLabel: false,
+      initialRouteName="Home"
+      screenOptions={({ route }) => {
+        const focusedRoute = getFocusedRouteNameFromRoute(route)
+        const isNestedFlow =
+          !!focusedRoute &&
+          ((route.name === "Workout" && focusedRoute !== "WorkoutTab") ||
+            (route.name === "Home" && focusedRoute !== "HomeTab"))
+
+        return {
+          headerShown: false,
+          sceneStyle: { backgroundColor: colors.background },
+          tabBarStyle: {
+            backgroundColor: colors.background,
+            borderTopColor: colors.separator,
+            borderTopWidth: 1,
+            display: isNestedFlow ? "none" : "flex",
+            height: tabBarBaseHeight + tabBarPaddingTop + tabBarPaddingBottom,
+            paddingTop: tabBarPaddingTop,
+            paddingBottom: tabBarPaddingBottom,
+          },
+          tabBarItemStyle: {
+            paddingVertical: 0,
+          },
+          tabBarShowLabel: false,
+        }
       }}
     >
       <Tab.Screen
         name="Home"
         component={HomeStackNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabBarIcon name="home" label="Ev" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabBarIcon name="home" label="Home" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -153,16 +144,7 @@ const AppTabs = () => {
         component={WorkoutStackNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name="dumbbell" label="Antrenman" focused={focused} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileStackNavigator}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon name="person" label="Profil" focused={focused} />
+            <TabBarIcon name="barbell" label="Workout" focused={focused} />
           ),
         }}
       />
@@ -173,7 +155,7 @@ const AppTabs = () => {
 export const AppNavigator = (props: NavigationProps) => {
   const { navigationTheme } = useAppTheme()
 
-  const exitRouteNames = [...exitRoutes, "WorkoutTab", "HomeTab", "ProfileTab"]
+  const exitRouteNames = [...exitRoutes, "WorkoutTab", "HomeTab"]
   useBackButtonHandler((routeName) => exitRouteNames.includes(routeName))
 
   return (

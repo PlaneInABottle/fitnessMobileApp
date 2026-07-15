@@ -11,6 +11,16 @@ describe("SetStore", () => {
     )
   })
 
+  it("allows required values to remain empty only while editing a draft", () => {
+    const root = RootStoreModel.create({})
+    const draft = { setType: "working" as const, reps: 5 }
+
+    expect(root.setStore.validateSetData("bench-press", draft).ok).toBe(false)
+    expect(root.setStore.validateSetData("bench-press", draft, { allowIncomplete: true }).ok).toBe(
+      true,
+    )
+  })
+
   it("enforces numeric ranges for required and optional fields", () => {
     const root = RootStoreModel.create({})
 

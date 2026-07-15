@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingViewProps,
   LayoutChangeEvent,
   Platform,
-  ScrollView,
   ScrollViewProps,
   StyleProp,
   View,
@@ -12,7 +11,10 @@ import {
 } from "react-native"
 import { useScrollToTop } from "@react-navigation/native"
 import { SystemBars, SystemBarsProps, SystemBarStyle } from "react-native-edge-to-edge"
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
+import {
+  KeyboardAwareScrollView,
+  type KeyboardAwareScrollViewRef,
+} from "react-native-keyboard-controller"
 
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
@@ -115,37 +117,22 @@ function useAutoPreset(props: AutoScreenProps): {
   const { preset, scrollEnabledToggleThreshold } = props
   const { percent = 0.92, point = 0 } = scrollEnabledToggleThreshold || {}
 
-  const scrollViewHeight = useRef<null | number>(null)
-  const scrollViewContentHeight = useRef<null | number>(null)
-  const [scrollEnabled, setScrollEnabled] = useState(true)
+  const [scrollViewHeight, setScrollViewHeight] = useState<null | number>(null)
+  const [scrollViewContentHeight, setScrollViewContentHeight] = useState<null | number>(null)
 
-  function updateScrollState() {
-    if (scrollViewHeight.current === null || scrollViewContentHeight.current === null) return
-
-    // check whether content fits the screen then toggle scroll state according to it
-    const contentFitsScreen = (function () {
-      if (point) {
-        return scrollViewContentHeight.current < scrollViewHeight.current - point
-      } else {
-        return scrollViewContentHeight.current < scrollViewHeight.current * percent
-      }
-    })()
-
-    // content is less than the size of the screen, so we can disable scrolling
-    if (scrollEnabled && contentFitsScreen) setScrollEnabled(false)
-
-    // content is greater than the size of the screen, so let's enable scrolling
-    if (!scrollEnabled && !contentFitsScreen) setScrollEnabled(true)
-  }
+  const contentFitsScreen =
+    scrollViewHeight !== null &&
+    scrollViewContentHeight !== null &&
+    (point
+      ? scrollViewContentHeight < scrollViewHeight - point
+      : scrollViewContentHeight < scrollViewHeight * percent)
 
   /**
    * @param {number} w - The width of the content.
    * @param {number} h - The height of the content.
    */
   function onContentSizeChange(w: number, h: number) {
-    // update scroll-view content height
-    scrollViewContentHeight.current = h
-    updateScrollState()
+    setScrollViewContentHeight(h)
   }
 
   /**
@@ -153,16 +140,11 @@ function useAutoPreset(props: AutoScreenProps): {
    */
   function onLayout(e: LayoutChangeEvent) {
     const { height } = e.nativeEvent.layout
-    // update scroll-view  height
-    scrollViewHeight.current = height
-    updateScrollState()
+    setScrollViewHeight(height)
   }
 
-  // update scroll state on every render
-  if (preset === "auto") updateScrollState()
-
   return {
-    scrollEnabled: preset === "auto" ? scrollEnabled : true,
+    scrollEnabled: preset === "auto" ? !contentFitsScreen : true,
     onContentSizeChange,
     onLayout,
   }
@@ -199,7 +181,7 @@ function ScreenWithScrolling(props: ScreenProps) {
     style,
   } = props as ScrollScreenProps
 
-  const ref = useRef<ScrollView>(null)
+  const ref = useRef<KeyboardAwareScrollViewRef>(null)
 
   const { scrollEnabled, onContentSizeChange, onLayout } = useAutoPreset(props as AutoScreenProps)
 

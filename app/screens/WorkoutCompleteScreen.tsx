@@ -104,12 +104,12 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
       if (templateId && hasChanges) {
         Alert.alert(
-          "Şablonu güncelle?",
-          `Egzersiz: +${summary!.addedExerciseIds.length} / -${summary!.removedExerciseIds.length}\nSet: +${summary!.addedSets} / -${summary!.removedSets}`,
+          "Update routine?",
+          `Exercises: +${summary!.addedExerciseIds.length} / -${summary!.removedExerciseIds.length}\nSets: +${summary!.addedSets} / -${summary!.removedSets}`,
           [
-            { text: "İptal", style: "cancel" },
+            { text: "Cancel", style: "cancel" },
             {
-              text: "Atla",
+              text: "Skip",
               style: "default",
               onPress: () => {
                 const ok = workoutStore.completeSession(true)
@@ -117,7 +117,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               },
             },
             {
-              text: "Güncelle",
+              text: "Update",
               style: "default",
               onPress: () => {
                 const ok = workoutStore.completeSession(false)
@@ -135,7 +135,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
     return (
       <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
-        <WorkoutHeader title="Antrenman Tamamlandı" />
+        <WorkoutHeader title="Workout Complete" />
 
         <View style={themed($content)}>
           {!session ? (
@@ -143,6 +143,12 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               message="No active workout session."
               actionLabel="Go Home"
               onActionPress={() => navigation.popToTop()}
+            />
+          ) : totalSets === 0 ? (
+            <ErrorMessage
+              message="Complete at least one set before finishing this workout."
+              actionLabel="Return to Workout"
+              onActionPress={() => navigation.goBack()}
             />
           ) : (
             <>
@@ -159,20 +165,17 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                 <View style={themed($celebrationIcon)}>
                   <Icon icon="check" size={48} color={theme.colors.success} />
                 </View>
-                <Text text="Harika iş!" preset="heading" style={themed($celebrationTitle)} />
-                <Text
-                  text="Antrenmanını başarıyla tamamladın"
-                  style={themed($celebrationSubtitle)}
-                />
+                <Text text="Great work!" preset="heading" style={themed($celebrationTitle)} />
+                <Text text="You completed your workout" style={themed($celebrationSubtitle)} />
               </View>
 
               {/* Stats Card */}
               <View style={themed($statsCard)}>
                 <View style={themed($statRow)}>
                   <View style={$statItem}>
-                    <Text text="Süre" size="xs" style={themed($statLabel)} />
+                    <Text text="Duration" size="xs" style={themed($statLabel)} />
                     <Text
-                      text={`${durationMinutes} dk`}
+                      text={`${durationMinutes} min`}
                       weight="bold"
                       size="lg"
                       style={themed($statValue)}
@@ -180,7 +183,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                   </View>
                   <View style={themed($statDivider)} />
                   <View style={$statItem}>
-                    <Text text="Hacim" size="xs" style={themed($statLabel)} />
+                    <Text text="Volume" size="xs" style={themed($statLabel)} />
                     <Text
                       text={`${totalVolume.toLocaleString()} kg`}
                       weight="bold"
@@ -191,7 +194,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                 </View>
                 <View style={themed($statRowSecond)}>
                   <View style={$statItem}>
-                    <Text text="Egzersiz" size="xs" style={themed($statLabel)} />
+                    <Text text="Exercises" size="xs" style={themed($statLabel)} />
                     <Text
                       testID="workoutComplete.exerciseCount"
                       text={exerciseCount.toString()}
@@ -202,7 +205,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                   </View>
                   <View style={themed($statDivider)} />
                   <View style={$statItem}>
-                    <Text text="Set" size="xs" style={themed($statLabel)} />
+                    <Text text="Sets" size="xs" style={themed($statLabel)} />
                     <Text
                       testID="workoutComplete.totalSets"
                       text={totalSets.toString()}
@@ -216,28 +219,24 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
               {showTemplateSave ? (
                 <View style={themed($templateSection)}>
-                  <Text
-                    text="Şablon olarak kaydet"
-                    weight="semiBold"
-                    style={themed($templateTitle)}
-                  />
+                  <Text text="Save as routine" weight="semiBold" style={themed($templateTitle)} />
                   <TextField
                     value={templateName}
                     onChangeText={setTemplateName}
-                    placeholder="Şablon adı"
+                    placeholder="Routine name"
                     autoCapitalize="words"
                     returnKeyType="done"
                   />
 
                   <View style={$actionsRow}>
                     <Button
-                      text="Kaydet"
+                      text="Save"
                       preset="filled"
                       onPress={handleConfirmSaveTemplate}
                       style={themed($actionButton)}
                     />
                     <Button
-                      text="İptal"
+                      text="Cancel"
                       preset="default"
                       onPress={handleCancelSaveTemplate}
                       style={themed($actionButton)}
@@ -247,13 +246,13 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               ) : (
                 <View style={themed($actions)}>
                   <Button
-                    text="Şablon Olarak Kaydet"
+                    text="Save as Routine"
                     preset="default"
                     onPress={handleStartSaveTemplate}
                     style={themed($saveTemplateButton)}
                   />
                   <Button
-                    text="Bitti"
+                    text="Done"
                     preset="filled"
                     onPress={handleDontSave}
                     style={themed($doneButton)}

@@ -1,32 +1,42 @@
 import { useEffect, useState } from "react"
-import { applySnapshot, IDisposer, onSnapshot } from "mobx-state-tree"
+import { applySnapshot, getSnapshot, IDisposer, onSnapshot } from "mobx-state-tree"
 
 import * as storage from "@/utils/storage"
-import * as secureStorage from "@/utils/storage/secure"
 
+import { migrateExerciseStoreSnapshot } from "./ExerciseStore"
 import { migratePerformanceMemoryStoreSnapshotToV2 } from "./PerformanceMemoryStore"
 import { RootStore, RootStoreModel, RootStoreSnapshotIn, RootStoreSnapshotOut } from "./RootStore"
 
 export const ROOT_STORE_PERSISTENCE_KEY = "ROOT_STORE"
-export const ROOT_STORE_SECURE_PERSISTENCE_KEY = "ROOT_STORE_SECURE"
+const LEGACY_ROOT_STORE_SECURE_PERSISTENCE_KEY = "ROOT_STORE_SECURE"
 
 let setupPromise: Promise<{ rootStore: RootStore; dispose: IDisposer }> | null = null
+
+function sanitizePersistedRootStoreSnapshot(value: unknown): Partial<RootStoreSnapshotIn> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {}
+
+  const candidate = value as Record<string, unknown>
+  const snapshot: Record<string, unknown> = {}
+
+  for (const key of ["exerciseStore", "setStore", "performanceMemoryStore", "workoutStore"]) {
+    const child = candidate[key]
+    if (child && typeof child === "object" && !Array.isArray(child)) snapshot[key] = child
+  }
+
+  return snapshot as Partial<RootStoreSnapshotIn>
+}
 
 async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: IDisposer }> {
   const rootStore = RootStoreModel.create({})
 
-  const persistedState = storage.load<RootStoreSnapshotIn>(ROOT_STORE_PERSISTENCE_KEY)
-  const persistedSecureState = secureStorage.load<Partial<RootStoreSnapshotIn>>(
-    ROOT_STORE_SECURE_PERSISTENCE_KEY,
+  const persistedState = storage.load<unknown>(ROOT_STORE_PERSISTENCE_KEY)
+  const legacySecureState = storage.loadLegacySecure<unknown>(
+    LEGACY_ROOT_STORE_SECURE_PERSISTENCE_KEY,
   )
 
   const merged = {
-    ...(persistedState ?? {}),
-    ...(persistedSecureState ?? {}),
-    authenticationStore: {
-      ...(persistedState?.authenticationStore ?? {}),
-      accessToken: undefined,
-    },
+    ...sanitizePersistedRootStoreSnapshot(persistedState),
+    ...sanitizePersistedRootStoreSnapshot(legacySecureState),
   } as RootStoreSnapshotIn
 
   // Non-persistent UI state; drop it from older persisted snapshots to avoid restore failures.
@@ -48,9 +58,14 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
     }
   }
 
-  if (persistedState || persistedSecureState) {
+  ;(merged as any).exerciseStore = migrateExerciseStoreSnapshot((merged as any).exerciseStore)
+
+  let didRestorePersistedState = false
+
+  if (persistedState || legacySecureState) {
     try {
       applySnapshot(rootStore, merged)
+      didRestorePersistedState = true
     } catch (error) {
       console.warn("Failed to restore root store, attempting with clean performance memory", error)
       try {
@@ -63,44 +78,22 @@ async function setupRootStoreImpl(): Promise<{ rootStore: RootStore; dispose: ID
             exerciseNotes: {},
           },
         } as any)
+        didRestorePersistedState = true
       } catch (finalError) {
         console.error("Failed to restore root store, clearing storage", finalError)
         storage.remove(ROOT_STORE_PERSISTENCE_KEY)
-        secureStorage.remove(ROOT_STORE_SECURE_PERSISTENCE_KEY)
+        storage.removeLegacySecure(LEGACY_ROOT_STORE_SECURE_PERSISTENCE_KEY)
       }
     }
   }
 
+  if (didRestorePersistedState) {
+    storage.save(ROOT_STORE_PERSISTENCE_KEY, getSnapshot(rootStore))
+    storage.removeLegacySecure(LEGACY_ROOT_STORE_SECURE_PERSISTENCE_KEY)
+  }
+
   const dispose = onSnapshot(rootStore, (snapshot) => {
-    // Keep exercises in plain storage; put performance/workouts into encrypted MMKV.
-    secureStorage.save(ROOT_STORE_SECURE_PERSISTENCE_KEY, {
-      performanceMemoryStore: snapshot.performanceMemoryStore,
-      workoutStore: snapshot.workoutStore,
-    })
-
-    // Avoid persisting sensitive auth tokens into plain MMKV.
-    const snapshotToPersist: RootStoreSnapshotOut = {
-      ...snapshot,
-      authenticationStore: {
-        ...snapshot.authenticationStore,
-        accessToken: undefined,
-      },
-      // Never persist workout/memory to plain MMKV; keep it encrypted.
-      performanceMemoryStore: {
-        schemaVersion: 2,
-        patternMemories: {},
-        personalRecords: {},
-        exerciseNotes: {},
-      },
-      workoutStore: {
-        currentSession: undefined,
-        templates: {},
-        sessionHistory: [],
-        lastError: undefined,
-      },
-    }
-
-    storage.save(ROOT_STORE_PERSISTENCE_KEY, snapshotToPersist)
+    storage.save(ROOT_STORE_PERSISTENCE_KEY, snapshot as RootStoreSnapshotOut)
   })
 
   return { rootStore, dispose }

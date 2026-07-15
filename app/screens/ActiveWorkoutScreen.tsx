@@ -8,11 +8,13 @@ import { EmptyState } from "@/components/EmptyState"
 import { Screen } from "@/components/Screen"
 import { ExerciseCard } from "@/components/workout/ExerciseCard"
 import { NoteInput } from "@/components/workout/NoteInput"
+import { RestTimerBar } from "@/components/workout/RestTimerBar"
 import { SetOptionsBottomSheet } from "@/components/workout/SetOptionsBottomSheet"
 import { SetRow } from "@/components/workout/SetRow"
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader"
 import { useStores } from "@/models/RootStoreContext"
 import type { SetData, SetTypeId } from "@/models/SetStore"
+import type { RestTimeSeconds } from "@/models/WorkoutStore"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -116,16 +118,20 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       )
     }
 
+    function handleRestTimeChange(workoutExerciseId: string, seconds: RestTimeSeconds) {
+      workoutStore.setExerciseRestTime(workoutExerciseId, seconds)
+    }
+
     function handleGoBack() {
       const hasData = session && session.exercises.length > 0
       if (hasData) {
         Alert.alert(
-          "Antrenmanı kaydetmediniz",
-          "Çıkmak istediğinizden emin misiniz? Tüm veriler kaybolacak.",
+          "Discard workout?",
+          "Are you sure you want to leave? This workout will be deleted.",
           [
-            { text: "İptal", style: "cancel" },
+            { text: "Cancel", style: "cancel" },
             {
-              text: "Çık",
+              text: "Discard",
               style: "destructive",
               onPress: () => {
                 workoutStore.discardSession()
@@ -140,19 +146,42 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
       }
     }
 
+    function handleFinish() {
+      if (completedSetsCount === 0) {
+        Alert.alert(
+          "Complete a set first",
+          session?.exercises.length
+            ? "Mark at least one set as done before finishing this workout."
+            : "Add an exercise and complete at least one set before finishing this workout.",
+        )
+        return
+      }
+
+      navigation.navigate("WorkoutComplete")
+    }
+
     return (
       <Screen preset="fixed" safeAreaEdges={["top"]}>
         <WorkoutHeader
-          title="Antrenman Kaydet"
+          title="Log Workout"
           leftActionLabel="Back"
           onLeftActionPress={handleGoBack}
-          rightActionLabel="Bitir"
-          onRightActionPress={() => navigation.navigate("WorkoutComplete")}
+          rightActionLabel="Finish"
+          onRightActionPress={handleFinish}
           showStats
           timeSeconds={elapsedSeconds}
           volumeKg={completedVolumeKg}
           setsCount={completedSetsCount}
         />
+
+        {session?.restTimerEndsAt ? (
+          <RestTimerBar
+            endsAt={session.restTimerEndsAt}
+            onAddThirty={() => workoutStore.addRestTimerSeconds(30)}
+            onSkip={workoutStore.skipRestTimer}
+            onExpire={workoutStore.consumeRestTimerExpiry}
+          />
+        ) : null}
 
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
           {!session ? (
@@ -163,6 +192,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
             />
           ) : session.exercises.length === 0 ? (
             <EmptyState
+              preset="workout"
               heading="No exercises yet"
               content="Add an exercise to start tracking sets."
               button="Add Exercise"
@@ -179,7 +209,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               )}
 
               {session.exercises.map((we) => {
-                const exercise = exerciseStore.exercises.get(we.exerciseId)
+                const exercise = exerciseStore.getExercise(we.exerciseId)
                 if (!exercise) return null
 
                 const templateExercise = template?.exercises.find(
@@ -214,7 +244,15 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
 
                 return (
                   <View key={we.id} style={themed($exerciseSection)}>
-                    <ExerciseCard exercise={exercise} showBottomSeparator={false} />
+                    <ExerciseCard
+                      exercise={exercise}
+                      showBottomSeparator={false}
+                      restTime={we.restTime as RestTimeSeconds}
+                      onRestTimeChange={(seconds) => handleRestTimeChange(we.id, seconds)}
+                      onPress={() =>
+                        navigation.navigate("ExerciseDetail", { exerciseId: exercise.id })
+                      }
+                    />
 
                     <NoteInput
                       value={we.notes}
@@ -307,13 +345,14 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                               allowEmptyNumbers={false}
                               index={displayIndex}
                               rowIndex={i}
+                              exerciseName={exercise.name}
+                              setNumber={i + 1}
                               isDone={s.isDone}
                               placeholders={placeholders}
                               previousValue={previousValue}
                               onPressSetType={() => handleOpenSetOptions(we.id, s.id, setType)}
                               onChange={(next) => handleUpdateSet(we.id, s.id, next)}
                               onDone={() => handleToggleDone(we.id, s.id)}
-                              doneButtonLabel="Toggle done"
                               value={{
                                 setType: s.setType,
                                 weight: s.weight,
@@ -327,7 +366,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                       })()}
 
                       <Button
-                        text="+ Set Ekle"
+                        text="+ Add Set"
                         preset="default"
                         onPress={() => handleAddSet(we.id, we.exerciseId)}
                         style={themed($addSetButton)}
@@ -338,7 +377,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               })}
 
               <Button
-                text="+ Egzersiz Ekle"
+                text="+ Add Exercise"
                 preset="filled"
                 onPress={() => navigation.navigate("ExerciseLibrary")}
                 style={themed($addExerciseButton)}

@@ -1,4 +1,3 @@
-export * from "./AuthenticationStore"
 export * from "./ExerciseStore"
 export * from "./SetStore"
 export * from "./PerformanceMemoryStore"

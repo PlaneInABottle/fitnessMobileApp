@@ -45,6 +45,10 @@ export interface SetRowProps {
   index?: number
   /** 0-based row index for styling (all set types) */
   rowIndex?: number
+  /** Exercise context used by screen readers. */
+  exerciseName?: string
+  /** 1-based set number used by screen readers. */
+  setNumber?: number
   isDone?: boolean
   onLongPress?: () => void
 }
@@ -54,22 +58,22 @@ function getFields(category: ExerciseCategory): [FieldConfig, FieldConfig] {
     case "STRENGTH":
       return [
         { key: "weight", label: "Kg", header: "KG" },
-        { key: "reps", label: "Reps", header: "TEKRAR" },
+        { key: "reps", label: "Reps", header: "REPS" },
       ]
     case "BODYWEIGHT":
       return [
-        { key: "reps", label: "Reps", header: "TEKRAR" },
+        { key: "reps", label: "Reps", header: "REPS" },
         { label: "", header: "" },
       ]
     case "TIMED":
       return [
-        { key: "time", label: "Sec", header: "SÜRE" },
+        { key: "time", label: "Sec", header: "TIME" },
         { label: "", header: "" },
       ]
     case "CARDIO":
       return [
-        { key: "time", label: "Sec", header: "SÜRE" },
-        { key: "distance", label: "m", header: "MESAFE" },
+        { key: "time", label: "Sec", header: "TIME" },
+        { key: "distance", label: "m", header: "DISTANCE" },
       ]
   }
 }
@@ -102,6 +106,8 @@ export function SetRow({
   allowEmptyNumbers = true,
   index,
   rowIndex,
+  exerciseName,
+  setNumber,
   isDone,
   onLongPress,
 }: SetRowProps) {
@@ -114,6 +120,7 @@ export function SetRow({
   const [localTouched, setLocalTouched] = useState<Partial<Record<EditableFieldKey, boolean>>>({})
   const [draftText, setDraftText] = useState<Partial<Record<EditableFieldKey, string>>>({})
   const [focusedField, setFocusedField] = useState<EditableFieldKey | null>(null)
+  const inputRefs = useRef<Partial<Record<EditableFieldKey, TextInput | null>>>({})
 
   // Track set type to detect when set type changes (need to reset state)
   const prevSetTypeRef = useRef(value?.setType)
@@ -148,6 +155,18 @@ export function SetRow({
       return `${previousValue.time ?? 0}s × ${previousValue.distance ?? 0}m`
     }
     return "-"
+  }
+
+  function getFieldAccessibilityLabel(field: FieldConfig): string {
+    if (!exerciseName || !setNumber || !field.key) return field.label
+
+    const fieldName: Record<EditableFieldKey, string> = {
+      weight: "weight in kilograms",
+      reps: "repetitions",
+      time: "time in seconds",
+      distance: "distance in meters",
+    }
+    return `${exerciseName}, set ${setNumber}, ${fieldName[field.key]}`
   }
 
   function handlePressSetType() {
@@ -199,6 +218,7 @@ export function SetRow({
 
       const isTouched = !!touched?.[key] || !!localTouched[key]
       const isKgOrReps = key === "weight" || key === "reps"
+      const nextFieldKey = key === field1.key ? field2.key : undefined
       const normalizedCurrent =
         typeof current === "number" && Number.isFinite(current) ? current : undefined
       const isZeroOrUndefined = normalizedCurrent === 0 || normalizedCurrent === undefined
@@ -226,11 +246,16 @@ export function SetRow({
       return (
         <View style={$cell}>
           <TextInput
+            ref={(input) => {
+              inputRefs.current[key] = input
+            }}
             value={displayValue}
-            accessibilityLabel={field.label}
+            accessibilityLabel={getFieldAccessibilityLabel(field)}
             placeholder={placeholders?.[key] ?? "0"}
             placeholderTextColor={colors.textDim}
             keyboardType="numeric"
+            returnKeyType={nextFieldKey ? "next" : "done"}
+            blurOnSubmit={!nextFieldKey}
             underlineColorAndroid="transparent"
             onFocus={() => {
               setFocusedField(key)
@@ -272,6 +297,7 @@ export function SetRow({
 
               setFocusedField((prev) => (prev === key ? null : prev))
               setDraftText((prev) => ({ ...prev, [key]: undefined }))
+              if (nextFieldKey) inputRefs.current[nextFieldKey]?.focus()
             }}
             style={[
               themed($input),
@@ -342,7 +368,7 @@ export function SetRow({
           <Text text="SET" style={themed($headerText)} />
         </View>
         <View style={$previousCell}>
-          <Text text="ÖNCEKİ" style={themed($headerText)} />
+          <Text text="PREVIOUS" style={themed($headerText)} />
         </View>
         <View style={$cell}>
           <Text text={field1.header || field1.label} style={themed($headerText)} />
@@ -365,8 +391,13 @@ export function SetRow({
       <View style={$setTypeCell}>
         <Pressable
           onPress={handlePressSetType}
+          style={$setTypeButton}
           accessibilityRole="button"
-          accessibilityLabel={`Set type: ${setTypeId}`}
+          accessibilityLabel={
+            exerciseName && setNumber
+              ? `Set type for ${exerciseName}, set ${setNumber}: ${setTypeId}`
+              : `Set type: ${setTypeId}`
+          }
         >
           <SetTypeIndicator
             type={setTypeId as SetType}
@@ -397,7 +428,12 @@ export function SetRow({
           style={[themed($doneButton), isDone && themed($doneButtonDone)]}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: !!isDone }}
-          accessibilityLabel={doneButtonLabel ?? "Done"}
+          accessibilityLabel={
+            doneButtonLabel ??
+            (exerciseName && setNumber
+              ? `Mark ${exerciseName}, set ${setNumber} ${isDone ? "incomplete" : "complete"}`
+              : "Done")
+          }
         >
           <Text text="✓" style={[themed($doneText), isDone && themed($doneTextDone)]} />
         </Pressable>
@@ -427,7 +463,14 @@ const $headerRow: ViewStyle = {
 }
 
 const $setTypeCell: ViewStyle = {
-  width: 36,
+  width: 44,
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $setTypeButton: ViewStyle = {
+  width: 44,
+  height: 44,
   alignItems: "center",
   justifyContent: "center",
 }
@@ -479,8 +522,8 @@ const $input: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 })
 
 const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  width: 32,
-  height: 32,
+  width: 44,
+  height: 44,
   borderRadius: 6,
   borderWidth: 1,
   borderColor: colors.cardSecondary,

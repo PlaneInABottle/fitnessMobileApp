@@ -1,14 +1,15 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react"
 import { Pressable, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 import { useFocusEffect } from "@react-navigation/native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
 import { ExerciseListItem } from "@/components/ExerciseListItem"
-import { Icon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
+import { getExerciseImages } from "@/data/exerciseMedia"
 import { useStores } from "@/models/RootStoreContext"
 import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
@@ -94,27 +95,27 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
       <Screen preset="scroll" safeAreaEdges={["top"]}>
         {/* Header */}
         <View style={themed($header)}>
-          <Pressable onPress={handleCancel} accessibilityRole="button" accessibilityLabel="İptal">
+          <Pressable onPress={handleCancel} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text weight="medium" style={themed($cancelText)}>
-              İptal
+              Cancel
             </Text>
           </Pressable>
 
           <Text weight="semiBold" size="lg" style={themed($headerTitle)}>
-            Rutin Oluştur
+            Create Routine
           </Text>
 
           <Pressable
             onPress={handleSave}
             disabled={!canSave || isSaving}
             accessibilityRole="button"
-            accessibilityLabel="Kaydet"
+            accessibilityLabel="Save"
           >
             <Text
               weight="semiBold"
               style={[themed($saveText), !canSave && themed($saveTextDisabled)]}
             >
-              Kaydet
+              Save
             </Text>
           </Pressable>
         </View>
@@ -125,7 +126,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           <TextField
             value={title}
             onChangeText={setTitle}
-            placeholder="Rutin başlığı"
+            placeholder="Routine title"
             autoCapitalize="sentences"
             autoCorrect={false}
             containerStyle={themed($titleInput)}
@@ -134,12 +135,12 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           {/* Exercise List or Empty State */}
           {selectedExerciseIds.length === 0 ? (
             <View style={themed($emptyState)}>
-              <Icon icon="dumbbell" size={64} color={theme.colors.textDim} />
+              <Ionicons name="barbell-outline" size={64} color={theme.colors.textDim} />
               <Text size="lg" style={themed($emptyTitle)}>
-                Rutininize bir egzersiz ekleyerek başlayın
+                Start by adding an exercise to your routine
               </Text>
               <Button
-                text="+ Egzersiz ekle"
+                text="+ Add Exercise"
                 preset="filled"
                 onPress={handleAddExercise}
                 style={themed($addButton)}
@@ -150,12 +151,12 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
             <View style={themed($exerciseList)}>
               <View style={$sectionHeader}>
                 <Text weight="semiBold" size="lg" style={themed($sectionTitle)}>
-                  Egzersizler ({selectedExerciseIds.length})
+                  Exercises ({selectedExerciseIds.length})
                 </Text>
               </View>
 
               {selectedExerciseIds.map((exerciseId) => {
-                const exercise = exerciseStore.exercises.get(exerciseId)
+                const exercise = exerciseStore.getExercise(exerciseId)
                 if (!exercise) return null
 
                 return (
@@ -163,15 +164,16 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
                     key={exerciseId}
                     title={exercise.name}
                     subtitle={exercise.muscleGroups.join(", ") || exercise.category}
+                    imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
                     onPress={() => handleRemoveExercise(exerciseId)}
                     onAdd={() => handleRemoveExercise(exerciseId)}
-                    addLabel="−"
+                    actionIcon="remove"
                   />
                 )
               })}
 
               <Button
-                text="+ Egzersiz ekle"
+                text="+ Add Exercise"
                 preset="default"
                 onPress={handleAddExercise}
                 style={themed($addMoreButton)}

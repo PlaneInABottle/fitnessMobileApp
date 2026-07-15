@@ -159,4 +159,35 @@ describe("SetRow", () => {
     expect(StyleSheet.flatten(kgInput.props.style).fontFamily).toBe("spaceGroteskBold")
     expect(StyleSheet.flatten(repsInput.props.style).fontFamily).toBe("spaceGroteskBold")
   })
+
+  it("provides contextual labels, stable 44pt actions, and contained keyboard traversal", () => {
+    const { getByLabelText } = render(
+      <ThemeProvider>
+        <NavigationContainer>
+          <SetRow
+            category="STRENGTH"
+            mode="edit"
+            value={{ setType: "working", weight: 0, reps: 0 }}
+            exerciseName="Bench Press"
+            setNumber={2}
+            onChange={jest.fn()}
+            onDone={jest.fn()}
+            onPressSetType={jest.fn()}
+          />
+        </NavigationContainer>
+      </ThemeProvider>,
+    )
+
+    const weight = getByLabelText("Bench Press, set 2, weight in kilograms")
+    const reps = getByLabelText("Bench Press, set 2, repetitions")
+    const setType = getByLabelText("Set type for Bench Press, set 2: working")
+    const done = getByLabelText("Mark Bench Press, set 2 complete")
+
+    expect(weight.props.returnKeyType).toBe("next")
+    expect(weight.props.blurOnSubmit).toBe(false)
+    expect(reps.props.returnKeyType).toBe("done")
+    expect(reps.props.blurOnSubmit).toBe(true)
+    expect(StyleSheet.flatten(setType.props.style)).toMatchObject({ width: 44, height: 44 })
+    expect(StyleSheet.flatten(done.props.style)).toMatchObject({ width: 44, height: 44 })
+  })
 })

@@ -15,24 +15,16 @@ function formatDuration(ms: number): string {
 }
 
 export function useSessionTimer(startedAt: Date | undefined): string {
-  const [duration, setDuration] = useState("00:00")
+  const [now, setNow] = useState(Date.now)
 
   useEffect(() => {
-    if (!startedAt) {
-      setDuration("00:00")
-      return
-    }
+    if (!startedAt) return
 
-    const updateDuration = () => {
-      const elapsed = Math.max(0, Date.now() - startedAt.getTime())
-      setDuration(formatDuration(elapsed))
-    }
-
-    updateDuration()
-    const interval = setInterval(updateDuration, 1000)
+    const interval = setInterval(() => setNow(Date.now()), 1000)
 
     return () => clearInterval(interval)
   }, [startedAt])
 
-  return duration
+  if (!startedAt) return "00:00"
+  return formatDuration(Math.max(0, now - startedAt.getTime()))
 }

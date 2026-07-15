@@ -1,90 +1,62 @@
 # Fitness Tracker
 
-A modern, high-performance fitness tracking application built with React Native and Expo. Designed with an offline-first philosophy and a focused user experience for tracking workouts, sets, and progress.
+Fitness Tracker is an offline workout log for iOS and Android. It supports quick sessions,
+reusable routines, exercise notes, multiple set types, performance suggestions, personal records,
+and a history dashboard. Workout data stays on the device and the app does not require an account.
 
-## 📋 Features
+## Requirements
 
-- **Offline-First Architecture**: Track your workouts anywhere, even without an internet connection.
-- **Custom Workout Creation**: Build your own routines or start an empty workout on the fly.
-- **Advanced Set Tracking**: Supports multiple set types including Warmup, Working, and Dropsets.
-- **Performance Memory**: Automatically remembers your last 5 performances per exercise and set type, providing reactive suggestions.
-- **Routine Templates**: Save your favorite workouts as templates for quick access in the future.
-- **Personal Records**: Tracks and displays your all-time bests for every exercise.
-- **Modern UI/UX**: Clean, intuitive interface with dark mode support and touch-optimized interactions.
+- Node.js 24
+- Bun 1.3 or newer
+- Xcode for iOS builds or Android Studio for Android builds
+- A development build; Expo Go cannot load the MMKV native module used by this app
 
-## 🚀 Tech Stack
+## Development
 
-- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
-- **State Management**: [MobX State Tree (MST)](https://mobx-state-tree.js.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Ignite UI](https://github.com/infinitered/ignite) based theme system
-- **Storage**: dual-layer persistence (MMKV for fast data + Secure Storage for sensitive auth tokens)
-
-## 🛠️ Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18+)
-- [Bun](https://bun.sh/) (preferred) or [npm](https://www.npmjs.com/)
-- [Expo Go](https://expo.dev/client) app on your mobile device (for development)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/PlaneInABottle/fitnessMobileApp.git
-   cd fitnessMobileApp
-   ```
-
-2. Install dependencies:
-   ```bash
-   bun install
-   ```
-
-3. Start the development server:
-   ```bash
-   bun run start
-   ```
-
-### Building for Native
-
-To build the native Android and iOS directories:
 ```bash
-bunx expo prebuild
+bun install --frozen-lockfile
+bun run start
 ```
 
-For EAS builds:
+In another terminal, build and launch the native app:
+
 ```bash
-bun run build:ios:sim # build for ios simulator
-bun run build:android:preview # build for android preview
+bun run ios
+# or
+bun run android
 ```
 
-## 🏗️ Architecture
+No environment variables or external services are required.
 
-The app follows a strict **5-Store Architecture** using MobX State Tree:
+## Quality Gates
 
-1.  **ExerciseStore**: Manages the library of available exercises and categories.
-2.  **WorkoutStore**: Handles active sessions, workout history, and templates.
-3.  **SetStore**: Logic for individual set validation and data management.
-4.  **PerformanceMemoryStore**: Remembers performance patterns and calculates suggestions.
-5.  **ProgressStore**: (In development) For advanced analytics and progress tracking.
-
-## 🧪 Testing
-
-The project uses Jest for unit and integration testing.
-
-Run all tests:
 ```bash
-bun run test
+bun run compile
+bun run lint:check
+bun run test -- --runInBand
+bun run deps:check
+bunx expo-doctor
 ```
 
-## 📄 License
+## Release Builds
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+After authenticating with EAS and linking the Expo project:
 
-## 🤝 Contributing
+```bash
+bunx eas-cli@20.5.1 build --profile preview --platform android
+bunx eas-cli@20.5.1 build --profile preview:simulator --platform ios
+bunx eas-cli@20.5.1 build --profile production --platform all
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+See [docs/release-checklist.md](docs/release-checklist.md) for the complete release process and
+[docs/store-listing.md](docs/store-listing.md) for store metadata.
 
----
-Built with ❤️ by Mirza
+## Data Model
+
+MobX State Tree owns the exercise library, active workout, routines, history, and performance
+memory. MMKV persists that root state locally. There is no authentication, analytics, advertising,
+or remote backend.
+
+## License
+
+Licensed under the [MIT License](LICENSE).

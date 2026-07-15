@@ -18,10 +18,11 @@ if (__DEV__) {
 }
 import "./utils/gestureHandler"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { StyleSheet } from "react-native"
 import { useFonts } from "expo-font"
 import * as Linking from "expo-linking"
+import * as SplashScreen from "expo-splash-screen"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
@@ -35,6 +36,8 @@ import { ThemeProvider } from "./theme/context"
 import { customFontsToLoad } from "./theme/typography"
 import { loadDateFnsLocale } from "./utils/formatDate"
 import * as storage from "./utils/storage"
+
+void SplashScreen.preventAutoHideAsync()
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
@@ -71,10 +74,35 @@ export function App() {
   const { rootStore, rehydrated: isStoreRehydrated } = useInitialRootStore()
 
   useEffect(() => {
-    initI18n()
-      .then(() => setIsI18nInitialized(true))
-      .then(() => loadDateFnsLocale())
+    let isActive = true
+
+    async function initializeI18n() {
+      try {
+        await initI18n()
+      } catch (error) {
+        console.error("Failed to initialize i18n", error)
+      } finally {
+        loadDateFnsLocale()
+        if (isActive) setIsI18nInitialized(true)
+      }
+    }
+
+    void initializeI18n()
+    return () => {
+      isActive = false
+    }
   }, [])
+
+  const isAppReady =
+    isNavigationStateRestored &&
+    isI18nInitialized &&
+    isStoreRehydrated &&
+    !!rootStore &&
+    (areFontsLoaded || !!fontLoadError)
+
+  const handleRootLayout = useCallback(() => {
+    if (isAppReady) void SplashScreen.hideAsync()
+  }, [isAppReady])
 
   // Before we show the app, we have to wait for our state to be ready.
   // In the meantime, don't render anything. This will be the background
@@ -82,15 +110,7 @@ export function App() {
   // In iOS: application:didFinishLaunchingWithOptions:
   // In Android: https://stackoverflow.com/a/45838109/204044
   // You can replace with your own loading component if you wish.
-  if (
-    !isNavigationStateRestored ||
-    !isI18nInitialized ||
-    !isStoreRehydrated ||
-    !rootStore ||
-    (!areFontsLoaded && !fontLoadError)
-  ) {
-    return null
-  }
+  if (!isAppReady || !rootStore) return null
 
   const linking = {
     prefixes: [prefix],
@@ -100,7 +120,7 @@ export function App() {
   // otherwise, we're ready to render the app
   return (
     <RootStoreProvider value={rootStore}>
-      <GestureHandlerRootView style={styles.gestureHandlerRoot}>
+      <GestureHandlerRootView style={styles.gestureHandlerRoot} onLayout={handleRootLayout}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <KeyboardProvider>
             <ThemeProvider>

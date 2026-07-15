@@ -1,7 +1,7 @@
 {
-  "name": "fitnessMobileApp",
-  "slug": "fitnessMobileApp",
-  "scheme": "fitnessmobileapp",
+  "name": "Fitness Tracker",
+  "slug": "fitness-tracker",
+  "scheme": "fitness-tracker",
   "version": "1.0.0",
   "orientation": "portrait",
   "userInterfaceStyle": "automatic",
@@ -9,40 +9,36 @@
   "updates": {
     "fallbackToCacheTimeout": 0
   },
-  "newArchEnabled": true,
-  "jsEngine": "hermes",
   "assetBundlePatterns": [
     "**/*"
   ],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
-    "package": "com.fitness.app",
+    "package": "com.planeinabottle.fitnesstracker",
     "adaptiveIcon": {
       "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
       "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
     },
-    "allowBackup": false,
-    "edgeToEdgeEnabled": true
+    "allowBackup": false
   },
   "ios": {
     "icon": "./assets/images/app-icon-ios.png",
-    "supportsTablet": true,
-    "bundleIdentifier": "com.fitness.app"
+    "supportsTablet": false,
+    "bundleIdentifier": "com.planeinabottle.fitnesstracker"
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",
     "bundler": "metro"
   },
   "plugins": [
-    "expo-localization",
     "expo-font",
     [
       "expo-splash-screen",
       {
         "image": "./assets/images/app-icon-android-adaptive-foreground.png",
-        "imageWidth": 300,
+        "imageWidth": 240,
         "resizeMode": "contain",
-        "backgroundColor": "#191015"
+        "backgroundColor": "#111315"
       }
     ],
     [
@@ -59,10 +55,13 @@
   "experiments": {
     "tsconfigPaths": true
   },
-  "owner": "smokymumbo",
+  "owner": "planeinabottle",
   "extra": {
     "ignite": {
       "version": "11.3.2"
+    },
+    "eas": {
+      "projectId": "ce2e41b6-a0cb-4e0d-a7d4-e1add6ed3f90"
     }
   }
 }

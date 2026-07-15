@@ -1,9 +1,9 @@
 import { FC, useState } from "react"
-import { Alert, Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import Ionicons from "@expo/vector-icons/Ionicons"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
-import { Icon } from "@/components/Icon"
 import { RoutineCard } from "@/components/RoutineCard"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -25,11 +25,18 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
       .sort((a, b) => (b.lastUsedAt?.getTime() ?? 0) - (a.lastUsedAt?.getTime() ?? 0))
       .slice(0, 5)
 
-    function handleStartEmptyWorkout() {
+    function handlePrimaryWorkoutAction() {
+      if (workoutStore.currentSession) {
+        navigation.navigate("ActiveWorkout")
+        return
+      }
+
       if (isStarting) return
       setIsStarting(true)
       try {
-        if (workoutStore.startNewSession()) navigation.navigate("ActiveWorkout")
+        if (workoutStore.startNewSession()) {
+          navigation.navigate("ExerciseLibrary", { newWorkout: true })
+        }
       } finally {
         setIsStarting(false)
       }
@@ -48,7 +55,7 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
     function getExercisePreview(exerciseIds: string[]): string {
       const names = exerciseIds
         .slice(0, 4)
-        .map((id) => exerciseStore.exercises.get(id)?.name ?? "Unknown")
+        .map((id) => exerciseStore.getExercise(id)?.name ?? "Unknown")
       if (exerciseIds.length > 4) {
         return names.join(", ") + ` +${exerciseIds.length - 4} more`
       }
@@ -61,17 +68,9 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
         <View style={themed($header)}>
           <View style={$headerLeft}>
             <Text preset="heading" style={themed($headerTitle)}>
-              Antrenman
+              Workout
             </Text>
           </View>
-          <Pressable
-            onPress={() => Alert.alert("Ayarlar", "Bu özellik yakında eklenecek")}
-            style={$settingsButton}
-            accessibilityRole="button"
-            accessibilityLabel="Settings"
-          >
-            <Icon icon="settings" size={24} color={theme.colors.text} />
-          </Pressable>
         </View>
 
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
@@ -83,51 +82,48 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
             </View>
           )}
 
-          {/* Start Empty Workout Button */}
+          {/* Primary workout action */}
           <Button
-            text="+ Boş Antrenmana Başla"
+            text={hasActiveSession ? "Resume workout" : "Start workout"}
             preset="filled"
-            onPress={handleStartEmptyWorkout}
+            onPress={handlePrimaryWorkoutAction}
             style={themed($startButton)}
             textStyle={themed($startButtonText)}
+          />
+          <Button
+            text="Browse exercise library"
+            onPress={() => navigation.navigate("ExerciseLibrary", { browseOnly: true })}
           />
 
           {/* Routines Section */}
           <View style={themed($section)}>
             <View style={$sectionHeader}>
               <Text preset="subheading" style={themed($sectionTitle)}>
-                Rutinler
+                Routines
               </Text>
               <Pressable
                 onPress={() => navigation.navigate("CreateRoutine")}
-                style={$addButton}
+                style={themed($createRoutineAction)}
                 accessibilityRole="button"
-                accessibilityLabel="Add routine"
+                accessibilityLabel="Create routine"
               >
-                <Text weight="bold" size="lg" style={{ color: theme.colors.tint }}>
-                  +
-                </Text>
+                <Ionicons name="add" size={18} color={theme.colors.tint} />
+                <Text text="Create" size="sm" weight="semiBold" style={themed($createText)} />
               </Pressable>
             </View>
-
-            <Pressable
-              style={themed($newRoutineButton)}
-              onPress={() => navigation.navigate("CreateRoutine")}
-              accessibilityRole="button"
-            >
-              <View style={$newRoutineButtonContent}>
-                <Text style={themed($newRoutineEmoji)}>✨</Text>
-                <Text weight="semiBold" style={themed($newRoutineText)}>
-                  Yeni Rutin
-                </Text>
-                <Icon icon="caretRight" size={18} color={theme.colors.textDim} />
-              </View>
-            </Pressable>
 
             {/* Routine Cards */}
             {recentTemplates.length === 0 ? (
               <View style={themed($emptyRoutines)}>
-                <Text style={themed($emptyText)}>No routines yet. Create your first one!</Text>
+                <Ionicons name="list-outline" size={28} color={theme.colors.textDim} />
+                <View style={$emptyCopy}>
+                  <Text text="No routines yet" weight="semiBold" />
+                  <Text
+                    text="Save repeat workouts for faster logging."
+                    size="sm"
+                    style={themed($emptyText)}
+                  />
+                </View>
               </View>
             ) : (
               <View style={themed($routinesList)}>
@@ -137,29 +133,13 @@ export const WorkoutTabScreen: FC<WorkoutStackScreenProps<"WorkoutTab">> = obser
                     title={t.name}
                     exercisePreview={getExercisePreview([...t.exerciseIds])}
                     onStart={() => handleStartFromTemplate(t.id)}
-                    onMenu={() => navigation.navigate("RoutineDetail", { templateId: t.id })}
+                    onOpen={() => navigation.navigate("RoutineDetail", { templateId: t.id })}
                   />
                 ))}
               </View>
             )}
           </View>
         </ScrollView>
-
-        {/* Resume Workout Indicator */}
-        {hasActiveSession && (
-          <Pressable
-            style={themed($resumeBar)}
-            onPress={() => navigation.navigate("ActiveWorkout")}
-          >
-            <View style={$resumeContent}>
-              <Icon icon="caretRight" size={20} color="#FFFFFF" />
-              <Text weight="semiBold" style={themed($resumeText)}>
-                Devam Eden Antrenman
-              </Text>
-            </View>
-            <Icon icon="caretRight" size={20} color="#FFFFFF" />
-          </Pressable>
-        )}
       </Screen>
     )
   },
@@ -185,10 +165,6 @@ const $headerLeft: ViewStyle = {
 const $headerTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
-
-const $settingsButton: ViewStyle = {
-  padding: 8,
-}
 
 const $scrollView: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
@@ -232,69 +208,41 @@ const $sectionHeader: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  marginBottom: 12,
+  marginBottom: 4,
 }
 
 const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
-const $addButton: ViewStyle = {
-  padding: 4,
-}
-
-const $newRoutineButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.card,
-  padding: spacing.md,
-  borderRadius: 12,
-})
-
-const $newRoutineButtonContent: ViewStyle = {
-  flexDirection: "row",
+const $createRoutineAction: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
-  gap: 10,
-}
-
-const $newRoutineEmoji: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  fontSize: 16,
+  flexDirection: "row",
+  gap: spacing.xs,
+  minHeight: 44,
+  paddingHorizontal: spacing.xs,
 })
 
-const $newRoutineText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  flex: 1,
+const $createText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
 })
 
 const $emptyRoutines: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  padding: spacing.lg,
-  backgroundColor: colors.card,
-  borderRadius: 12,
   alignItems: "center",
+  borderColor: colors.separator,
+  borderRadius: 8,
+  borderWidth: 1,
+  flexDirection: "row",
+  gap: spacing.md,
+  padding: spacing.lg,
 })
+
+const $emptyCopy: ViewStyle = { flex: 1, gap: 3 }
 
 const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
 })
 
 const $routinesList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.md,
-})
-
-const $resumeBar: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  backgroundColor: colors.tint,
-  paddingVertical: spacing.sm,
-  paddingHorizontal: spacing.md,
-})
-
-const $resumeContent: ViewStyle = {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 8,
-}
-
-const $resumeText: ThemedStyle<TextStyle> = () => ({
-  color: "#FFFFFF",
+  gap: spacing.sm,
 })

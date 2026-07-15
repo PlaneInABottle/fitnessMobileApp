@@ -32,7 +32,6 @@ function formatTime(seconds: number): string {
 
 /**
  * Horizontal stats bar for displaying workout metrics.
- * Shows time, volume, sets count, and anatomy placeholder.
  */
 export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
   const { timeSeconds, volumeKg, setsCount, style: $styleOverride } = props
@@ -42,7 +41,7 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
     <View style={[themed($container), $styleOverride]}>
       <View style={$statItem}>
         <Text size="xxs" style={themed($label)}>
-          Süre
+          Duration
         </Text>
         <Text
           weight="bold"
@@ -56,7 +55,7 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
       <View style={themed($separator)} />
       <View style={$statItem}>
         <Text size="xxs" style={themed($label)}>
-          Hacim
+          Volume
         </Text>
         <Text
           weight="bold"
@@ -80,14 +79,6 @@ export function WorkoutStatsBar(props: WorkoutStatsBarProps) {
         >
           {setsCount}
         </Text>
-      </View>
-      <View style={themed($separator)} />
-      <View style={$statItem}>
-        <View style={themed($anatomyPlaceholder)}>
-          <Text size="xxs" style={themed($anatomyIcon)}>
-            🏋️
-          </Text>
-        </View>
       </View>
     </View>
   )
@@ -125,15 +116,4 @@ const $value: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $valueBlue: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
-})
-
-const $anatomyPlaceholder: ThemedStyle<ViewStyle> = () => ({
-  width: 32,
-  height: 32,
-  justifyContent: "center",
-  alignItems: "center",
-})
-
-const $anatomyIcon: ThemedStyle<TextStyle> = () => ({
-  fontSize: 20,
 })

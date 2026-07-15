@@ -1,16 +1,16 @@
 import { getRoot, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 
 import { ExerciseSetFieldKey } from "./ExerciseStore"
-import { SET_TYPE_IDS } from "./utils/constants"
+import { SET_TYPE_IDS, SetTypeId } from "./utils/constants"
+
+export type { SetTypeId } from "./utils/constants"
 
 export const SET_TYPES = {
-  WARMUP: { name: "Warmup", label: "Isınma Seti", letter: "W" },
+  WARMUP: { name: "Warmup", label: "Warm-up Set", letter: "W" },
   WORKING: { name: "Working", label: "Normal Set", letter: "" },
   DROPSET: { name: "Drop Set", label: "Drop Set", letter: "D" },
-  FAILURE: { name: "Failure", label: "Tükeniş Seti", letter: "F" },
+  FAILURE: { name: "Failure", label: "Failure Set", letter: "F" },
 } as const
-
-export type SetTypeId = "warmup" | "working" | "dropset" | "failure"
 
 export type SetData = {
   setType: SetTypeId | string
@@ -23,6 +23,7 @@ export type SetData = {
 }
 
 export type SetValidationResult = { ok: true } | { ok: false; error: string }
+export type SetValidationOptions = { allowIncomplete?: boolean }
 
 const FIELD_RANGES: Record<ExerciseSetFieldKey, { min: number; max: number }> = {
   weight: { min: 0, max: 500 },
@@ -72,6 +73,7 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
   validateSetData(
     exerciseId: string,
     setData: Partial<SetData> | null | undefined,
+    options: SetValidationOptions = {},
   ): SetValidationResult {
     if (!setData) return { ok: false, error: "Set data is required" }
 
@@ -99,7 +101,9 @@ export const SetStoreModel = types.model("SetStore", {}).actions((self) => ({
       const isRequired = requiredFields.includes(field)
 
       if (value === undefined) {
-        if (isRequired) return { ok: false, error: `${field} is required` }
+        if (isRequired && !options.allowIncomplete) {
+          return { ok: false, error: `${field} is required` }
+        }
         continue
       }
 

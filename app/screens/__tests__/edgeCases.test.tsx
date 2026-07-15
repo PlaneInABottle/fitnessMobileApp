@@ -1,3 +1,4 @@
+import { Alert } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { render, fireEvent, waitFor } from "@testing-library/react-native"
@@ -45,17 +46,26 @@ describe("Edge Cases - Empty Session State", () => {
     await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
   })
 
-  it("can end empty session and complete workout", async () => {
+  it("prevents an empty session from being completed", async () => {
     const store = createStoreWithSession()
     const { getByText } = renderActiveWorkout(store)
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
 
-    await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
+    try {
+      await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
 
-    // Button text is now "Bitir" in Turkish
-    fireEvent.press(getByText("Bitir"))
+      fireEvent.press(getByText("Finish"))
 
-    // Workout Complete screen should show - now Turkish
-    await waitFor(() => expect(getByText("Antrenman Tamamlandı")).toBeTruthy())
+      await waitFor(() =>
+        expect(alertSpy).toHaveBeenCalledWith(
+          "Complete a set first",
+          "Add an exercise and complete at least one set before finishing this workout.",
+        ),
+      )
+      expect(store.workoutStore.currentSession).toBeDefined()
+    } finally {
+      alertSpy.mockRestore()
+    }
   })
 })
 
@@ -71,12 +81,12 @@ describe("Edge Cases - Multiple Exercises with Sets", () => {
     expect(getByText("Squat")).toBeTruthy()
 
     // Add set to first exercise - button text is now Turkish
-    const addSetButtons = getAllByText("+ Set Ekle")
+    const addSetButtons = getAllByText("+ Add Set")
     fireEvent.press(addSetButtons[0])
 
     // Fill in set values
-    const repsInputs = getAllByLabelText("Reps")
-    const kgInputs = getAllByLabelText("Kg")
+    const repsInputs = getAllByLabelText(/repetitions/)
+    const kgInputs = getAllByLabelText(/weight in kilograms/)
     fireEvent.changeText(repsInputs[0], "5")
     fireEvent.changeText(kgInputs[0], "60")
 
@@ -120,8 +130,8 @@ describe("Edge Cases - Validation", () => {
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     // Default set exists; edit values
-    fireEvent.changeText(getByLabelText("Reps"), "10")
-    fireEvent.changeText(getByLabelText("Kg"), "100")
+    fireEvent.changeText(getByLabelText("Bench Press, set 1, repetitions"), "10")
+    fireEvent.changeText(getByLabelText("Bench Press, set 1, weight in kilograms"), "100")
 
     await waitFor(() => {
       expect(store.workoutStore.currentSession?.exercises[0]?.sets.length).toBe(1)

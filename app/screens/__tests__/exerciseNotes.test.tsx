@@ -39,22 +39,21 @@ describe("ActiveWorkoutScreen - Exercise notes", () => {
     store.workoutStore.startNewSession()
     const weId = store.workoutStore.addExerciseToSession("bench-press")!
 
-    store.workoutStore.updateWorkoutExerciseNotes(weId, "Önceki not")
+    store.workoutStore.updateWorkoutExerciseNotes(weId, "Previous note")
 
     const { getByText, getByPlaceholderText, getByDisplayValue } = renderActiveWorkout(store)
 
     await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
 
     // Previous notes display
-    expect(getByDisplayValue("Önceki not")).toBeTruthy()
+    expect(getByDisplayValue("Previous note")).toBeTruthy()
 
-    // Placeholder is Turkish
-    const input = getByPlaceholderText("Buraya not ekleyin...")
+    const input = getByPlaceholderText("Add a note...")
 
-    fireEvent.changeText(input, "Yeni not")
+    fireEvent.changeText(input, "Updated note")
 
     await waitFor(() => {
-      expect(store.workoutStore.currentSession?.exercises[0]?.notes).toBe("Yeni not")
+      expect(store.workoutStore.currentSession?.exercises[0]?.notes).toBe("Updated note")
     })
   }, 15000)
 
