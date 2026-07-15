@@ -12,7 +12,9 @@
 
 Fitness Tracker gives you a practical way to plan training, understand each movement, and record every working set.
 
-Browse a library of more than 870 exercises across muscle groups and equipment types. Open an exercise to review instructions and a motion demonstration before adding it to a routine or workout.
+Browse a library of more than 870 exercises across muscle groups and equipment types. Review
+step-by-step instructions and start/finish pose guidance across the library, with motion
+demonstrations available for selected exercises.
 
 Build reusable routines, track sets, reps, weight, rest time, and notes, then review completed sessions in your workout history. Core tracking works locally without creating an account.
 
@@ -41,7 +43,7 @@ Initial release with a searchable exercise library, motion demonstrations, custo
 
 ## URLs To Supply
 
-- Support URL: TODO
-- Privacy policy URL: TODO
-- Terms URL: TODO
+- Support URL: https://planeinabottle.github.io/fitnessMobileApp/support/
+- Privacy policy URL: https://planeinabottle.github.io/fitnessMobileApp/privacy/
+- Terms URL: Not required for the current release; no custom terms are provided
 - Account deletion URL: Not applicable unless account features are enabled

@@ -48,6 +48,11 @@ bunx eas-cli@21.0.1 build --profile preview:simulator --platform ios
 bunx eas-cli@21.0.1 build --profile production --platform all
 ```
 
+The iOS scripts use EAS cloud builds so they can be started from Linux. `build:ios:sim` creates a
+development-client Simulator build, while `build:ios:preview` creates a standalone Simulator build
+for browser-device services or automated tests. Android scripts continue to support local builds on
+machines with the Android SDK.
+
 See [docs/release-checklist.md](docs/release-checklist.md) for the complete release process and
 [docs/store-listing.md](docs/store-listing.md) for store metadata.
 

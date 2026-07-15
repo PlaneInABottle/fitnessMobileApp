@@ -16,7 +16,7 @@ Core workout and history data is stored locally on the device. No paid content o
 Review contact:
 
 - Name: TODO
-- Email: TODO
+- Email: y.mirza.altay@gmail.com
 - Phone: TODO
 
 Demo credentials: Not required for the current build.

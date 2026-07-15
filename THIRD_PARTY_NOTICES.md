@@ -39,5 +39,6 @@ inaccuracies or artifacts and provides them without warranty.
 - License URL: https://creativecommons.org/licenses/by-sa/4.0/
 - Changes: videos were muted, limited to 15 seconds, resized, and transcoded to H.264/yuv420p
 
-The app displays source and license attribution next to each imported video. Original source URLs
-are retained in `app/data/exerciseVideos.generated.ts`.
+The app labels each imported video as modified and displays its source and license attribution next
+to the demonstration. Original source URLs are retained in
+`app/data/exerciseVideos.generated.ts`.

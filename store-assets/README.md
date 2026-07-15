@@ -12,7 +12,8 @@ Store-ready media and draft listing copy for Fitness Tracker 1.0.0.
 - `video/google-play-preview-landscape.mp4`: 20-second, 1920 x 1080 H.264/AAC source for YouTube.
 - `metadata/`: listing copy, screenshot captions, reviewer notes, and release checklist.
 
-The Play preview must be uploaded to YouTube as public or unlisted before its URL can be added to the listing. Reviewer credentials are intentionally not stored in Git.
+The Play preview must be uploaded to YouTube as a public, non-monetized, embeddable video before
+its URL can be added to the listing. Reviewer credentials are intentionally not stored in Git.
 
 Specifications checked on July 12, 2026:
 

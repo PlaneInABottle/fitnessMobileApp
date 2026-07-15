@@ -136,7 +136,7 @@ export const ExerciseDetailScreen: FC<WorkoutStackScreenProps<"ExerciseDetail">>
                     accessibilityLabel={`Open ${video.sourceName} source`}
                   >
                     <Text size="xs" style={themed($attributionText)}>
-                      Demo by {video.attribution} via {video.sourceName}
+                      Modified demo by {video.attribution} via {video.sourceName}
                     </Text>
                   </Pressable>
                   <Text size="xs" style={themed($attributionSeparator)}>

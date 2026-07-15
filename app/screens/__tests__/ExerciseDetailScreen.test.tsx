@@ -36,7 +36,7 @@ describe("ExerciseDetailScreen", () => {
     expect(getByText("Demo")).toBeTruthy()
     expect(getByText("Start")).toBeTruthy()
     expect(getByText("Finish")).toBeTruthy()
-    expect(getByText(/Demo by YMove via YMove/)).toBeTruthy()
+    expect(getByText(/Modified demo by YMove via YMove/)).toBeTruthy()
     expect(getByText("Royalty-free commercial use")).toBeTruthy()
     expect(getByText("Instructions")).toBeTruthy()
 
