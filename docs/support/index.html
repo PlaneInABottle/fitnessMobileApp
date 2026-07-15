@@ -3,33 +3,74 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Support - Fitness Tracker</title>
+    <meta
+      name="description"
+      content="Get help with Fitness Tracker and learn what information to include in a support request."
+    />
+    <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b111b" media="(prefers-color-scheme: dark)" />
+    <title>Support | Fitness Tracker</title>
+    <link rel="icon" href="../assets/app-icon.webp" type="image/webp" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
-  <body>
-    <header>
-      <a class="brand" href="../">Fitness Tracker</a>
-      <nav><a href="../privacy/">Privacy</a><a href="./">Support</a></nav>
+  <body class="legal-page">
+    <a class="skip-link" href="#main-content">Skip to Main Content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="../" aria-label="Fitness Tracker home">
+          <img src="../assets/app-icon.webp" alt="" width="40" height="40" />
+          <span>Fitness Tracker</span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="../privacy/">Privacy</a>
+          <a href="./" aria-current="page">Support</a>
+        </nav>
+      </div>
     </header>
-    <main>
-      <h1>Support</h1>
-      <p class="lead">For help with Fitness Tracker, email the address below.</p>
-      <section>
-        <h2>Contact</h2>
-        <p><a href="mailto:y.mirza.altay@gmail.com">y.mirza.altay@gmail.com</a></p>
-        <p>
-          Include your device model, operating-system version, app version, and steps to reproduce
-          the issue.
+
+    <main class="legal-main container" id="main-content">
+      <div class="legal-heading">
+        <p class="eyebrow">Help</p>
+        <h1>Support</h1>
+        <p class="lead">
+          Need help with Fitness Tracker? Send an email and include the details below.
         </p>
-      </section>
-      <section>
-        <h2>Local data</h2>
-        <p>
-          Workout data is stored only on your device. Reinstalling the app removes that data, so use
-          reinstalling only as a last troubleshooting step.
-        </p>
-      </section>
+        <a class="button button-primary" href="mailto:y.mirza.altay@gmail.com">Email Support</a>
+      </div>
+
+      <div class="legal-content support-grid">
+        <section>
+          <h2>What to Include</h2>
+          <p>
+            Include your device model, operating-system version, app version, what you expected to
+            happen, and the steps that reproduce the issue.
+          </p>
+        </section>
+        <section>
+          <h2>Local Workout Data</h2>
+          <p>
+            Workout data is stored only on your device. Reinstalling the app removes that data, so
+            use reinstalling only as a last troubleshooting step.
+          </p>
+        </section>
+        <section>
+          <h2>Response Contact</h2>
+          <p>
+            Support requests are handled by email at
+            <a href="mailto:y.mirza.altay@gmail.com">y.mirza.altay@gmail.com</a>.
+          </p>
+        </section>
+      </div>
     </main>
-    <footer><a href="../">Fitness Tracker home</a></footer>
+
+    <footer class="site-footer">
+      <div class="container footer-inner footer-inner-compact">
+        <span>Fitness Tracker</span>
+        <nav aria-label="Footer navigation">
+          <a href="../">Home</a>
+          <a href="../privacy/">Privacy</a>
+        </nav>
+      </div>
+    </footer>
   </body>
 </html>
