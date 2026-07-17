@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-and-test:
     name: Lint and Test
@@ -39,8 +43,11 @@ jobs:
       - name: Type Check
         run: bun run compile
 
+      - name: Check dependency architecture
+        run: bun run deps:check
+
       - name: Run Tests
-        run: bun run test
+        run: bun run test:ci
 
       - name: Verify Bundle
         run: bunx expo export --platform android --dump-sourcemap --output-dir dist

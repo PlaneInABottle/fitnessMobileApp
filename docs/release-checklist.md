@@ -3,9 +3,10 @@
 ## Before building
 
 - Confirm `app.json` version and store copy.
+- Confirm generated iOS and Android metadata matches `app.json` before a local native build; regenerate stale native directories only after checking for manual native edits.
 - Run `bun install --frozen-lockfile`.
-- Run `bun run compile`, `bun run lint:check`, and `bun run test -- --runInBand`.
-- Run `bun run deps:check` and `bunx expo-doctor`.
+- Run `bun run verify:release`.
+- Run `bun run test:maestro` against a development build on a physical device or emulator.
 - Complete a workout on a physical device or simulator and verify history after relaunch.
 - Verify light and dark themes, empty states, long exercise names, and numeric input.
 - Confirm the GitHub Pages workflow has deployed `docs/` and verify the privacy and support URLs.

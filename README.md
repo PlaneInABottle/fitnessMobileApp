@@ -31,11 +31,19 @@ No environment variables or external services are required.
 ## Quality Gates
 
 ```bash
-bun run compile
-bun run lint:check
-bun run test -- --runInBand
-bun run deps:check
-bunx expo-doctor
+bun run verify
+```
+
+Before a release, include dependency advisories and Expo configuration checks:
+
+```bash
+bun run verify:release
+```
+
+With a development build open on a connected device, run the stable mobile smoke flow with:
+
+```bash
+bun run test:maestro
 ```
 
 ## Release Builds

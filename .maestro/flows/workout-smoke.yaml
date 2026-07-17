@@ -1,0 +1,38 @@
+appId: com.planeinabottle.fitnesstracker
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    when:
+      visible: "Development servers"
+    commands:
+      - openLink: "fitness-tracker://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 30000
+- tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Reload"
+    commands:
+      - tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Ready to train?"
+    timeout: 30000
+- tapOn: "Start workout"
+- assertVisible: "Add Exercise"
+- tapOn: "Bench Press"
+- assertVisible: "Exercise details"
+- extendedWaitUntil:
+    visible: "Pause"
+    timeout: 10000
+- assertVisible: "Instructions"
+- tapOn: "Add Exercise"
+- assertVisible: "Log Workout"
+- assertVisible: "+ Add Exercise"
+- tapOn: "Back"
+- assertVisible: "Discard workout?"
+- tapOn: "Discard"
+- assertVisible: "Workout"

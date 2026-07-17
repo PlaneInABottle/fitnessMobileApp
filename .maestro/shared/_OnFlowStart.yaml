@@ -17,7 +17,7 @@
 # ---
 # [your maestro flow]
 #
-appId: ${MAESTRO_APP_ID}
+appId: com.planeinabottle.fitnesstracker
 ---
 # launch the app with a clean slate
 - launchApp:
@@ -28,13 +28,26 @@ appId: ${MAESTRO_APP_ID}
 - waitForAnimationToEnd
 
 # conditionally run the dev client flow if the words "Development servers" is present.
-# this uses the default maestro timeout and moves on if it doesn't see the text.
+# connect deterministically through the USB-reversed localhost Metro endpoint.
 - runFlow:
     when:
-      visible: 'Development servers'
+      visible: "Development servers"
     commands:
-      # this regex allows for different hosts and ports
-      - tapOn: "http://.*:.*" 
+      - openLink: "fitness-tracker://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible: "Reload"
+    commands:
+      - tapOn: "Close"
       - waitForAnimationToEnd
 
 - runFlow:
@@ -49,7 +62,7 @@ appId: ${MAESTRO_APP_ID}
 - runFlow:
     when:
       platform: iOS
-      visible: 
+      visible:
         id: "SBSwitcherWindow:Main" # id of the iOS bottom sheet we want to dismiss
     commands:
       - swipe:
