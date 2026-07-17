@@ -1,10 +1,20 @@
-import { EXERCISE_IMAGES, type ExerciseImagePair } from "./exerciseImages.generated"
-import { EXERCISE_VIDEOS, type ExerciseVideo } from "./exerciseVideos.generated"
+import { getGeneratedExerciseImages, type ExerciseImagePair } from "./exerciseImages.generated"
+import {
+  EXERCISE_VIDEO_IDS,
+  getGeneratedExerciseVideo,
+  type ExerciseVideo,
+} from "./exerciseVideos.generated"
+
+const exerciseVideoIds = new Set<string>(EXERCISE_VIDEO_IDS)
 
 export function getExerciseImages(exerciseId: string): ExerciseImagePair | undefined {
-  return EXERCISE_IMAGES[exerciseId]
+  return getGeneratedExerciseImages(exerciseId)
 }
 
 export function getExerciseVideo(exerciseId: string): ExerciseVideo | undefined {
-  return EXERCISE_VIDEOS[exerciseId]
+  return getGeneratedExerciseVideo(exerciseId)
+}
+
+export function hasExerciseVideo(exerciseId: string): boolean {
+  return exerciseVideoIds.has(exerciseId)
 }

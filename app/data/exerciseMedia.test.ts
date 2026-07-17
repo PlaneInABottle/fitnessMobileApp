@@ -1,7 +1,7 @@
 import { EXERCISE_CATALOG, getCatalogExercise } from "./exerciseCatalog"
-import { EXERCISE_IMAGES } from "./exerciseImages.generated"
+import { EXERCISE_IMAGE_IDS } from "./exerciseImages.generated"
 import { getExerciseImages, getExerciseVideo } from "./exerciseMedia"
-import { EXERCISE_VIDEOS } from "./exerciseVideos.generated"
+import { EXERCISE_VIDEO_IDS } from "./exerciseVideos.generated"
 
 describe("exercise catalog media", () => {
   it("contains a unique 873-exercise catalog", () => {
@@ -10,20 +10,20 @@ describe("exercise catalog media", () => {
   })
 
   it("provides start and finish images for all available catalog media", () => {
-    expect(Object.keys(EXERCISE_IMAGES)).toHaveLength(872)
+    expect(EXERCISE_IMAGE_IDS).toHaveLength(872)
     expect(getExerciseImages("bench-press")).toHaveLength(2)
     expect(getExerciseImages("Hanging_Leg_Raise")).toBeUndefined()
   })
 
   it("provides licensed demonstrations for 50 catalog exercises", () => {
-    const entries = Object.entries(EXERCISE_VIDEOS)
-    expect(entries).toHaveLength(50)
+    expect(EXERCISE_VIDEO_IDS).toHaveLength(50)
 
-    for (const [exerciseId, video] of entries) {
+    for (const exerciseId of EXERCISE_VIDEO_IDS) {
+      const video = getExerciseVideo(exerciseId)
       expect(getCatalogExercise(exerciseId)).toBeDefined()
-      expect(video.source).toBeDefined()
-      expect(video.attribution).not.toBe("")
-      expect(video.licenseUrl).toMatch(/^https:\/\//)
+      expect(video?.source).toBeDefined()
+      expect(video?.attribution).not.toBe("")
+      expect(video?.licenseUrl).toMatch(/^https:\/\//)
     }
   })
 

@@ -223,16 +223,17 @@ async function processVideo(record) {
 }
 
 function buildVideoManifest(records) {
-  const entries = records.map(
-    (record) => `  ${JSON.stringify(record.exerciseId)}: {
-    source: require("../../assets/exercise-videos/${record.exerciseId}.mp4"),
-    title: ${JSON.stringify(record.title)},
-    sourceName: ${JSON.stringify(record.sourceName)},
-    sourceUrl: ${JSON.stringify(record.sourceUrl)},
-    licenseName: ${JSON.stringify(record.licenseName)},
-    licenseUrl: ${JSON.stringify(record.licenseUrl)},
-    attribution: ${JSON.stringify(record.attribution)},
-  },`,
+  const cases = records.map(
+    (record) => `    case ${JSON.stringify(record.exerciseId)}:
+      return {
+        source: require("../../assets/exercise-videos/${record.exerciseId}.mp4"),
+        title: ${JSON.stringify(record.title)},
+        sourceName: ${JSON.stringify(record.sourceName)},
+        sourceUrl: ${JSON.stringify(record.sourceUrl)},
+        licenseName: ${JSON.stringify(record.licenseName)},
+        licenseUrl: ${JSON.stringify(record.licenseUrl)},
+        attribution: ${JSON.stringify(record.attribution)},
+      }`,
   )
 
   return [
@@ -248,8 +249,16 @@ function buildVideoManifest(records) {
     "  attribution: string",
     "}",
     "",
-    "export const EXERCISE_VIDEOS: Readonly<Record<string, ExerciseVideo>> = {",
-    ...entries,
+    "export const EXERCISE_VIDEO_IDS = [",
+    ...records.map(({ exerciseId }) => `  ${JSON.stringify(exerciseId)},`),
+    "] as const",
+    "",
+    "export function getGeneratedExerciseVideo(exerciseId: string): ExerciseVideo | undefined {",
+    "  switch (exerciseId) {",
+    ...cases,
+    "    default:",
+    "      return undefined",
+    "  }",
     "}",
     "",
   ].join("\n")
