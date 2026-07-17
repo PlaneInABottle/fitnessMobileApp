@@ -1,4 +1,4 @@
-import { Platform } from "react-native"
+import { Platform, Vibration } from "react-native"
 import * as Haptics from "expo-haptics"
 
 /**
@@ -6,10 +6,14 @@ import * as Haptics from "expo-haptics"
  * that do not expose a compatible haptics engine.
  */
 export function playSetCompletedHaptic(): void {
-  const feedback =
-    Platform.OS === "android"
-      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm)
-      : Haptics.selectionAsync()
+  // Some Android devices expose a vibrator but no haptic engine, making
+  // semantic feedback such as `Confirm` imperceptible or a no-op.
+  if (Platform.OS === "android") {
+    Vibration.vibrate(60)
+    return
+  }
+
+  const feedback = Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
 
   void feedback.catch(() => undefined)
 }
