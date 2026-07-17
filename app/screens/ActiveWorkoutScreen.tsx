@@ -125,6 +125,15 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
     }
 
     function handleGoBack() {
+      const returnToWorkoutTab = () => {
+        if (navigation.canGoBack()) {
+          navigation.goBack()
+          return
+        }
+
+        navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
+      }
+
       const hasData = session && session.exercises.length > 0
       if (hasData) {
         Alert.alert(
@@ -137,14 +146,14 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
               style: "destructive",
               onPress: () => {
                 workoutStore.discardSession()
-                navigation.goBack()
+                returnToWorkoutTab()
               },
             },
           ],
         )
       } else {
         workoutStore.discardSession()
-        navigation.goBack()
+        returnToWorkoutTab()
       }
     }
 

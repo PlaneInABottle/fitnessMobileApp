@@ -67,6 +67,18 @@ describe("Edge Cases - Empty Session State", () => {
       alertSpy.mockRestore()
     }
   })
+
+  it("returns to the workout tab when the active workout is the root screen", async () => {
+    const store = createStoreWithSession()
+    const { getByLabelText, getByText } = renderActiveWorkout(store)
+
+    await waitFor(() => expect(getByText("No exercises yet")).toBeTruthy())
+
+    fireEvent.press(getByLabelText("Back"))
+
+    await waitFor(() => expect(getByText("Start workout")).toBeTruthy())
+    expect(store.workoutStore.currentSession).toBeUndefined()
+  })
 })
 
 describe("Edge Cases - Multiple Exercises with Sets", () => {
