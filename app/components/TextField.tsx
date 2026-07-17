@@ -170,7 +170,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
     $inputStyle,
     disabled && { color: colors.textDim },
     isRTL && { textAlign: "right" as TextStyle["textAlign"] },
-    TextInputProps.multiline && { height: "auto" },
+    TextInputProps.multiline ? $multilineInputStyle : $singleLineInputStyle,
     $inputStyleOverride,
   ]
 
@@ -230,7 +230,7 @@ export const TextField = forwardRef(function TextField(props: TextFieldProps, re
         <TextInput
           ref={input}
           underlineColorAndroid={colors.transparent}
-          textAlignVertical="top"
+          textAlignVertical={TextInputProps.multiline ? "top" : "center"}
           placeholder={placeholderContent}
           placeholderTextColor={colors.textDim}
           {...TextInputProps}
@@ -269,7 +269,7 @@ const $labelStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 })
 
 const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  alignItems: "flex-start",
+  alignItems: "center",
   borderWidth: 1,
   borderRadius: 12,
   minHeight: 48,
@@ -280,16 +280,25 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $inputStyle: ThemedStyle<TextStyle> = ({ colors, typography, spacing }) => ({
   flex: 1,
-  alignSelf: "stretch",
   fontFamily: typography.primary.normal,
   color: colors.text,
   fontSize: 16,
-  height: 24,
   // https://github.com/facebook/react-native/issues/21720#issuecomment-532642093
   paddingVertical: 0,
   paddingHorizontal: 0,
-  marginVertical: spacing.xs,
   marginHorizontal: spacing.sm,
+})
+
+const $singleLineInputStyle: TextStyle = {
+  alignSelf: "center",
+  height: 24,
+  marginVertical: 0,
+}
+
+const $multilineInputStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  alignSelf: "stretch",
+  height: "auto",
+  marginVertical: spacing.xs,
 })
 
 const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
