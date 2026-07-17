@@ -5,6 +5,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native"
 import { RootStoreModel, RootStoreProvider } from "@/models"
 import type { WorkoutStackParamList } from "@/navigators/navigationTypes"
 import { CreateRoutineScreen } from "@/screens/CreateRoutineScreen"
+import { ExerciseDetailScreen } from "@/screens/ExerciseDetailScreen"
 import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { ThemeProvider } from "@/theme/context"
@@ -20,6 +21,7 @@ function renderCreateRoutineScreen(store = RootStoreModel.create({})) {
             <Stack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
             <Stack.Screen name="CreateRoutine" component={CreateRoutineScreen} />
             <Stack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
+            <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>
@@ -38,6 +40,7 @@ function renderFromWorkoutTab(store = RootStoreModel.create({})) {
             <Stack.Screen name="WorkoutTab" component={WorkoutTabScreen} />
             <Stack.Screen name="CreateRoutine" component={CreateRoutineScreen} />
             <Stack.Screen name="ExerciseLibrary" component={ExerciseLibraryScreen} />
+            <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>
@@ -53,7 +56,8 @@ describe("CreateRoutineScreen", () => {
 
     expect(getByText("Create Routine")).toBeTruthy()
     expect(getByPlaceholderText("Routine title")).toBeTruthy()
-    expect(getByText("Start by adding an exercise to your routine")).toBeTruthy()
+    expect(getByText("No exercises yet")).toBeTruthy()
+    expect(getByText("Add exercises in the order you want to train them.")).toBeTruthy()
   })
 
   it("shows header with cancel and save buttons", () => {
@@ -109,6 +113,25 @@ describe("CreateRoutineScreen", () => {
       expect(getByText("Exercises (1)")).toBeTruthy()
       expect(getByText("Bench Press")).toBeTruthy()
     })
+  })
+
+  it("opens exercise details when the selected exercise row is pressed", async () => {
+    const { getByLabelText, getByPlaceholderText, getByText } = renderCreateRoutineScreen()
+
+    fireEvent.press(getByText("+ Add Exercise"))
+    await waitFor(() => expect(getByPlaceholderText("Search exercises")).toBeTruthy())
+
+    fireEvent.changeText(
+      getByPlaceholderText("Search exercises"),
+      "barbell bench press medium grip",
+    )
+    await waitFor(() => expect(getByLabelText("Add Bench Press")).toBeTruthy())
+    fireEvent.press(getByLabelText("Add Bench Press"))
+
+    await waitFor(() => expect(getByText("Exercises (1)")).toBeTruthy())
+    fireEvent.press(getByText("Bench Press"))
+
+    await waitFor(() => expect(getByText("Exercise details")).toBeTruthy())
   })
 
   it("save button is disabled when title is empty", () => {

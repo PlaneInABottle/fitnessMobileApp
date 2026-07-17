@@ -29,7 +29,8 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   padding: spacing.md,
   borderWidth: 1,
   borderColor: colors.error,
-  borderRadius: 8,
+  borderRadius: 12,
+  backgroundColor: colors.errorBackground,
   gap: spacing.sm,
 })
 

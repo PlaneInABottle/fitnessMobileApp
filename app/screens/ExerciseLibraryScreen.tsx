@@ -1,5 +1,6 @@
-import { FC, useCallback, useState } from "react"
+import { FC, useCallback, useMemo, useState } from "react"
 import { FlatList, ListRenderItem, ScrollView, TextStyle, View, ViewStyle } from "react-native"
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs"
 import { observer } from "mobx-react-lite"
 
 import { BottomSheet } from "@/components/BottomSheet"
@@ -16,7 +17,7 @@ import {
   CATALOG_LEVELS,
   CATALOG_SOURCE_CATEGORIES,
 } from "@/data/exerciseCatalog"
-import { getExerciseImages, getExerciseVideo } from "@/data/exerciseMedia"
+import { getExerciseImages, hasExerciseVideo } from "@/data/exerciseMedia"
 import {
   EXERCISE_CATEGORY_VALUES,
   MUSCLE_GROUPS,
@@ -24,7 +25,7 @@ import {
   type Exercise,
 } from "@/models/ExerciseStore"
 import { useStores } from "@/models/RootStoreContext"
-import type { WorkoutStackScreenProps } from "@/navigators/navigationTypes"
+import type { AppStackParamList, WorkoutStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
@@ -36,6 +37,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     const fromCreateRoutine = !!route.params?.fromCreateRoutine
     const browseOnly = !!route.params?.browseOnly
     const newWorkout = !!route.params?.newWorkout
+    const returnToHome = !!route.params?.returnToHome
     const session = workoutStore.currentSession
 
     const [query, setQuery] = useState("")
@@ -45,9 +47,10 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
     const [selectedSourceCategory, setSelectedSourceCategory] = useState<string | null>(null)
     const [showFilters, setShowFilters] = useState(false)
+    const allExercises = exerciseStore.allExercises
 
-    const exercises = (() => {
-      let result = exerciseStore.searchExercises(query)
+    const exercises = useMemo(() => {
+      let result = query ? exerciseStore.searchExercises(query) : allExercises
       if (selectedCategory) {
         result = result.filter((e) => e.category === selectedCategory)
       }
@@ -61,15 +64,34 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
       if (selectedSourceCategory) {
         result = result.filter((e) => e.sourceCategory === selectedSourceCategory)
       }
-      return result.slice().sort((a, b) => {
-        const videoPriority = Number(!!getExerciseVideo(b.id)) - Number(!!getExerciseVideo(a.id))
-        return videoPriority || a.name.localeCompare(b.name)
+      const withVideo: Exercise[] = []
+      const withoutVideo: Exercise[] = []
+      result.forEach((exercise) => {
+        if (hasExerciseVideo(exercise.id)) withVideo.push(exercise)
+        else withoutVideo.push(exercise)
       })
-    })()
+      return [...withVideo, ...withoutVideo]
+    }, [
+      allExercises,
+      exerciseStore,
+      query,
+      selectedCategory,
+      selectedEquipment,
+      selectedLevel,
+      selectedMuscle,
+      selectedSourceCategory,
+    ])
 
     function handleClose() {
       if (newWorkout && workoutStore.currentSession?.exercises.length === 0) {
         workoutStore.discardSession()
+      }
+      if (returnToHome) {
+        navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
+        navigation
+          .getParent<BottomTabNavigationProp<AppStackParamList>>()
+          ?.navigate("Home", { screen: "HomeTab" })
+        return
       }
       if (navigation.canGoBack()) navigation.goBack()
       else navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
@@ -95,8 +117,12 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
         workoutStore.clearError()
         const workoutExerciseId = workoutStore.addExerciseToSession(exerciseId)
         if (!workoutExerciseId) return
-        if (newWorkout) navigation.replace("ActiveWorkout")
-        else navigation.goBack()
+        if (newWorkout) {
+          navigation.reset({
+            index: 1,
+            routes: [{ name: "WorkoutTab" }, { name: "ActiveWorkout" }],
+          })
+        } else navigation.goBack()
       },
       [fromCreateRoutine, navigation, newWorkout, workoutStore],
     )
@@ -120,7 +146,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
             item.primaryMuscles?.join(", ") || item.muscleGroups.join(", ") || item.category
           }
           imageSource={item.imageUrl ?? getExerciseImages(item.id)?.[0]}
-          hasVideo={!!getExerciseVideo(item.id)}
+          hasVideo={hasExerciseVideo(item.id)}
           onPress={() =>
             navigation.navigate("ExerciseDetail", {
               exerciseId: item.id,
@@ -139,7 +165,7 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
     )
 
     return (
-      <Screen preset="fixed" safeAreaEdges={["top"]}>
+      <Screen preset="fixed" safeAreaEdges={["top", "bottom"]}>
         <WorkoutHeader
           title={browseOnly ? "Exercise Library" : "Add Exercise"}
           leftActionLabel={browseOnly ? "Back" : "Cancel"}
@@ -206,9 +232,9 @@ export const ExerciseLibraryScreen: FC<WorkoutStackScreenProps<"ExerciseLibrary"
               contentContainerStyle={themed($content)}
               keyboardDismissMode="on-drag"
               keyboardShouldPersistTaps="handled"
-              initialNumToRender={14}
-              maxToRenderPerBatch={14}
-              windowSize={7}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={5}
               getItemLayout={(_, index) => ({
                 length: EXERCISE_ROW_HEIGHT,
                 offset: EXERCISE_ROW_HEIGHT * index,

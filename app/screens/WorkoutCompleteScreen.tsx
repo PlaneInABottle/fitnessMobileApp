@@ -1,6 +1,5 @@
-import { FC, useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { Alert, BackHandler, TextStyle, View, ViewStyle } from "react-native"
-import { useFocusEffect } from "@react-navigation/native"
+import { FC, useMemo, useState } from "react"
+import { Alert, TextStyle, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
 
 import { Button } from "@/components/Button"
@@ -24,17 +23,6 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
 
     const [showTemplateSave, setShowTemplateSave] = useState(false)
     const [templateName, setTemplateName] = useState("")
-
-    useLayoutEffect(() => {
-      navigation.setOptions({ gestureEnabled: false })
-    }, [navigation])
-
-    useFocusEffect(
-      useCallback(() => {
-        const subscription = BackHandler.addEventListener("hardwareBackPress", () => true)
-        return () => subscription.remove()
-      }, []),
-    )
 
     const { durationMinutes, exerciseCount, totalSets, totalVolume } = useMemo(() => {
       if (!session) return { durationMinutes: 0, exerciseCount: 0, totalSets: 0, totalVolume: 0 }
@@ -76,6 +64,10 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       setTemplateName("")
     }
 
+    function returnToWorkoutTab() {
+      navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })
+    }
+
     function handleConfirmSaveTemplate() {
       const id = workoutStore.createTemplateFromSession(templateName)
       if (!id) return
@@ -84,10 +76,10 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       if (!ok) {
         // Session completion failed but template was created - navigate anyway
         // to avoid leaving user stuck on this screen
-        navigation.popToTop()
+        returnToWorkoutTab()
         return
       }
-      navigation.popToTop()
+      returnToWorkoutTab()
     }
 
     function handleDontSave() {
@@ -113,7 +105,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               style: "default",
               onPress: () => {
                 const ok = workoutStore.completeSession(true)
-                if (ok) navigation.popToTop()
+                if (ok) returnToWorkoutTab()
               },
             },
             {
@@ -121,7 +113,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               style: "default",
               onPress: () => {
                 const ok = workoutStore.completeSession(false)
-                if (ok) navigation.popToTop()
+                if (ok) returnToWorkoutTab()
               },
             },
           ],
@@ -130,19 +122,23 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
       }
 
       const ok = workoutStore.completeSession()
-      if (ok) navigation.popToTop()
+      if (ok) returnToWorkoutTab()
     }
 
     return (
       <Screen preset="scroll" ScrollViewProps={{ stickyHeaderIndices: [0] }}>
-        <WorkoutHeader title="Workout Complete" />
+        <WorkoutHeader
+          title="Workout summary"
+          leftActionLabel="Back"
+          onLeftActionPress={navigation.goBack}
+        />
 
         <View style={themed($content)}>
           {!session ? (
             <ErrorMessage
               message="No active workout session."
-              actionLabel="Go Home"
-              onActionPress={() => navigation.popToTop()}
+              actionLabel="Back to workouts"
+              onActionPress={returnToWorkoutTab}
             />
           ) : totalSets === 0 ? (
             <ErrorMessage
@@ -221,6 +217,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
                 <View style={themed($templateSection)}>
                   <Text text="Save as routine" weight="semiBold" style={themed($templateTitle)} />
                   <TextField
+                    label="Routine name"
                     value={templateName}
                     onChangeText={setTemplateName}
                     placeholder="Routine name"
@@ -246,7 +243,7 @@ export const WorkoutCompleteScreen: FC<WorkoutStackScreenProps<"WorkoutComplete"
               ) : (
                 <View style={themed($actions)}>
                   <Button
-                    text="Save as Routine"
+                    text="Save as routine"
                     preset="default"
                     onPress={handleStartSaveTemplate}
                     style={themed($saveTemplateButton)}
@@ -298,7 +295,9 @@ const $celebrationSubtitle: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $statsCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.card,
+  borderColor: colors.separator,
   borderRadius: 12,
+  borderWidth: 1,
   padding: spacing.md,
 })
 
@@ -339,7 +338,9 @@ const $actions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $templateSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.card,
+  borderColor: colors.separator,
   borderRadius: 12,
+  borderWidth: 1,
   padding: spacing.md,
   gap: spacing.sm,
   marginTop: spacing.md,

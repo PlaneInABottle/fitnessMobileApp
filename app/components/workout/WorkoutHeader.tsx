@@ -53,7 +53,13 @@ export function WorkoutHeader({
             accessibilityLabel={leftActionLabel}
           >
             <Icon icon="caretLeft" size={20} color={theme.colors.tint} />
-            <Text text={title} weight="semiBold" size="lg" style={themed($titleText)} />
+            <Text
+              text={title}
+              weight="semiBold"
+              size="lg"
+              numberOfLines={1}
+              style={themed($titleText)}
+            />
           </Pressable>
         ) : (
           <Text text={title} preset="heading" style={themed($titleTextCenter)} />
@@ -114,11 +120,15 @@ const $row: ViewStyle = {
 const $leftAction: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
+  flex: 1,
+  minWidth: 0,
+  minHeight: 44,
   gap: 4,
 }
 
 const $titleText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
+  flexShrink: 1,
 })
 
 const $titleTextCenter: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -130,17 +140,21 @@ const $titleTextCenter: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $rightActions: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
+  flexShrink: 0,
   gap: 12,
 }
 
 const $timerButton: ViewStyle = {
-  padding: 8,
+  alignItems: "center",
+  height: 44,
+  justifyContent: "center",
+  width: 44,
 }
 
 const $finishButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
-  borderRadius: 8,
-  minHeight: 36,
+  borderRadius: 10,
+  minHeight: 44,
   paddingHorizontal: 16,
   paddingVertical: 8,
 })

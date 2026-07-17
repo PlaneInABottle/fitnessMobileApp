@@ -1,18 +1,18 @@
 /**
  * Fitness Tracker dark theme color palette.
- * PRIMARY theme designed for gym environment readability
+ * PRIMARY theme designed for gym environment readability.
  * Based on established fitness-tracking app design patterns.
  */
 const palette = {
-  // Neutrals - Dark mode (true black base for OLED optimization)
-  neutral100: "#000000", // True black - main background
-  neutral200: "#1C1C1E", // Card background
-  neutral300: "#2C2C2E", // Card secondary / elevated surfaces
-  neutral400: "#38383A", // Separator
-  neutral500: "#48484A", // Border
-  neutral600: "#636366", // Text tertiary
-  neutral700: "#8E8E93", // Text secondary
-  neutral800: "#EBEBF5", // Text primary (slightly off-white)
+  // Neutrals - Dark mode. Near-black surfaces preserve contrast without the glare of pure black.
+  neutral100: "#0B0D10", // Main background
+  neutral200: "#15181D", // Card background
+  neutral300: "#20242B", // Card secondary / elevated surfaces
+  neutral400: "#2B3038", // Separator
+  neutral500: "#3A414B", // Border
+  neutral600: "#737B88", // Text tertiary
+  neutral700: "#A2A8B2", // Text secondary
+  neutral800: "#F1F3F5", // Text primary (off-white)
   neutral900: "#FFFFFF", // Pure white for emphasis
 
   // Primary - iOS Blue (main action color)
@@ -66,12 +66,12 @@ export const colors = {
   transparent: "rgba(0, 0, 0, 0)",
 
   // Text colors
-  text: palette.neutral900, // White for primary text
+  text: palette.neutral800, // Off-white for comfortable primary text
   textDim: palette.neutral700, // Gray for secondary text
   textMuted: palette.neutral600, // Darker gray for tertiary/disabled
 
   // Backgrounds
-  background: palette.neutral100, // True black main background
+  background: palette.neutral100,
   backgroundSecondary: palette.neutral200, // Slightly elevated background
   card: palette.neutral200, // Card background
   cardSecondary: palette.neutral300, // Elevated card / nested elements

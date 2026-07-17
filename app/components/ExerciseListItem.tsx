@@ -52,16 +52,16 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
         accessibilityLabel={`${title}. ${subtitle}${hasVideo ? ". Video demonstration available" : ""}`}
       >
         <View style={themed($thumbnail)}>
+          <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
           {imageSource ? (
             <Image
               source={imageSource}
               style={$thumbnailImage}
               contentFit="contain"
-              transition={120}
+              cachePolicy="memory-disk"
+              recyclingKey={`${title}:${String(imageSource)}`}
             />
-          ) : (
-            <Ionicons name="barbell-outline" size={24} color={theme.colors.textDim} />
-          )}
+          ) : null}
           {hasVideo ? (
             <View style={themed($videoBadge)}>
               <Ionicons name="play" size={10} color={theme.colors.palette.neutral100} />
@@ -93,11 +93,14 @@ export function ExerciseListItem(props: ExerciseListItemProps) {
   )
 }
 
-const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
+  height: 72,
   paddingVertical: spacing.sm,
   paddingHorizontal: spacing.md,
+  borderBottomColor: colors.separator,
+  borderBottomWidth: 1,
 })
 
 const $mainAction: ThemedStyle<ViewStyle> = () => ({
@@ -135,8 +138,11 @@ const $videoBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $thumbnailImage: ImageStyle = {
-  width: 56,
-  height: 56,
+  position: "absolute",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
   borderRadius: 6,
 }
 
@@ -155,7 +161,11 @@ const $subtitle: ThemedStyle<TextStyle> = ({ colors }) => ({
 })
 
 const $addButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.xs,
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 44,
+  minWidth: 44,
+  marginLeft: spacing.xs,
 })
 
 const $addIconContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({

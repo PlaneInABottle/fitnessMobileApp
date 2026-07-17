@@ -130,6 +130,7 @@ export function Button(props: ButtonProps) {
       themed($viewPresets[preset]),
       $viewStyleOverride,
       !!pressed && themed([$pressedViewPresets[preset], $pressedViewStyleOverride]),
+      !!disabled && $disabledViewStyle,
       !!disabled && $disabledViewStyleOverride,
     ]
   }
@@ -179,8 +180,8 @@ export function Button(props: ButtonProps) {
 }
 
 const $baseViewStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  minHeight: 56,
-  borderRadius: 4,
+  minHeight: 52,
+  borderRadius: 12,
   justifyContent: "center",
   alignItems: "center",
   paddingVertical: spacing.sm,
@@ -213,8 +214,8 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({
       borderWidth: 1,
-      borderColor: colors.palette.neutral400,
-      backgroundColor: colors.palette.neutral100,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
     }),
   ],
   filled: [
@@ -222,13 +223,13 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({
       backgroundColor: colors.tint,
-      borderRadius: 8,
+      borderRadius: 12,
     }),
   ],
   reversed: [
     $styles.row,
     $baseViewStyle,
-    ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
+    ({ colors }) => ({ backgroundColor: colors.palette.neutral800, borderRadius: 12 }),
   ],
   outline: [
     $styles.row,
@@ -237,6 +238,7 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
       borderWidth: 1,
       borderColor: colors.tint,
       backgroundColor: "transparent",
+      borderRadius: 12,
     }),
   ],
   pill: [
@@ -244,8 +246,8 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({
       backgroundColor: colors.card,
-      borderRadius: 20,
-      minHeight: 36,
+      borderRadius: 999,
+      minHeight: 44,
       paddingHorizontal: 16,
     }),
   ],
@@ -254,7 +256,7 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({
       backgroundColor: colors.error,
-      borderRadius: 8,
+      borderRadius: 12,
     }),
   ],
 }
@@ -265,7 +267,7 @@ const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   reversed: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
   outline: [$baseTextStyle, ({ colors }) => ({ color: colors.tint })],
   pill: [$baseTextStyle, ({ colors }) => ({ color: colors.text })],
-  danger: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
+  danger: [$baseTextStyle, () => ({ color: "#FFFFFF" })],
 }
 
 const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
@@ -284,4 +286,8 @@ const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
   outline: () => ({ opacity: 0.9 }),
   pill: () => ({ opacity: 0.9 }),
   danger: () => ({ opacity: 0.9 }),
+}
+
+const $disabledViewStyle: ViewStyle = {
+  opacity: 0.45,
 }

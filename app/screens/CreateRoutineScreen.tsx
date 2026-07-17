@@ -92,10 +92,15 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
     }, [])
 
     return (
-      <Screen preset="scroll" safeAreaEdges={["top"]}>
+      <Screen preset="scroll" safeAreaEdges={["top", "bottom"]}>
         {/* Header */}
         <View style={themed($header)}>
-          <Pressable onPress={handleCancel} accessibilityRole="button" accessibilityLabel="Cancel">
+          <Pressable
+            onPress={handleCancel}
+            style={$headerAction}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel"
+          >
             <Text weight="medium" style={themed($cancelText)}>
               Cancel
             </Text>
@@ -108,12 +113,14 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           <Pressable
             onPress={handleSave}
             disabled={!canSave || isSaving}
+            style={$headerAction}
             accessibilityRole="button"
             accessibilityLabel="Save"
+            accessibilityState={{ disabled: !canSave || isSaving }}
           >
             <Text
               weight="semiBold"
-              style={[themed($saveText), !canSave && themed($saveTextDisabled)]}
+              style={[themed($saveText), (!canSave || isSaving) && themed($saveTextDisabled)]}
             >
               Save
             </Text>
@@ -124,6 +131,7 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
         <View style={themed($content)}>
           {/* Title Input */}
           <TextField
+            label="Routine name"
             value={title}
             onChangeText={setTitle}
             placeholder="Routine title"
@@ -135,9 +143,14 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
           {/* Exercise List or Empty State */}
           {selectedExerciseIds.length === 0 ? (
             <View style={themed($emptyState)}>
-              <Ionicons name="barbell-outline" size={64} color={theme.colors.textDim} />
-              <Text size="lg" style={themed($emptyTitle)}>
-                Start by adding an exercise to your routine
+              <View style={themed($emptyIcon)}>
+                <Ionicons name="barbell-outline" size={32} color={theme.colors.textDim} />
+              </View>
+              <Text size="lg" weight="semiBold" style={themed($emptyTitle)}>
+                No exercises yet
+              </Text>
+              <Text size="sm" style={themed($emptyCopy)}>
+                Add exercises in the order you want to train them.
               </Text>
               <Button
                 text="+ Add Exercise"
@@ -155,22 +168,24 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
                 </Text>
               </View>
 
-              {selectedExerciseIds.map((exerciseId) => {
-                const exercise = exerciseStore.getExercise(exerciseId)
-                if (!exercise) return null
+              <View style={themed($exerciseRows)}>
+                {selectedExerciseIds.map((exerciseId) => {
+                  const exercise = exerciseStore.getExercise(exerciseId)
+                  if (!exercise) return null
 
-                return (
-                  <ExerciseListItem
-                    key={exerciseId}
-                    title={exercise.name}
-                    subtitle={exercise.muscleGroups.join(", ") || exercise.category}
-                    imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
-                    onPress={() => handleRemoveExercise(exerciseId)}
-                    onAdd={() => handleRemoveExercise(exerciseId)}
-                    actionIcon="remove"
-                  />
-                )
-              })}
+                  return (
+                    <ExerciseListItem
+                      key={exerciseId}
+                      title={exercise.name}
+                      subtitle={exercise.muscleGroups.join(", ") || exercise.category}
+                      imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
+                      onPress={() => navigation.navigate("ExerciseDetail", { exerciseId })}
+                      onAdd={() => handleRemoveExercise(exerciseId)}
+                      actionIcon="remove"
+                    />
+                  )
+                })}
+              </View>
 
               <Button
                 text="+ Add Exercise"
@@ -213,6 +228,13 @@ const $headerTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
 })
 
+const $headerAction: ViewStyle = {
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 44,
+  minWidth: 56,
+}
+
 const $cancelText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
 })
@@ -237,12 +259,28 @@ const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
   alignItems: "center",
   justifyContent: "center",
-  gap: spacing.lg,
+  gap: spacing.sm,
   paddingVertical: spacing.xxl,
 })
 
+const $emptyIcon: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  alignItems: "center",
+  backgroundColor: colors.card,
+  borderRadius: 32,
+  height: 64,
+  justifyContent: "center",
+  marginBottom: 4,
+  width: 64,
+})
+
 const $emptyTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  textAlign: "center",
+})
+
+const $emptyCopy: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
+  maxWidth: 280,
   textAlign: "center",
 })
 
@@ -262,6 +300,14 @@ const $exerciseList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.sm,
 })
 
+const $exerciseRows: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.card,
+  borderColor: colors.separator,
+  borderRadius: 12,
+  borderWidth: 1,
+  overflow: "hidden",
+})
+
 const $sectionHeader: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
@@ -274,7 +320,7 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $addMoreButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.card,
-  borderRadius: 8,
+  borderRadius: 12,
   paddingVertical: 12,
   marginTop: 8,
 })
@@ -290,7 +336,7 @@ const $errorContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   justifyContent: "space-between",
   padding: spacing.md,
   backgroundColor: colors.errorBackground,
-  borderRadius: 8,
+  borderRadius: 12,
 })
 
 const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({

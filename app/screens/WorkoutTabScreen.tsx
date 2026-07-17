@@ -180,7 +180,8 @@ const $errorContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   padding: spacing.md,
   borderWidth: 1,
   borderColor: colors.error,
-  borderRadius: 8,
+  borderRadius: 12,
+  backgroundColor: colors.errorBackground,
   gap: spacing.sm,
 })
 
@@ -190,7 +191,7 @@ const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
-  borderRadius: 8,
+  borderRadius: 12,
   paddingVertical: 14,
 })
 
@@ -230,7 +231,7 @@ const $createText: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $emptyRoutines: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   borderColor: colors.separator,
-  borderRadius: 8,
+  borderRadius: 12,
   borderWidth: 1,
   flexDirection: "row",
   gap: spacing.md,

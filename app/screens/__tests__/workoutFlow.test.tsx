@@ -162,12 +162,12 @@ describe("Workout MVP flow", () => {
 
     fireEvent.press(getByText("Finish"))
 
-    await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+    await waitFor(() => expect(getByText("Workout summary")).toBeTruthy())
 
     expect(getByTestId("workoutComplete.exerciseCount").props.children).toBe("1")
     expect(getByTestId("workoutComplete.totalSets").props.children).toBe("2")
 
-    fireEvent.press(getByText("Save as Routine"))
+    fireEvent.press(getByText("Save as routine"))
     fireEvent.changeText(getByPlaceholderText("Routine name"), "Upper A")
     fireEvent.press(getByText("Save"))
 
@@ -216,7 +216,7 @@ describe("Workout MVP flow", () => {
       }
 
       fireEvent.press(getByText("Finish"))
-      await waitFor(() => expect(getByText("Workout Complete")).toBeTruthy())
+      await waitFor(() => expect(getByText("Workout summary")).toBeTruthy())
 
       fireEvent.press(getByText("Done"))
 

@@ -20,7 +20,7 @@ export const lightTheme: Theme = {
 
 /**
  * Dark theme configuration
- * PRIMARY theme - optimized for gym environment and OLED screens
+ * PRIMARY theme - optimized for comfortable gym environment contrast
  * Based on established fitness-tracking app design patterns.
  */
 export const darkTheme: Theme = {

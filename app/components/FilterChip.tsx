@@ -62,8 +62,8 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   paddingHorizontal: spacing.md,
-  paddingVertical: spacing.xs,
-  borderRadius: 20,
+  minHeight: 44,
+  borderRadius: 999,
   backgroundColor: colors.card,
   borderWidth: 1,
   borderColor: "transparent",
@@ -75,7 +75,7 @@ const $containerActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $containerPressed: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  opacity: 0.8,
+  opacity: 0.78,
   backgroundColor: colors.cardSecondary,
 })
 

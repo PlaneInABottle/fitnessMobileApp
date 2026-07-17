@@ -79,15 +79,17 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
 
   function handleStartWorkout() {
     if (!workoutStore.currentSession && !workoutStore.startNewSession()) return
-    navigation
-      .getParent<BottomTabNavigationProp<AppStackParamList>>()
-      ?.navigate("Workout", { screen: "ExerciseLibrary", params: { newWorkout: true } })
+    navigation.getParent<BottomTabNavigationProp<AppStackParamList>>()?.navigate("Workout", {
+      screen: "ExerciseLibrary",
+      params: { newWorkout: true, returnToHome: true },
+    })
   }
 
   function browseExercises() {
-    navigation
-      .getParent<BottomTabNavigationProp<AppStackParamList>>()
-      ?.navigate("Workout", { screen: "ExerciseLibrary", params: { browseOnly: true } })
+    navigation.getParent<BottomTabNavigationProp<AppStackParamList>>()?.navigate("Workout", {
+      screen: "ExerciseLibrary",
+      params: { browseOnly: true, returnToHome: true },
+    })
   }
 
   return (
@@ -145,51 +147,52 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
           </Text>
 
           <View style={themed($statsBand)}>
-            <View style={$statItem}>
-              <Text
-                testID="home-total-workouts"
-                text={history.length.toString()}
-                weight="bold"
-                size="xl"
-                style={themed($statValue)}
-              />
-              <Text text="Workouts" size="sm" style={themed($statLabel)} />
+            <View style={$statsRow}>
+              <View style={$statItem}>
+                <Text
+                  testID="home-total-workouts"
+                  text={history.length.toString()}
+                  weight="bold"
+                  size="xl"
+                  style={themed($statValue)}
+                />
+                <Text text="Workouts" size="sm" style={themed($statLabel)} />
+              </View>
+              <View style={themed($statDivider)} />
+              <View style={$statItem}>
+                <Text
+                  testID="home-week-workouts"
+                  text={workoutsThisWeek.toString()}
+                  weight="bold"
+                  size="xl"
+                  style={themed($statValue)}
+                />
+                <Text text="This week" size="sm" style={themed($statLabel)} />
+              </View>
             </View>
-
-            <View style={themed($statDivider)} />
-            <View style={$statItem}>
-              <Text
-                testID="home-week-workouts"
-                text={workoutsThisWeek.toString()}
-                weight="bold"
-                size="xl"
-                style={themed($statValue)}
-              />
-              <Text text="This week" size="sm" style={themed($statLabel)} />
-            </View>
-
-            <View style={themed($statDivider)} />
-            <View style={$statItem}>
-              <Text
-                testID="home-total-volume"
-                text={numberFormatter.format(totalVolume)}
-                weight="bold"
-                size="xl"
-                style={themed($statValue)}
-              />
-              <Text text="Volume (kg)" size="sm" style={themed($statLabel)} />
-            </View>
-
-            <View style={themed($statDivider)} />
-            <View style={$statItem}>
-              <Text
-                testID="home-total-minutes"
-                text={numberFormatter.format(totalMinutes)}
-                weight="bold"
-                size="xl"
-                style={themed($statValue)}
-              />
-              <Text text="Minutes" size="sm" style={themed($statLabel)} />
+            <View style={themed($statsRowDivider)} />
+            <View style={$statsRow}>
+              <View style={$statItem}>
+                <Text
+                  testID="home-total-volume"
+                  text={numberFormatter.format(totalVolume)}
+                  weight="bold"
+                  size="xl"
+                  style={themed($statValue)}
+                />
+                <Text text="Volume (kg)" size="sm" style={themed($statLabel)} />
+              </View>
+              <View style={themed($statDivider)} />
+              <View style={$statItem}>
+                <Text
+                  testID="home-total-minutes"
+                  text={numberFormatter.format(totalMinutes)}
+                  weight="bold"
+                  size="xl"
+                  style={themed($statValue)}
+                />
+                <Text text="Minutes" size="sm" style={themed($statLabel)} />
+              </View>
             </View>
           </View>
 
@@ -356,8 +359,13 @@ const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.xl,
 })
 
-const $welcomeSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $welcomeSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.card,
+  borderColor: colors.separator,
+  borderRadius: 12,
+  borderWidth: 1,
   gap: spacing.sm,
+  padding: spacing.lg,
 })
 
 const $welcomeText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -370,14 +378,14 @@ const $subtitleText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
-  borderRadius: 8,
+  borderRadius: 12,
   marginTop: 4,
 })
 
 const $activeWorkout: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   backgroundColor: colors.tint,
-  borderRadius: 8,
+  borderRadius: 12,
   flexDirection: "row",
   justifyContent: "space-between",
   minHeight: 88,
@@ -406,16 +414,19 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
 })
 
 const $statsBand: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  alignItems: "stretch",
   backgroundColor: colors.card,
   borderColor: colors.separator,
-  borderRadius: 8,
+  borderRadius: 12,
   borderWidth: 1,
-  flexDirection: "row",
-  minHeight: 88,
-  paddingHorizontal: spacing.sm,
-  paddingVertical: spacing.md,
+  minHeight: 164,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
 })
+
+const $statsRow: ViewStyle = {
+  flex: 1,
+  flexDirection: "row",
+}
 
 const $statItem: ViewStyle = {
   alignItems: "center",
@@ -429,6 +440,11 @@ const $statDivider: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 1,
 })
 
+const $statsRowDivider: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.separator,
+  height: 1,
+})
+
 const $statValue: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   fontSize: 20,
@@ -436,7 +452,7 @@ const $statValue: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $statLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 11,
+  fontSize: 12,
   textAlign: "center",
 })
 
@@ -447,7 +463,7 @@ const $summaryFootnote: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $emptyHistory: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   borderColor: colors.separator,
-  borderRadius: 8,
+  borderRadius: 12,
   borderWidth: 1,
   flexDirection: "row",
   gap: spacing.md,
@@ -466,7 +482,7 @@ const $historyList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $historyCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.card,
   borderColor: colors.separator,
-  borderRadius: 8,
+  borderRadius: 12,
   borderWidth: 1,
   gap: spacing.sm,
   padding: spacing.md,

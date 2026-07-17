@@ -143,7 +143,7 @@ export function SetRow({
     if (category === "STRENGTH") {
       const w = previousValue.weight ?? 0
       const r = previousValue.reps ?? 0
-      return `${w}kg × ${r}`
+      return `${w} × ${r}`
     }
     if (category === "BODYWEIGHT") {
       return `${previousValue.reps ?? 0}`
@@ -152,7 +152,7 @@ export function SetRow({
       return `${previousValue.time ?? 0}s`
     }
     if (category === "CARDIO") {
-      return `${previousValue.time ?? 0}s × ${previousValue.distance ?? 0}m`
+      return `${previousValue.time ?? 0}s · ${previousValue.distance ?? 0}m`
     }
     return "-"
   }
@@ -286,17 +286,6 @@ export function SetRow({
               setDraftText((prev) => ({ ...prev, [key]: undefined }))
             }}
             onSubmitEditing={() => {
-              const t = (draftText[key] ?? "").trim()
-
-              if (!t) {
-                onChange({ ...value, [key]: allowEmptyNumbers ? undefined : 0 }, key)
-              } else {
-                const parsed = toNumberOrUndefined(t, true)
-                if (parsed !== undefined) onChange({ ...value, [key]: parsed }, key)
-              }
-
-              setFocusedField((prev) => (prev === key ? null : prev))
-              setDraftText((prev) => ({ ...prev, [key]: undefined }))
               if (nextFieldKey) inputRefs.current[nextFieldKey]?.focus()
             }}
             style={[
@@ -334,7 +323,7 @@ export function SetRow({
     if (isDone) {
       return {
         ...base,
-        backgroundColor: colors.warningBackground,
+        backgroundColor: colors.successBackground,
       }
     }
 
@@ -368,7 +357,7 @@ export function SetRow({
           <Text text="SET" style={themed($headerText)} />
         </View>
         <View style={$previousCell}>
-          <Text text="PREVIOUS" style={themed($headerText)} />
+          <Text text="LAST" style={themed($headerText)} />
         </View>
         <View style={$cell}>
           <Text text={field1.header || field1.label} style={themed($headerText)} />
@@ -477,12 +466,12 @@ const $setTypeButton: ViewStyle = {
 
 const $previousCell: ViewStyle = {
   flex: 0.8,
-  paddingHorizontal: 12,
+  paddingHorizontal: 4,
 }
 
 const $cell: ViewStyle = {
   flex: 1,
-  paddingHorizontal: 12,
+  paddingHorizontal: 4,
 }
 
 const $doneCell: ViewStyle = {
@@ -510,6 +499,7 @@ const $previousText: ThemedStyle<TextStyle> = ({ colors }) => ({
 })
 
 const $input: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  height: 44,
   borderWidth: 0,
   borderRadius: 6,
   paddingVertical: 0,

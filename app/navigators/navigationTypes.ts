@@ -14,7 +14,12 @@ export type WorkoutStackParamList = {
   WorkoutTab: undefined
   ActiveWorkout: undefined
   ExerciseLibrary:
-    | { browseOnly?: boolean; fromCreateRoutine?: boolean; newWorkout?: boolean }
+    | {
+        browseOnly?: boolean
+        fromCreateRoutine?: boolean
+        newWorkout?: boolean
+        returnToHome?: boolean
+      }
     | undefined
   ExerciseDetail: {
     exerciseId: string

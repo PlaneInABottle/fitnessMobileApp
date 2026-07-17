@@ -31,7 +31,7 @@ export function NoteInput({ value, onChangeText, placeholder }: NoteInputProps) 
 const $container: ThemedStyle<ViewStyle> = () => ({})
 
 const $inputWrapper: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
+  backgroundColor: colors.card,
   borderRadius: 0,
   minHeight: 56,
   paddingVertical: spacing.xs,

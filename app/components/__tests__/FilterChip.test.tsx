@@ -1,3 +1,4 @@
+import { StyleSheet } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { render, fireEvent } from "@testing-library/react-native"
 
@@ -86,6 +87,14 @@ describe("FilterChip", () => {
       })
 
       expect(getByRole("button")).toBeTruthy()
+    })
+
+    it("provides a stable minimum touch target", () => {
+      const { getByRole } = renderFilterChip({ label: "Accessible chip" })
+
+      expect(StyleSheet.flatten(getByRole("button").props.style)).toMatchObject({
+        minHeight: 44,
+      })
     })
 
     it("has correct selected state for active chip", () => {

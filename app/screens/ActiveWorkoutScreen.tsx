@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, ScrollView, View, ViewStyle } from "react-native"
 import { observer } from "mobx-react-lite"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Button } from "@/components/Button"
 import { ErrorMessage } from "@/components/common/ErrorMessage"
@@ -22,7 +23,8 @@ import type { ThemedStyle } from "@/theme/types"
 export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> = observer(
   function ActiveWorkoutScreen({ navigation }) {
     const { workoutStore, exerciseStore, setStore, performanceMemoryStore } = useStores()
-    const { themed } = useAppTheme()
+    const { themed, theme } = useAppTheme()
+    const insets = useSafeAreaInsets()
 
     const session = workoutStore.currentSession
     const template = session?.templateId
@@ -188,7 +190,7 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
             <ErrorMessage
               message="No active workout session."
               actionLabel="Start Workout"
-              onActionPress={() => navigation.popToTop()}
+              onActionPress={() => navigation.reset({ index: 0, routes: [{ name: "WorkoutTab" }] })}
             />
           ) : session.exercises.length === 0 ? (
             <EmptyState
@@ -375,16 +377,22 @@ export const ActiveWorkoutScreen: FC<WorkoutStackScreenProps<"ActiveWorkout">> =
                   </View>
                 )
               })}
-
-              <Button
-                text="+ Add Exercise"
-                preset="filled"
-                onPress={() => navigation.navigate("ExerciseLibrary")}
-                style={themed($addExerciseButton)}
-              />
             </>
           )}
         </ScrollView>
+
+        {!!session && session.exercises.length > 0 && (
+          <View
+            testID="active-workout-footer"
+            style={[themed($footer), { paddingBottom: Math.max(insets.bottom, theme.spacing.md) }]}
+          >
+            <Button
+              text="+ Add Exercise"
+              preset="filled"
+              onPress={() => navigation.navigate("ExerciseLibrary")}
+            />
+          </View>
+        )}
 
         <SetOptionsBottomSheet
           visible={!!selectedSetInfo}
@@ -407,14 +415,18 @@ const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingTop: spacing.md,
   paddingHorizontal: 0,
   gap: 0,
-  paddingBottom: spacing.xl,
+  paddingBottom: spacing.md,
 })
 
 const $exerciseSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderRadius: 0,
+  backgroundColor: colors.card,
+  borderColor: colors.separator,
+  borderRadius: 12,
+  borderWidth: 1,
+  overflow: "hidden",
   padding: 0,
   gap: 0,
+  marginHorizontal: spacing.md,
   marginBottom: spacing.lg,
 })
 
@@ -425,15 +437,16 @@ const $setsContainer: ThemedStyle<ViewStyle> = () => ({
 const $addSetButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.cardSecondary,
   borderWidth: 0,
-  borderRadius: 8,
+  borderRadius: 10,
   minHeight: 44,
   marginTop: spacing.sm,
   marginBottom: spacing.md,
   marginHorizontal: spacing.md,
 })
 
-const $addExerciseButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.tint,
-  borderRadius: 8,
-  marginTop: spacing.lg,
+const $footer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  borderTopColor: colors.separator,
+  borderTopWidth: 1,
+  padding: spacing.md,
 })

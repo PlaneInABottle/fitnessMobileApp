@@ -68,12 +68,31 @@ jest.mock("expo-video", () => {
     useVideoPlayer: (source: unknown, setup?: (player: any) => void) => {
       const setupRef = React.useRef(setup)
       return React.useMemo(() => {
-        const player = { source, loop: false, muted: false, play: jest.fn(), pause: jest.fn() }
+        const player = {
+          source,
+          loop: false,
+          muted: false,
+          status: (globalThis as any).__VIDEO_STATUS__ ?? "readyToPlay",
+          playing: true,
+          play: jest.fn(),
+          pause: jest.fn(),
+          replaceAsync:
+            (globalThis as any).__VIDEO_REPLACE_ASYNC__ ?? jest.fn().mockResolvedValue(undefined),
+        }
         setupRef.current?.(player)
         return player
       }, [source])
     },
     VideoView: ({ player: _player, ...props }: any) => React.createElement(View, props),
+  }
+})
+
+jest.mock("expo", () => {
+  const expo = jest.requireActual("expo")
+
+  return {
+    ...expo,
+    useEvent: (_emitter: unknown, _eventName: string, initialValue: unknown) => initialValue,
   }
 })
 

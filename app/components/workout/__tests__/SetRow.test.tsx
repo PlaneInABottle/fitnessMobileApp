@@ -97,6 +97,20 @@ describe("SetRow", () => {
     expect(getByLabelText("Kg").props.value).toBe("0")
   })
 
+  it("does not overwrite a submitted value when focus advances to the next field", () => {
+    const { getByLabelText } = render(
+      <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} />,
+    )
+
+    const kgInput = getByLabelText("Kg")
+    fireEvent(kgInput, "focus")
+    fireEvent.changeText(kgInput, "60")
+    fireEvent(kgInput, "submitEditing")
+    fireEvent(kgInput, "blur")
+
+    expect(getByLabelText("Kg").props.value).toBe("60")
+  })
+
   it("shows Kg/Reps as 0 when set is done and untouched", () => {
     const { getByLabelText } = render(
       <Harness initialValue={{ setType: "working", weight: 0, reps: 0 }} isDone />,

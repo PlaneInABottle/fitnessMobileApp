@@ -65,7 +65,7 @@ export const WorkoutHistoryScreen: FC<HomeStackScreenProps<"WorkoutHistory">> = 
     }, [session])
 
     return (
-      <Screen preset="scroll" safeAreaEdges={["top"]}>
+      <Screen preset="scroll" safeAreaEdges={["top", "bottom"]}>
         <WorkoutHeader
           title="Workout details"
           leftActionLabel="Back"

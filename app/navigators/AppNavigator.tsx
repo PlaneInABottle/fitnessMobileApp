@@ -10,7 +10,6 @@ import { getFocusedRouteNameFromRoute, NavigationContainer } from "@react-naviga
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-import { SessionOverlay } from "@/components/session"
 import { TabBarIcon } from "@/components/TabBarIcon"
 import Config from "@/config"
 import { ActiveWorkoutScreen } from "@/screens/ActiveWorkoutScreen"
@@ -143,6 +142,7 @@ const AppTabs = () => {
         name="Workout"
         component={WorkoutStackNavigator}
         options={{
+          popToTopOnBlur: true,
           tabBarIcon: ({ focused }) => (
             <TabBarIcon name="barbell" label="Workout" focused={focused} />
           ),
@@ -163,7 +163,6 @@ export const AppNavigator = (props: NavigationProps) => {
       <ErrorBoundary catchErrors={Config.catchErrors}>
         <View style={$container}>
           <AppTabs />
-          <SessionOverlay />
         </View>
       </ErrorBoundary>
     </NavigationContainer>

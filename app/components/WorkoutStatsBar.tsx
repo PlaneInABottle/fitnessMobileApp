@@ -91,7 +91,9 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.card,
   paddingVertical: spacing.sm,
   paddingHorizontal: spacing.md,
-  borderRadius: 8,
+  borderRadius: 12,
+  borderColor: colors.separator,
+  borderWidth: 1,
 })
 
 const $statItem: ViewStyle = {

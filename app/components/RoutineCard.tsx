@@ -64,7 +64,7 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   backgroundColor: colors.card,
   borderColor: colors.separator,
-  borderRadius: 8,
+  borderRadius: 12,
   borderWidth: 1,
   flexDirection: "row",
   minHeight: 76,
@@ -100,7 +100,7 @@ const $exercisePreview: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $startButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   backgroundColor: colors.tint,
-  borderRadius: 6,
+  borderRadius: 10,
   flexDirection: "row",
   gap: spacing.xs,
   justifyContent: "center",

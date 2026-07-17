@@ -46,7 +46,7 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
 
     if (!template) {
       return (
-        <Screen preset="fixed" safeAreaEdges={["top"]}>
+        <Screen preset="fixed" safeAreaEdges={["top", "bottom"]}>
           <View style={themed($header)}>
             <Pressable
               onPress={handleGoBack}
@@ -68,7 +68,7 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
     }
 
     return (
-      <Screen preset="fixed" safeAreaEdges={["top"]}>
+      <Screen preset="fixed" safeAreaEdges={["top", "bottom"]}>
         {/* Header */}
         <View style={themed($header)}>
           <Pressable
@@ -87,7 +87,7 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
         <ScrollView style={themed($scrollView)} contentContainerStyle={themed($content)}>
           {/* Routine Info */}
           <View style={themed($routineInfo)}>
-            <Text weight="bold" size="xxl" style={themed($routineName)}>
+            <Text weight="bold" size="xl" style={themed($routineName)}>
               {template.name}
             </Text>
           </View>
@@ -108,35 +108,34 @@ export const RoutineDetailScreen: FC<WorkoutStackScreenProps<"RoutineDetail">> =
               Exercises ({template.exerciseIds.length})
             </Text>
 
-            {template.exerciseIds.map((exerciseId) => {
-              const exercise = exerciseStore.getExercise(exerciseId)
-              if (!exercise) return null
-              const plannedSetCount =
-                template.exercises.find((item) => item.exerciseId === exerciseId)?.sets.length ?? 0
+            <View style={themed($exerciseRows)}>
+              {template.exerciseIds.map((exerciseId) => {
+                const exercise = exerciseStore.getExercise(exerciseId)
+                if (!exercise) return null
+                const plannedSetCount =
+                  template.exercises.find((item) => item.exerciseId === exerciseId)?.sets.length ??
+                  0
 
-              return (
-                <ExerciseListItem
-                  key={exerciseId}
-                  title={exercise.name}
-                  subtitle={`${plannedSetCount} ${plannedSetCount === 1 ? "set" : "sets"} planned`}
-                  imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
-                  onPress={() => navigation.navigate("ExerciseDetail", { exerciseId })}
-                />
-              )
-            })}
+                return (
+                  <ExerciseListItem
+                    key={exerciseId}
+                    title={exercise.name}
+                    subtitle={`${plannedSetCount} ${plannedSetCount === 1 ? "set" : "sets"} planned`}
+                    imageSource={exercise.imageUrl ?? getExerciseImages(exercise.id)?.[0]}
+                    onPress={() => navigation.navigate("ExerciseDetail", { exerciseId })}
+                  />
+                )
+              })}
+            </View>
           </View>
 
           {/* Edit Routine Link */}
-          <Pressable
+          <Button
+            text="Edit Routine"
+            preset="outline"
             onPress={handleEditRoutine}
-            style={themed($editLink)}
-            accessibilityRole="button"
             accessibilityLabel="Edit routine"
-          >
-            <Text weight="semiBold" style={themed($editLinkText)}>
-              Edit Routine
-            </Text>
-          </Pressable>
+          />
         </ScrollView>
       </Screen>
     )
@@ -159,6 +158,7 @@ const $backButton: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
   gap: 4,
+  minHeight: 44,
 }
 
 const $backText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -199,17 +199,16 @@ const $exerciseSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.sm,
 })
 
+const $exerciseRows: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.card,
+  borderColor: colors.separator,
+  borderRadius: 12,
+  borderWidth: 1,
+  overflow: "hidden",
+})
+
 const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-})
-
-const $editLink: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  alignItems: "center",
-  paddingVertical: spacing.md,
-})
-
-const $editLinkText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.tint,
 })
 
 const $notFoundContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

@@ -35,8 +35,8 @@ describe("ExerciseLibraryScreen scrolling", () => {
 
     const exerciseList = UNSAFE_getByType(FlatList)
     expect(exerciseList.props.data).toHaveLength(873)
-    expect(exerciseList.props.initialNumToRender).toBe(14)
-    expect(exerciseList.props.windowSize).toBe(7)
+    expect(exerciseList.props.initialNumToRender).toBe(10)
+    expect(exerciseList.props.windowSize).toBe(5)
 
     fireEvent.changeText(
       getByPlaceholderText("Search exercises"),

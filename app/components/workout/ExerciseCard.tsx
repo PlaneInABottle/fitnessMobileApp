@@ -119,7 +119,7 @@ export function ExerciseCard({
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
+  backgroundColor: colors.card,
   paddingHorizontal: spacing.md,
   paddingVertical: spacing.sm,
   gap: spacing.sm,

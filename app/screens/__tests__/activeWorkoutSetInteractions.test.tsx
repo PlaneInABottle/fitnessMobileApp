@@ -1,3 +1,4 @@
+import { StyleSheet } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native"
@@ -30,6 +31,24 @@ function renderActiveWorkout(store = RootStoreModel.create({})) {
 }
 
 describe("ActiveWorkoutScreen - Set interactions", () => {
+  it("keeps the add-exercise action above the device navigation inset", async () => {
+    ;(globalThis as any).__SAFE_AREA_INSETS__ = { top: 0, right: 0, bottom: 34, left: 0 }
+    const store = RootStoreModel.create({})
+    store.workoutStore.startNewSession()
+    store.workoutStore.addExerciseToSession("bench-press")
+
+    try {
+      const { getByTestId, getByText } = renderActiveWorkout(store)
+      await waitFor(() => expect(getByText("Bench Press")).toBeTruthy())
+
+      expect(StyleSheet.flatten(getByTestId("active-workout-footer").props.style)).toMatchObject({
+        paddingBottom: 34,
+      })
+    } finally {
+      delete (globalThis as any).__SAFE_AREA_INSETS__
+    }
+  })
+
   it("renders set type indicators with working set indices", async () => {
     const store = RootStoreModel.create({})
     store.workoutStore.startNewSession()
