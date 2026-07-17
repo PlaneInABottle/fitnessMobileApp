@@ -427,8 +427,10 @@ export const WorkoutStoreModel = types
 
       workoutExercise.restTime = nextRestTime
       workoutExercise.sets.forEach((set) => {
-        if (!set.isDone) set.restTime = nextRestTime
+        set.restTime = nextRestTime
       })
+
+      if (nextRestTime === 0) requireCurrentSession().restTimerEndsAt = undefined
     }
 
     function updateSetInWorkoutExerciseUnsafe(

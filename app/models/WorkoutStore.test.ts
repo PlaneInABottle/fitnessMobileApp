@@ -603,6 +603,32 @@ describe("WorkoutStore", () => {
       expect(getSnapshot(root.workoutStore)).not.toHaveProperty("restTimerEndsAt")
     })
 
+    it("turns off an active timer and clears saved rest time from completed sets", () => {
+      jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
+      const root = RootStoreModel.create({})
+      root.workoutStore.startNewSession()
+      const exerciseId = root.workoutStore.addExerciseToSession("bench-press")!
+      const exercise = root.workoutStore.currentSession!.exercises[0]
+      const set = exercise.sets[0]
+
+      root.workoutStore.setExerciseRestTime(exerciseId, 90)
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, {
+        weight: 100,
+        reps: 5,
+        isDone: true,
+      })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeDefined()
+
+      root.workoutStore.setExerciseRestTime(exerciseId, 0)
+      expect(exercise.restTime).toBe(0)
+      expect(set.restTime).toBe(0)
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeUndefined()
+
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, { isDone: false })
+      root.workoutStore.updateSetInWorkoutExercise(exerciseId, set.id, { isDone: true })
+      expect(root.workoutStore.currentSession?.restTimerEndsAt).toBeUndefined()
+    })
+
     it("restores an absolute deadline and safely defaults old snapshots", () => {
       jest.setSystemTime(new Date("2025-01-01T00:00:00Z"))
       const root = RootStoreModel.create({})
