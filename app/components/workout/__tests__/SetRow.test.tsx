@@ -61,8 +61,8 @@ describe("SetRow", () => {
 
     fireEvent.press(getByLabelText("Done"))
 
-    expect(onChange).toHaveBeenCalledWith({ setType: "working", weight: 100, reps: 5 })
-    expect(onDone).toHaveBeenCalled()
+    expect(onChange).not.toHaveBeenCalled()
+    expect(onDone).toHaveBeenCalledWith({ setType: "working", weight: 100, reps: 5 })
   })
 
   it("shows Kg/Reps placeholders when values are 0 and untouched", () => {
@@ -203,5 +203,11 @@ describe("SetRow", () => {
     expect(reps.props.blurOnSubmit).toBe(true)
     expect(StyleSheet.flatten(setType.props.style)).toMatchObject({ width: 44, height: 44 })
     expect(StyleSheet.flatten(done.props.style)).toMatchObject({ width: 44, height: 44 })
+    const visualButton = done.children[0]
+    if (typeof visualButton === "string") throw new Error("Expected a visual button container")
+    expect(StyleSheet.flatten(visualButton.props.style)).toMatchObject({
+      width: 36,
+      height: 36,
+    })
   })
 })

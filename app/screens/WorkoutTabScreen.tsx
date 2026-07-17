@@ -195,10 +195,9 @@ const $startButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   paddingVertical: 14,
 })
 
-const $startButtonText: ThemedStyle<TextStyle> = () => ({
+const $startButtonText: ThemedStyle<TextStyle> = ({ typography }) => ({
   color: "#FFFFFF",
-  fontSize: 16,
-  fontWeight: "600",
+  fontFamily: typography.primary.semiBold,
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({

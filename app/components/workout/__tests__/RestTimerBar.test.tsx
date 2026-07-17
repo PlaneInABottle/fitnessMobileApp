@@ -40,6 +40,28 @@ describe("RestTimerBar", () => {
     expect(onSkip).toHaveBeenCalledTimes(1)
   })
 
+  it("resamples the current time when the deadline changes", () => {
+    const { getByText, rerender, onAddThirty, onSkip, onExpire } = renderTimer(
+      new Date("2025-01-01T00:01:30Z"),
+    )
+
+    expect(getByText("1:30")).toBeTruthy()
+    jest.setSystemTime(new Date("2025-01-01T00:01:00Z"))
+
+    rerender(
+      <ThemeProvider>
+        <RestTimerBar
+          endsAt={new Date("2025-01-01T00:02:00Z")}
+          onAddThirty={onAddThirty}
+          onSkip={onSkip}
+          onExpire={onExpire}
+        />
+      </ThemeProvider>,
+    )
+
+    expect(getByText("1:00")).toBeTruthy()
+  })
+
   it("shows non-color completion, vibrates once, and cleans up its interval", () => {
     const vibrationSpy = jest.spyOn(Vibration, "vibrate").mockImplementation(() => true)
     const { getByText, getByLabelText, unmount } = renderTimer(new Date("2025-01-01T00:00:01Z"))

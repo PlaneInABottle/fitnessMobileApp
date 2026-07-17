@@ -1,4 +1,4 @@
-import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import { StyleProp, View, ViewStyle } from "react-native"
 
 import { useAppTheme } from "@/theme/context"
 import type { SetType, ThemedStyle } from "@/theme/types"
@@ -39,7 +39,7 @@ export function SetTypeIndicator(props: SetTypeIndicatorProps) {
 
   return (
     <View style={[themed($container), $styleOverride]}>
-      <Text weight="bold" size="xs" style={[themed($text), { color }]}>
+      <Text weight="bold" size="xs" style={{ color }}>
         {displayText}
       </Text>
     </View>
@@ -53,8 +53,4 @@ const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.cardSecondary,
   justifyContent: "center",
   alignItems: "center",
-})
-
-const $text: ThemedStyle<TextStyle> = () => ({
-  fontWeight: "700",
 })

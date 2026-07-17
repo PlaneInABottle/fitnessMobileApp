@@ -18,7 +18,11 @@ function formatRemaining(seconds: number): string {
   return `${minutes}:${remainder.toString().padStart(2, "0")}`
 }
 
-export function RestTimerBar({ endsAt, onAddThirty, onSkip, onExpire }: RestTimerBarProps) {
+export function RestTimerBar(props: RestTimerBarProps) {
+  return <RestTimerClock key={props.endsAt?.getTime() ?? "no-deadline"} {...props} />
+}
+
+function RestTimerClock({ endsAt, onAddThirty, onSkip, onExpire }: RestTimerBarProps) {
   const { themed } = useAppTheme()
   const endMs = endsAt?.getTime()
   // This clock sample seeds an absolute-deadline countdown; subsequent reads happen in subscriptions.
@@ -29,9 +33,9 @@ export function RestTimerBar({ endsAt, onAddThirty, onSkip, onExpire }: RestTime
     if (endMs === undefined) return
 
     const interval = setInterval(() => {
-      const nextNow = Date.now()
-      setNow(nextNow)
-      if (nextNow >= endMs) clearInterval(interval)
+      const currentNow = Date.now()
+      setNow(currentNow)
+      if (currentNow >= endMs) clearInterval(interval)
     }, 1000)
     return () => clearInterval(interval)
   }, [endMs])
@@ -82,7 +86,13 @@ export function RestTimerBar({ endsAt, onAddThirty, onSkip, onExpire }: RestTime
           accessibilityLabel="Add 30 seconds to rest timer"
           style={themed($action)}
         >
-          <Text text="+30" weight="semiBold" size="sm" style={themed($actionText)} />
+          <Text
+            text="+30"
+            weight="semiBold"
+            size="xs"
+            numberOfLines={1}
+            style={themed($actionText)}
+          />
         </Pressable>
         <Pressable
           onPress={onSkip}
@@ -93,7 +103,8 @@ export function RestTimerBar({ endsAt, onAddThirty, onSkip, onExpire }: RestTime
           <Text
             text={isComplete ? "Dismiss" : "Skip"}
             weight="semiBold"
-            size="sm"
+            size="xs"
+            numberOfLines={1}
             style={themed($actionText)}
           />
         </Pressable>
@@ -113,7 +124,12 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderBottomColor: colors.separator,
   backgroundColor: colors.card,
 })
-const $status: ViewStyle = { flexDirection: "row", alignItems: "center", gap: 12 }
+const $status: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  flexShrink: 1,
+  gap: 12,
+}
 
 const $label: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.text })
 
@@ -124,6 +140,7 @@ const $actions: ViewStyle = { flexDirection: "row", alignItems: "center", gap: 8
 const $action: ThemedStyle<ViewStyle> = ({ colors }) => ({
   minWidth: 52,
   minHeight: 44,
+  paddingHorizontal: 12,
   alignItems: "center",
   justifyContent: "center",
   borderRadius: 8,

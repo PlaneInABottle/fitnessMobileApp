@@ -202,7 +202,9 @@ export const CreateRoutineScreen: FC<WorkoutStackScreenProps<"CreateRoutine">> =
             <View style={themed($errorContainer)}>
               <Text style={themed($errorText)}>{workoutStore.lastError}</Text>
               <Pressable onPress={workoutStore.clearError}>
-                <Text style={themed($clearErrorText)}>Clear</Text>
+                <Text weight="semiBold" style={themed($clearErrorText)}>
+                  Clear
+                </Text>
               </Pressable>
             </View>
           )}
@@ -291,9 +293,9 @@ const $addButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   paddingVertical: 12,
 })
 
-const $addButtonText: ThemedStyle<TextStyle> = () => ({
+const $addButtonText: ThemedStyle<TextStyle> = ({ typography }) => ({
   color: "#FFFFFF",
-  fontWeight: "600",
+  fontFamily: typography.primary.semiBold,
 })
 
 const $exerciseList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -325,9 +327,9 @@ const $addMoreButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   marginTop: 8,
 })
 
-const $addMoreButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
+const $addMoreButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.tint,
-  fontWeight: "600",
+  fontFamily: typography.primary.semiBold,
 })
 
 const $errorContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -346,5 +348,4 @@ const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $clearErrorText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
-  fontWeight: "600",
 })

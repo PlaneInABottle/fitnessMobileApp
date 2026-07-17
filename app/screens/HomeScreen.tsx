@@ -153,10 +153,10 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                   testID="home-total-workouts"
                   text={history.length.toString()}
                   weight="bold"
-                  size="xl"
+                  size="lg"
                   style={themed($statValue)}
                 />
-                <Text text="Workouts" size="sm" style={themed($statLabel)} />
+                <Text text="Workouts" size="xxs" style={themed($statLabel)} />
               </View>
               <View style={themed($statDivider)} />
               <View style={$statItem}>
@@ -164,10 +164,10 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                   testID="home-week-workouts"
                   text={workoutsThisWeek.toString()}
                   weight="bold"
-                  size="xl"
+                  size="lg"
                   style={themed($statValue)}
                 />
-                <Text text="This week" size="sm" style={themed($statLabel)} />
+                <Text text="This week" size="xxs" style={themed($statLabel)} />
               </View>
             </View>
             <View style={themed($statsRowDivider)} />
@@ -177,10 +177,10 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                   testID="home-total-volume"
                   text={numberFormatter.format(totalVolume)}
                   weight="bold"
-                  size="xl"
+                  size="lg"
                   style={themed($statValue)}
                 />
-                <Text text="Volume (kg)" size="sm" style={themed($statLabel)} />
+                <Text text="Volume (kg)" size="xxs" style={themed($statLabel)} />
               </View>
               <View style={themed($statDivider)} />
               <View style={$statItem}>
@@ -188,10 +188,10 @@ export const HomeScreen: FC<HomeStackScreenProps<"HomeTab">> = observer(function
                   testID="home-total-minutes"
                   text={numberFormatter.format(totalMinutes)}
                   weight="bold"
-                  size="xl"
+                  size="lg"
                   style={themed($statValue)}
                 />
-                <Text text="Minutes" size="sm" style={themed($statLabel)} />
+                <Text text="Minutes" size="xxs" style={themed($statLabel)} />
               </View>
             </View>
           </View>
@@ -447,12 +447,10 @@ const $statsRowDivider: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $statValue: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  fontSize: 20,
 })
 
 const $statLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 12,
   textAlign: "center",
 })
 

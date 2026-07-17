@@ -24,7 +24,7 @@ export function MemorySuggestions({ suggestions, onUseSuggestion }: MemorySugges
 
   return (
     <View style={themed($container)}>
-      <Text text="Suggestions" style={themed($title)} />
+      <Text text="Suggestions" size="xxs" style={themed($title)} />
       <View style={themed($chips)}>
         {suggestions.map((s) => (
           <Pressable
@@ -33,7 +33,7 @@ export function MemorySuggestions({ suggestions, onUseSuggestion }: MemorySugges
             style={themed($chip)}
             accessibilityRole="button"
           >
-            <Text text={s.label} style={themed($chipText)} />
+            <Text text={s.label} size="xs" weight="medium" style={themed($chipText)} />
           </Pressable>
         ))}
       </View>
@@ -47,7 +47,6 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 12,
 })
 
 const $chips: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -67,5 +66,4 @@ const $chip: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 
 const $chipText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  fontSize: 13,
 })

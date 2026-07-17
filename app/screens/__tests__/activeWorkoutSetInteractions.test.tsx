@@ -10,6 +10,13 @@ import { ExerciseLibraryScreen } from "@/screens/ExerciseLibraryScreen"
 import { WorkoutCompleteScreen } from "@/screens/WorkoutCompleteScreen"
 import { WorkoutTabScreen } from "@/screens/WorkoutTabScreen"
 import { ThemeProvider } from "@/theme/context"
+import { playSetCompletedHaptic } from "@/utils/haptics"
+
+jest.mock("@/utils/haptics", () => ({
+  playSetCompletedHaptic: jest.fn(),
+}))
+
+const playSetCompletedHapticMock = jest.mocked(playSetCompletedHaptic)
 
 const Stack = createNativeStackNavigator<WorkoutStackParamList>()
 
@@ -31,6 +38,10 @@ function renderActiveWorkout(store = RootStoreModel.create({})) {
 }
 
 describe("ActiveWorkoutScreen - Set interactions", () => {
+  beforeEach(() => {
+    playSetCompletedHapticMock.mockClear()
+  })
+
   it("keeps the add-exercise action above the device navigation inset", async () => {
     ;(globalThis as any).__SAFE_AREA_INSETS__ = { top: 0, right: 0, bottom: 34, left: 0 }
     const store = RootStoreModel.create({})
@@ -43,6 +54,10 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
 
       expect(StyleSheet.flatten(getByTestId("active-workout-footer").props.style)).toMatchObject({
         paddingBottom: 34,
+      })
+      expect(getByTestId("active-workout-scroll").props).toMatchObject({
+        keyboardDismissMode: "on-drag",
+        keyboardShouldPersistTaps: "always",
       })
     } finally {
       delete (globalThis as any).__SAFE_AREA_INSETS__
@@ -206,6 +221,7 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
       expect(store.workoutStore.currentSession?.exercises[0].restTime).toBe(60)
 
       fireEvent.press(getByLabelText("Mark Bench Press, set 1 complete"))
+      expect(playSetCompletedHapticMock).toHaveBeenCalledTimes(1)
       expect(store.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
         "2025-01-01T00:01:00.000Z",
       )
@@ -213,6 +229,7 @@ describe("ActiveWorkoutScreen - Set interactions", () => {
 
       jest.setSystemTime(new Date("2025-01-01T00:00:10Z"))
       fireEvent.press(getByLabelText("Mark Bench Press, set 1 incomplete"))
+      expect(playSetCompletedHapticMock).toHaveBeenCalledTimes(1)
       expect(store.workoutStore.currentSession?.restTimerEndsAt?.toISOString()).toBe(
         "2025-01-01T00:01:00.000Z",
       )

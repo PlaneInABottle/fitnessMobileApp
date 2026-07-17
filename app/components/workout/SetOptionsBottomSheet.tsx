@@ -76,23 +76,17 @@ export function SetOptionsBottomSheet({
               accessibilityState={{ selected: isSelected }}
             >
               <View style={[themed($letterBadge), { borderColor: color }]}>
-                <Text weight="bold" style={[themed($letterText), { color }]}>
+                <Text weight="bold" size="xs" style={{ color }}>
                   {option.letter}
                 </Text>
               </View>
               <Text
                 weight={isSelected ? "semiBold" : "normal"}
+                size="sm"
                 style={[themed($optionLabel), isRemove && { color: theme.colors.error }]}
               >
                 {option.label}
               </Text>
-              <Pressable
-                style={$helpButton}
-                accessibilityRole="button"
-                accessibilityLabel={`Help for ${option.label}`}
-              >
-                <Text style={themed($helpIcon)}>?</Text>
-              </Pressable>
             </Pressable>
           )
         })}
@@ -136,27 +130,7 @@ const $letterBadge: ThemedStyle<ViewStyle> = ({ colors }) => ({
   marginRight: 12,
 })
 
-const $letterText: ThemedStyle<TextStyle> = () => ({
-  fontSize: 14,
-  fontWeight: "700",
-})
-
 const $optionLabel: ThemedStyle<TextStyle> = ({ colors }) => ({
   flex: 1,
   color: colors.text,
-  fontSize: 15,
-})
-
-const $helpButton: ViewStyle = {
-  width: 28,
-  height: 28,
-  borderRadius: 14,
-  justifyContent: "center",
-  alignItems: "center",
-}
-
-const $helpIcon: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
-  fontSize: 16,
-  fontWeight: "600",
 })

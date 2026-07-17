@@ -33,7 +33,7 @@ export interface SetRowProps {
   touched?: Partial<Record<EditableFieldKey | "setType", boolean>>
   availableSetTypes?: Array<{ id: SetTypeId; name: string; letter?: string }>
   onChange?: (next: Partial<SetData>, touchedKey?: EditableFieldKey | "setType") => void
-  onDone?: () => void
+  onDone?: (completionPatch?: Partial<SetData>) => void
   doneButtonLabel?: string
   onPressSetType?: () => void
   /**
@@ -177,9 +177,9 @@ export function SetRow({
     if (mode !== "edit" || !onDone) return
 
     // Only convert placeholder -> actual values when marking a set as done.
+    let completionPatch: Partial<SetData> | undefined
     if (!isDone && onChange && placeholders) {
-      const [f1, f2] = getFields(category)
-      const keys = [f1.key, f2.key].filter(Boolean) as EditableFieldKey[]
+      const keys = [field1.key, field2.key].filter(Boolean) as EditableFieldKey[]
 
       let didPatch = false
       const next: Partial<SetData> = { ...(value ?? {}) }
@@ -201,10 +201,10 @@ export function SetRow({
         }
       })
 
-      if (didPatch) onChange(next)
+      if (didPatch) completionPatch = next
     }
 
-    onDone()
+    onDone(completionPatch)
   }
 
   function renderFieldCell(field: FieldConfig) {
@@ -354,21 +354,31 @@ export function SetRow({
     return (
       <View style={themed([$styles.row, $row, $headerRow])}>
         <View style={$setTypeCell}>
-          <Text text="SET" style={themed($headerText)} />
+          <Text text="SET" size="xxs" weight="semiBold" style={themed($headerText)} />
         </View>
         <View style={$previousCell}>
-          <Text text="LAST" style={themed($headerText)} />
+          <Text text="LAST" size="xxs" weight="semiBold" style={themed($headerText)} />
         </View>
         <View style={$cell}>
-          <Text text={field1.header || field1.label} style={themed($headerText)} />
+          <Text
+            text={field1.header || field1.label}
+            size="xxs"
+            weight="semiBold"
+            style={themed($headerText)}
+          />
         </View>
         {field2.label ? (
           <View style={$cell}>
-            <Text text={field2.header || field2.label} style={themed($headerText)} />
+            <Text
+              text={field2.header || field2.label}
+              size="xxs"
+              weight="semiBold"
+              style={themed($headerText)}
+            />
           </View>
         ) : null}
         <View style={$doneCell}>
-          <Text text="✓" style={themed($headerText)} />
+          <Text text="✓" size="xxs" weight="semiBold" style={themed($headerText)} />
         </View>
       </View>
     )
@@ -397,11 +407,7 @@ export function SetRow({
 
       {/* Previous Value */}
       <View style={$previousCell}>
-        <Text
-          text={formatPrevious()}
-          style={[themed($previousText), isDone && { color: colors.text }]}
-          numberOfLines={1}
-        />
+        <Text text={formatPrevious()} size="xxs" style={themed($previousText)} numberOfLines={1} />
       </View>
 
       {/* Field 1 (Weight/Time) */}
@@ -414,7 +420,7 @@ export function SetRow({
       <View style={$doneCell}>
         <Pressable
           onPress={handlePressDone}
-          style={[themed($doneButton), isDone && themed($doneButtonDone)]}
+          style={$doneButtonHitArea}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: !!isDone }}
           accessibilityLabel={
@@ -424,7 +430,22 @@ export function SetRow({
               : "Done")
           }
         >
-          <Text text="✓" style={[themed($doneText), isDone && themed($doneTextDone)]} />
+          {({ pressed }) => (
+            <View
+              style={[
+                themed($doneButton),
+                isDone && themed($doneButtonDone),
+                pressed && themed($doneButtonPressed),
+              ]}
+            >
+              <Text
+                text="✓"
+                size="xs"
+                weight="semiBold"
+                style={[themed($doneText), isDone && themed($doneTextDone)]}
+              />
+            </View>
+          )}
         </Pressable>
       </View>
     </View>
@@ -482,19 +503,15 @@ const $doneCell: ViewStyle = {
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 11,
-  fontWeight: "600",
   textAlign: "center",
 })
 
 const $cellText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  fontSize: 14,
 })
 
 const $previousText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-  fontSize: 12,
   textAlign: "center",
 })
 
@@ -511,10 +528,17 @@ const $input: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   textAlign: "center",
 })
 
-const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $doneButtonHitArea: ViewStyle = {
   width: 44,
   height: 44,
-  borderRadius: 6,
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $doneButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: 36,
+  height: 36,
+  borderRadius: 7,
   borderWidth: 1,
   borderColor: colors.cardSecondary,
   alignItems: "center",
@@ -527,10 +551,12 @@ const $doneButtonDone: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.success,
 })
 
+const $doneButtonPressed: ThemedStyle<ViewStyle> = () => ({
+  opacity: 0.72,
+})
+
 const $doneText: ThemedStyle<TextStyle> = () => ({
   color: "#FFFFFF",
-  fontSize: 16,
-  fontWeight: "600",
 })
 
 const $doneTextDone: ThemedStyle<TextStyle> = () => ({

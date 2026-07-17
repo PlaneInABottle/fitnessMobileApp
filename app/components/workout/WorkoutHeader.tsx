@@ -159,10 +159,11 @@ const $finishButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   paddingVertical: 8,
 })
 
-const $finishButtonText: ThemedStyle<TextStyle> = () => ({
+const $finishButtonText: ThemedStyle<TextStyle> = ({ typography }) => ({
   color: "#FFFFFF",
-  fontWeight: "600",
+  fontFamily: typography.primary.semiBold,
   fontSize: 14,
+  lineHeight: 20,
 })
 
 const $statsBar: ThemedStyle<ViewStyle> = ({ spacing }) => ({

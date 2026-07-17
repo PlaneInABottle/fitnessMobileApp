@@ -87,6 +87,12 @@ jest.mock("expo-video", () => {
   }
 })
 
+jest.mock("expo-haptics", () => ({
+  AndroidHaptics: { Confirm: "confirm" },
+  performAndroidHapticsAsync: jest.fn().mockResolvedValue(undefined),
+  selectionAsync: jest.fn().mockResolvedValue(undefined),
+}))
+
 jest.mock("expo", () => {
   const expo = jest.requireActual("expo")
 
